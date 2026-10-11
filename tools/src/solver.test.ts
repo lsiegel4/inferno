@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { createGame, parseFloor } from "@inferno/shared";
 import { describe, expect, it } from "vitest";
-import { loadFloorsFromDir } from "./load-floors.js";
+import { loadFloorsFromDir } from "@inferno/shared/node";
 import { atFloorStart, solveFloor } from "./solver.js";
 
 const floor = (rows: string[], legend: Record<string, Record<string, unknown>> = {}) =>

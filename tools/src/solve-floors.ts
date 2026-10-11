@@ -1,6 +1,6 @@
 /** CLI: validate every floor in a directory and print each floor's shortest route. */
 import { createGame, FloorSetError } from "@inferno/shared";
-import { loadFloorsFromDir } from "./load-floors.js";
+import { loadFloorsFromDir } from "@inferno/shared/node";
 import { atFloorStart, formatAction, solveFloor } from "./solver.js";
 
 const dir = process.argv[2] ?? "floors";

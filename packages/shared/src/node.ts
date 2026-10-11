@@ -1,6 +1,7 @@
+/** Node-only helpers (filesystem). Import from "@inferno/shared/node"; not used by the client. */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { parseFloor, type FloorDef } from "@inferno/shared";
+import { parseFloor, type FloorDef } from "./floor.js";
 
 /** Read every floor folder (grid.txt + floor.json) in a directory. */
 export function loadFloorsFromDir(dir: string): FloorDef[] {

@@ -3,14 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "start": "node dist/index.js"
+    "start": "node dist/main.js",
+    "dev": "tsc -p tsconfig.build.json && NODE_ENV=development node dist/main.js"
   },
   "dependencies": {
-    "@inferno/shared": "workspace:*"
+    "@inferno/shared": "workspace:*",
+    "fastify": "^5.12.5",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.2",
+    "@inferno/tools": "workspace:*"
   }
 }
