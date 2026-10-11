@@ -166,6 +166,10 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
       inventory: z.array(InventoryItemSchema).optional(),
       outcome: TurnOutcomeSchema.optional(),
       sign: z.object({ text: z.string() }).optional(),
+      revealed: z
+        .array(z.object({ x: z.number().int(), y: z.number().int(), ch: z.string().length(1) }))
+        .optional(),
+      hidden: z.array(z.object({ x: z.number().int(), y: z.number().int() })).optional(),
     }),
   ),
   envelope("floor_changed", z.object({ floor: FloorStateSchema, hero: HeroSchema })),

@@ -12,7 +12,7 @@ import {
   toFloorState,
   toProtocolHero,
   toProtocolInventory,
-  turnChanges,
+  turnDelta,
   type Action,
   type ChatMessage,
   type ErrorCode,
@@ -241,11 +241,17 @@ export class GameRoom {
     const inventoryChanged = JSON.stringify(r.state.inventory) !== JSON.stringify(before.inventory);
     const sign = r.events.find((e) => e.type === "sign_read");
 
+    const delta = floorChanged
+      ? { changes: [], revealed: [], hidden: [] }
+      : turnDelta(before, r.state, r.changed);
+
     this.broadcast("turn", {
       turn: r.state.turn,
       action,
       hero: toProtocolHero(r.state),
-      changes: floorChanged ? [] : turnChanges(r.state, r.changed),
+      changes: delta.changes,
+      ...(delta.revealed.length ? { revealed: delta.revealed } : {}),
+      ...(delta.hidden.length ? { hidden: delta.hidden } : {}),
       ...(inventoryChanged ? { inventory: toProtocolInventory(r.state) } : {}),
       ...(r.outcome ? { outcome: r.outcome } : {}),
       ...(sign?.type === "sign_read" ? { sign: { text: sign.text } } : {}),

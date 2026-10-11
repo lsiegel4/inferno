@@ -269,6 +269,33 @@ describe("turn messages", () => {
   });
 });
 
+describe("darkness", () => {
+  it("turn messages carry revealed and hidden tiles", () => {
+    const dark = parseFloor("#######\n#S...U#\n#######", {
+      id: "f1",
+      index: 1,
+      minimumPlayers: 1,
+      reveal: { mode: "torchlight", radius: 1 },
+    });
+    const { clock, player } = setup([dark]);
+    const a = player("ana");
+    expect(a.of("welcome")[0]!.data.floor.tiles).toBe(" #     \n#S.    \n #     ");
+    a.vote(0, right);
+    clock.advance(RULES.tickMinMs);
+    const turn = a.of("turn")[0]!.data;
+    expect(turn.revealed).toEqual([
+      { x: 2, y: 0, ch: "#" },
+      { x: 3, y: 1, ch: "." },
+      { x: 2, y: 2, ch: "#" },
+    ]);
+    expect(turn.hidden).toEqual([
+      { x: 1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 1, y: 2 },
+    ]);
+  });
+});
+
 describe("chat", () => {
   it("broadcasts messages, rate-limits, and rejects long ones", () => {
     const { clock, player } = setup();
