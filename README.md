@@ -23,13 +23,15 @@ corepack enable
 pnpm install
 ```
 
-| Command                             | What it does                       |
-| ----------------------------------- | ---------------------------------- |
-| `pnpm build`                        | Build every package (shared first) |
-| `pnpm test`                         | Run all tests (Vitest)             |
-| `pnpm typecheck`                    | Type-check every package           |
-| `pnpm lint`                         | ESLint                             |
-| `pnpm format` / `pnpm format:check` | Prettier                           |
-| `pnpm --filter @inferno/client dev` | Run the client dev server          |
+| Command                              | What it does                                                                           |
+| ------------------------------------ | -------------------------------------------------------------------------------------- |
+| `pnpm build`                         | Build every package (shared first)                                                     |
+| `pnpm test`                          | Run all tests (Vitest)                                                                 |
+| `pnpm typecheck`                     | Type-check every package                                                               |
+| `pnpm lint`                          | ESLint                                                                                 |
+| `pnpm format` / `pnpm format:check`  | Prettier                                                                               |
+| `pnpm --filter @inferno/client dev`  | Run the client dev server                                                              |
+| `pnpm --filter @inferno/server dev`  | Run the game server on :3000 with dev login (`ws://localhost:3000/ws?dev_user=<name>`) |
+| `pnpm --filter @inferno/tools solve` | Validate every floor and print its shortest route                                      |
 
 Packages that import `@inferno/shared` use its built output, so run `pnpm build` before `pnpm typecheck` or `pnpm test` on a fresh checkout.

@@ -17,7 +17,7 @@ export interface Solution {
 }
 
 /** Everything that affects future play on the current floor (turn count excluded). */
-function stateKey(s: GameState): string {
+export function stateKey(s: GameState): string {
   const floor = s.floors[s.currentFloor]!;
   return JSON.stringify([
     s.currentFloor,

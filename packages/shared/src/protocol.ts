@@ -7,6 +7,9 @@ import { z } from "zod";
 /** Wire protocol version carried in every WebSocket envelope (api-contracts §1.1). */
 export const PROTOCOL_VERSION = 1;
 
+/** Maximum chat message length in characters (game design §11). */
+export const CHAT_MAX_LENGTH = 200;
+
 // ---------------------------------------------------------------------------
 // Shared types (api-contracts §4)
 
@@ -50,6 +53,12 @@ export const FloorStateSchema = z.object({
 });
 export type FloorState = z.infer<typeof FloorStateSchema>;
 
+export const InventoryItemSchema = z.object({
+  id: z.string(),
+  type: z.enum(["key", "torch", "weight"]),
+});
+export type InventoryItemView = z.infer<typeof InventoryItemSchema>;
+
 export const PresenceSchema = z.object({
   active: z.number().int().min(0),
   minimum: z.number().int().min(1),
@@ -70,6 +79,7 @@ export const TurnRecordSchema = z.object({
 });
 export type TurnRecord = z.infer<typeof TurnRecordSchema>;
 
+/** `tick` equals the number of turns completed so far: a vote for tick N decides turn N + 1. */
 export const TallySchema = z.object({
   tick: z.number().int().min(0),
   endsAt: z.string(),
@@ -101,7 +111,8 @@ export const ClientMessageSchema = z.discriminatedUnion("type", [
   envelope("hello", z.object({})),
   envelope("vote", z.object({ tick: z.number().int().min(0), action: ActionSchema })),
   envelope("ready", z.object({})),
-  envelope("chat_send", z.object({ text: z.string().min(1).max(200) })),
+  // Length is checked by the server so it can answer CHAT_TOO_LONG instead of BAD_MESSAGE.
+  envelope("chat_send", z.object({ text: z.string().min(1).max(10_000) })),
   envelope("ping", z.object({})),
 ]);
 export type ClientMessage = z.infer<typeof ClientMessageSchema>;
@@ -137,9 +148,9 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
       turn: z.number().int().min(0),
       floor: FloorStateSchema,
       hero: HeroSchema,
-      inventory: z.array(z.string()),
+      inventory: z.array(InventoryItemSchema),
       presence: PresenceSchema,
-      tally: TallySchema,
+      tally: TallySchema.nullable(),
       recentTurns: z.array(TurnRecordSchema),
       recentChat: z.array(ChatMessageSchema),
       gameOver: z.boolean(),
@@ -152,8 +163,9 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
       action: ActionSchema,
       hero: HeroSchema,
       changes: z.array(EntitySchema),
-      inventory: z.array(z.string()).optional(),
+      inventory: z.array(InventoryItemSchema).optional(),
       outcome: TurnOutcomeSchema.optional(),
+      sign: z.object({ text: z.string() }).optional(),
     }),
   ),
   envelope("floor_changed", z.object({ floor: FloorStateSchema, hero: HeroSchema })),

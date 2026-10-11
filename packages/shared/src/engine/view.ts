@@ -1,5 +1,5 @@
 /** Convert engine state into protocol shapes sent to clients. */
-import type { Entity, FloorState, Hero } from "../protocol.js";
+import type { Entity, FloorState, Hero, InventoryItemView } from "../protocol.js";
 import type { FloorDef } from "../floor.js";
 import { isHidden } from "./registry.js";
 import type { GameState, RuntimeEntity } from "./types.js";
@@ -54,4 +54,8 @@ export function turnChanges(state: GameState, changed: readonly string[]): Entit
     const out = toProtocolEntity(e);
     return isHidden(e) ? [{ ...out, state: { hidden: true } }] : [out];
   });
+}
+
+export function toProtocolInventory(state: GameState): InventoryItemView[] {
+  return state.inventory.map((i) => ({ id: i.id, type: i.type as InventoryItemView["type"] }));
 }
