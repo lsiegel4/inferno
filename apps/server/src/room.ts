@@ -379,6 +379,12 @@ export class GameRoom {
     this.broadcast("chat_message", msg);
   }
 
+  /** A player changed their handle (PUT /me/handle). */
+  renamePlayer(userId: string, handle: string): void {
+    const player = this.players.get(userId);
+    if (player) player.handle = handle;
+  }
+
   // ---------------------------------------------------------------------------
   // History (REST)
 

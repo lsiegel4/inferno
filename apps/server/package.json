@@ -12,12 +12,14 @@
     "dev": "tsc -p tsconfig.build.json && NODE_ENV=development node dist/main.js"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.3",
     "@inferno/shared": "workspace:*",
     "fastify": "^5.12.5",
+    "google-auth-library": "^11.2.0",
     "ws": "^8.22.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.2",
-    "@inferno/tools": "workspace:*"
+    "@inferno/tools": "workspace:*",
+    "@types/ws": "^8.18.2"
   }
 }
