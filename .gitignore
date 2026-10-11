@@ -1,0 +1,9 @@
+docs/
+node_modules/
+dist/
+coverage/
+cdk.out/
+*.tsbuildinfo
+.env
+.env.*
+.DS_Store
