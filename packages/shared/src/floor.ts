@@ -29,11 +29,26 @@ export const LegendEntrySchema = z
   .catchall(z.unknown());
 export type LegendEntry = z.infer<typeof LegendEntrySchema>;
 
+/**
+ * How much of the floor players can see (game design §7a, darkness).
+ * - viewport: the whole floor is revealed.
+ * - torchlight: tiles within `radius` of the hero or a light source are revealed.
+ * - line_of_sight: like torchlight, but walls and move-blocking entities block sight.
+ * Distances are Euclidean: a tile is within radius r when dx² + dy² ≤ r².
+ */
+export const RevealSchema = z.discriminatedUnion("mode", [
+  z.object({ mode: z.literal("viewport") }),
+  z.object({ mode: z.literal("torchlight"), radius: z.number().int().min(0) }),
+  z.object({ mode: z.literal("line_of_sight"), radius: z.number().int().min(0) }),
+]);
+export type Reveal = z.infer<typeof RevealSchema>;
+
 export const FloorMetaSchema = z.object({
   id: z.string().min(1),
   index: z.number().int().min(1),
   minimumPlayers: z.number().int().min(1),
   legend: z.record(z.string().length(1), LegendEntrySchema).default({}),
+  reveal: RevealSchema.default({ mode: "viewport" }),
 });
 export type FloorMeta = z.infer<typeof FloorMetaSchema>;
 
@@ -50,6 +65,7 @@ export interface FloorDef {
   id: string;
   index: number;
   minimumPlayers: number;
+  reveal: Reveal;
   width: number;
   height: number;
   /** Terrain rows; legend characters are replaced with ".". */
@@ -140,6 +156,7 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
     id: meta.id,
     index: meta.index,
     minimumPlayers: meta.minimumPlayers,
+    reveal: meta.reveal,
     width,
     height: rows.length,
     terrain,
