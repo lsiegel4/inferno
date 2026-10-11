@@ -1,0 +1,34 @@
+{
+  "id": "prototype-big-floor",
+  "index": 2,
+  "minimumPlayers": 1,
+  "legend": {
+    "a": {
+      "id": "lever-a",
+      "kind": "lever",
+      "targets": ["door-a"]
+    },
+    "A": {
+      "id": "door-a",
+      "kind": "door"
+    },
+    "b": {
+      "id": "lever-b",
+      "kind": "lever",
+      "targets": ["door-b"]
+    },
+    "B": {
+      "id": "door-b",
+      "kind": "door"
+    },
+    "c": {
+      "id": "lever-c",
+      "kind": "lever",
+      "targets": ["door-c"]
+    },
+    "C": {
+      "id": "door-c",
+      "kind": "door"
+    }
+  }
+}
