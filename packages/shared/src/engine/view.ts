@@ -2,9 +2,10 @@
 import type { Entity, FloorState, Hero } from "../protocol.js";
 import type { FloorDef } from "../floor.js";
 import { isHidden } from "./registry.js";
+import { revealFor } from "./reveal.js";
 import type { GameState, RuntimeEntity } from "./types.js";
 
-/** Decides whether a tile is revealed to clients. v1 reveals everything until darkness lands. */
+/** Decides whether a tile is revealed to clients (see reveal.ts for darkness). */
 export type RevealFn = (x: number, y: number) => boolean;
 export const revealAll: RevealFn = () => true;
 
@@ -23,7 +24,8 @@ function visibleEntities(entities: readonly RuntimeEntity[], reveal: RevealFn): 
   return entities.filter((e) => !isHidden(e) && reveal(e.x, e.y)).map(toProtocolEntity);
 }
 
-export function toFloorState(state: GameState, reveal: RevealFn = revealAll): FloorState {
+/** The current floor as clients see it: unrevealed terrain and entities are left out. */
+export function toFloorState(state: GameState, reveal: RevealFn = revealFor(state)): FloorState {
   const floor = state.floors[state.currentFloor]!;
   const { def } = floor;
   return {
@@ -44,14 +46,19 @@ export function toProtocolHero(state: GameState): Hero {
 
 /**
  * Entities to send in a `turn` message. A changed entity that became hidden is sent with
- * `state.hidden: true` so clients can remove it.
+ * `state.hidden: true` so clients can remove it. Changes on unrevealed tiles are left out.
  */
-export function turnChanges(state: GameState, changed: readonly string[]): Entity[] {
+export function turnChanges(
+  state: GameState,
+  changed: readonly string[],
+  reveal: RevealFn = revealFor(state),
+): Entity[] {
   const floor = state.floors[state.currentFloor]!;
   return changed.flatMap((id) => {
     const e = floor.entities.find((x) => x.id === id);
     if (!e) return [];
     const out = toProtocolEntity(e);
-    return isHidden(e) ? [{ ...out, state: { hidden: true } }] : [out];
+    if (isHidden(e)) return [{ ...out, state: { hidden: true } }];
+    return reveal(e.x, e.y) ? [out] : [];
   });
 }

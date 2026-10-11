@@ -82,14 +82,23 @@ export function fallTo(ctx: TurnContext, floorId: string, x: number, y: number):
 export function die(ctx: TurnContext): void {
   const { state } = ctx;
   const floor = ctx.floor;
+  const previous = floor.entities;
   floor.entities = floor.initial.map((initial) => {
-    const current = floor.entities.find((e) => e.id === initial.id) ?? initial;
+    const current = previous.find((e) => e.id === initial.id) ?? initial;
     const t = entityType(initial.kind);
     const kept = t.onFloorReset ? t.onFloorReset(current, initial) : initial;
     const copy = structuredClone(kept);
     if (JSON.stringify(copy) !== JSON.stringify(current)) ctx.changed.add(copy.id);
     return copy;
   });
+  // Entities placed during play (not in the floor file, e.g. a torch's light) are removed. They
+  // are kept as tombstones (state.removed) so clients can be told they disappeared.
+  const initialIds = new Set(floor.initial.map((e) => e.id));
+  for (const e of previous) {
+    if (initialIds.has(e.id) || e.state.removed === true) continue;
+    floor.entities.push({ ...structuredClone(e), state: { ...e.state, removed: true } });
+    ctx.changed.add(e.id);
+  }
   for (const s of floor.spent) if (s.returnOnReset) state.inventory.push(s.item);
   floor.spent = [];
   const { start } = floor.def;

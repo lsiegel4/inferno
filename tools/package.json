@@ -7,7 +7,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "solve": "node dist/solve-floors.js ../floors"
+    "solve": "node dist/solve-floors.js ../floors",
+    "previews": "node dist/render-reveal.js"
   },
   "dependencies": {
     "@inferno/shared": "workspace:*"

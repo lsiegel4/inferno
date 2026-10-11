@@ -33,7 +33,27 @@ export interface EntityType {
   validate?(e: PlacedEntity, floor: FloorDef, all: ReadonlyMap<string, FloorDef>): string[];
 }
 
+/**
+ * Item behaviour for `use(item)` when no faced entity handles it, e.g. placing a torch on an
+ * empty tile. Registered per item type alongside entity types.
+ */
+export interface ItemType {
+  type: string;
+  /** Use the item on the tile at (x, y) that the hero faces. Return false if it had no effect. */
+  onUseAt?(ctx: TurnContext, item: InventoryItem, x: number, y: number): boolean;
+}
+
 const types = new Map<string, EntityType>();
+const itemTypes = new Map<string, ItemType>();
+
+export function registerItemType(t: ItemType): void {
+  if (itemTypes.has(t.type)) throw new Error(`Item type "${t.type}" registered twice`);
+  itemTypes.set(t.type, t);
+}
+
+export function itemType(type: string): ItemType | undefined {
+  return itemTypes.get(type);
+}
 
 export function registerEntityType(t: EntityType): void {
   if (types.has(t.kind)) throw new Error(`Entity type "${t.kind}" registered twice`);
@@ -50,7 +70,13 @@ export function hasEntityType(kind: string): boolean {
   return types.has(kind);
 }
 
+/** Entities placed during play (e.g. a torch's light) are marked removed on floor reset. */
+export function isRemoved(e: RuntimeEntity): boolean {
+  return e.state.removed === true;
+}
+
 export function blocksMove(e: RuntimeEntity): boolean {
+  if (isRemoved(e)) return false;
   return entityType(e.kind).blocksMove?.(e) ?? false;
 }
 
@@ -60,5 +86,5 @@ export function blocksJump(e: RuntimeEntity): boolean {
 }
 
 export function isHidden(e: RuntimeEntity): boolean {
-  return entityType(e.kind).hidden?.(e) ?? false;
+  return isRemoved(e) || (entityType(e.kind).hidden?.(e) ?? false);
 }

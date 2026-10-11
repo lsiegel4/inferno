@@ -1,7 +1,7 @@
 import type { Action } from "../protocol.js";
 import { TERRAIN, terrainAt } from "../floor.js";
 import { TurnContext } from "./context.js";
-import { blocksJump, entityType } from "./registry.js";
+import { blocksJump, entityType, itemType } from "./registry.js";
 import { isBlocked, moveHeroTo } from "./transitions.js";
 import { DELTAS, type GameState, type RuntimeEntity, type TurnResult } from "./types.js";
 
@@ -62,7 +62,11 @@ function perform(ctx: TurnContext, action: Action): boolean {
     case "use": {
       const item = ctx.state.inventory.find((i) => i.id === action.itemId);
       if (!item) return false;
-      return facedEntities(ctx).some((e) => entityType(e.kind).onUse?.(ctx, e, item) ?? false);
+      if (facedEntities(ctx).some((e) => entityType(e.kind).onUse?.(ctx, e, item) ?? false)) {
+        return true;
+      }
+      const [dx, dy] = DELTAS[hero.facing];
+      return itemType(item.type)?.onUseAt?.(ctx, item, hero.x + dx, hero.y + dy) ?? false;
     }
     case "wait":
       return true;
