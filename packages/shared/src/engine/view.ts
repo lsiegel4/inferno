@@ -44,23 +44,54 @@ export function toProtocolHero(state: GameState): Hero {
   return { x, y, facing };
 }
 
+export interface TurnDelta {
+  /** Entities that changed or came into view; ones that left view are sent with state.hidden. */
+  changes: Entity[];
+  /** Tiles that became visible this turn (darkness). */
+  revealed: { x: number; y: number; ch: string }[];
+  /** Tiles that went dark this turn (darkness). */
+  hidden: { x: number; y: number }[];
+}
+
 /**
- * Entities to send in a `turn` message. A changed entity that became hidden is sent with
- * `state.hidden: true` so clients can remove it. Changes on unrevealed tiles are left out.
+ * What a `turn` message must carry for a turn that stayed on the same floor: changed entities,
+ * entities that came into or went out of view, and tiles that were revealed or went dark.
  */
-export function turnChanges(
-  state: GameState,
+export function turnDelta(
+  before: GameState,
+  after: GameState,
   changed: readonly string[],
-  reveal: RevealFn = revealFor(state),
-): Entity[] {
-  const floor = state.floors[state.currentFloor]!;
-  return changed.flatMap((id) => {
-    const e = floor.entities.find((x) => x.id === id);
-    if (!e) return [];
-    const out = toProtocolEntity(e);
-    if (isHidden(e)) return [{ ...out, state: { hidden: true } }];
-    return reveal(e.x, e.y) ? [out] : [];
-  });
+): TurnDelta {
+  const rb = revealFor(before);
+  const ra = revealFor(after);
+  const floorBefore = before.floors[before.currentFloor]!;
+  const floorAfter = after.floors[after.currentFloor]!;
+  const { def } = floorAfter;
+
+  const revealed: TurnDelta["revealed"] = [];
+  const hidden: TurnDelta["hidden"] = [];
+  for (let y = 0; y < def.height; y++) {
+    for (let x = 0; x < def.width; x++) {
+      const was = rb(x, y);
+      const now = ra(x, y);
+      if (now && !was) revealed.push({ x, y, ch: def.terrain[y]![x]! });
+      else if (was && !now) hidden.push({ x, y });
+    }
+  }
+
+  const wasVisible = new Map(
+    floorBefore.entities.map((e) => [e.id, !isHidden(e) && rb(e.x, e.y)] as const),
+  );
+  const changedIds = new Set(changed);
+  const changes: Entity[] = [];
+  for (const e of floorAfter.entities) {
+    const was = wasVisible.get(e.id) ?? false;
+    const now = !isHidden(e) && ra(e.x, e.y);
+    if (now && (!was || changedIds.has(e.id))) changes.push(toProtocolEntity(e));
+    else if (!now && was)
+      changes.push({ id: e.id, kind: e.kind, x: e.x, y: e.y, state: { hidden: true } });
+  }
+  return { changes, revealed, hidden };
 }
 
 export function toProtocolInventory(state: GameState): InventoryItemView[] {
