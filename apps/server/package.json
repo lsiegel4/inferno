@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "start": "node dist/main.js",
-    "dev": "tsc -p tsconfig.build.json && NODE_ENV=development node dist/main.js"
+    "dev": "tsc -p tsconfig.build.json && NODE_ENV=development node --env-file-if-exists=../../.env dist/main.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.3",

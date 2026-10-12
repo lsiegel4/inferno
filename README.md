@@ -35,7 +35,7 @@ pnpm install
 
 ### Game server
 
-`pnpm --filter @inferno/server dev` builds and runs the server on port 3000. Environment variables:
+`pnpm --filter @inferno/server dev` builds and runs the server on port 3000, loading variables from a `.env` file in the repo root if one exists (git-ignored). Environment variables:
 
 | Variable           | Default                 | Purpose                                                                                     |
 | ------------------ | ----------------------- | ------------------------------------------------------------------------------------------- |
