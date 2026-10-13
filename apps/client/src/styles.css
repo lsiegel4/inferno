@@ -471,6 +471,26 @@ input:focus-visible {
   letter-spacing: 0.12em;
 }
 
+.crash {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  max-width: 440px;
+  margin: 48px auto;
+  padding-inline: 16px;
+}
+.crash h2 {
+  margin: 0;
+  font: 400 28px/1.1 var(--display);
+  color: var(--ember);
+}
+.crash pre {
+  max-width: 100%;
+  overflow-x: auto;
+  color: var(--ash);
+  font: 13px/1.4 var(--ledger);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .key:active:not(:disabled) {
     transform: none;

@@ -18,7 +18,11 @@ export function describeEntry(e: LogEntry): string {
 /** Hero turns, without player names (game design §9.3). */
 export function EventLog({ log }: { log: LogEntry[] }) {
   const end = useRef<HTMLLIElement>(null);
-  useEffect(() => end.current?.scrollIntoView?.({ block: "nearest" }), [log.length]);
+  useEffect(() => {
+    // Braces matter: newer browsers return a Promise from scrollIntoView, and an effect must
+    // return nothing or a cleanup function.
+    end.current?.scrollIntoView?.({ block: "nearest" });
+  }, [log.length]);
   if (log.length === 0)
     return <p className="empty">No turns yet. Every hero move is recorded here.</p>;
   return (
