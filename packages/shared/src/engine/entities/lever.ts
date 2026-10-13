@@ -13,7 +13,7 @@ export const lever: EntityType = {
     if (e.state.pulled) return false;
     e.state.pulled = true;
     ctx.markChanged(e);
-    ctx.signal(stringListProp(e.props, "targets"), true);
+    ctx.signal(stringListProp(e.props, "targets"), true, { sourceId: e.id, latch: true });
     return true;
   },
   onFloorReset: (current) => current,

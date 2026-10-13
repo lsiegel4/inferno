@@ -21,7 +21,19 @@ export interface EntityType {
   /** The hero stepped or landed on this entity's tile. */
   onEnter?(ctx: TurnContext, e: RuntimeEntity): void;
   /** A linked lever/plate switched this entity on or off. */
-  onSignal?(ctx: TurnContext, e: RuntimeEntity, on: boolean): void;
+  onSignal?(ctx: TurnContext, e: RuntimeEntity, on: boolean, signal: SignalSource): void;
+  /**
+   * The hero moved into this (blocking) entity, travelling (dx, dy). Return true if the entity
+   * moved out of the way (e.g. a pushed block); the hero then enters the tile.
+   */
+  onPushed?(ctx: TurnContext, e: RuntimeEntity, dx: number, dy: number): boolean;
+  /** Called for every entity on the current floor after the hero's action, each turn. */
+  onTurnEnd?(ctx: TurnContext, e: RuntimeEntity): void;
+  /**
+   * Does this entity cover its tile's hazard (e.g. a block that filled lava or a pit)? A covered
+   * tile is plain floor: lava does not kill and other entities there do not trigger.
+   */
+  coversHazard?(e: RuntimeEntity): boolean;
   /**
    * Floor reset after a death. Default: restore the initial entity (puzzle elements reset).
    * Return the entity to keep (e.g. `current` for doors, which stay open).
@@ -31,6 +43,12 @@ export interface EntityType {
   hidden?(e: RuntimeEntity): boolean;
   /** Extra floor-file validation for this kind. */
   validate?(e: PlacedEntity, floor: FloorDef, all: ReadonlyMap<string, FloorDef>): string[];
+}
+
+/** Who sent a signal. Latching signals (levers) hold their target on for good. */
+export interface SignalSource {
+  sourceId: string;
+  latch: boolean;
 }
 
 /**
@@ -83,6 +101,11 @@ export function blocksMove(e: RuntimeEntity): boolean {
 export function blocksJump(e: RuntimeEntity): boolean {
   const t = entityType(e.kind);
   return t.blocksJump ? t.blocksJump(e) : blocksMove(e);
+}
+
+export function coversHazard(e: RuntimeEntity): boolean {
+  if (isRemoved(e)) return false;
+  return entityType(e.kind).coversHazard?.(e) ?? false;
 }
 
 export function isHidden(e: RuntimeEntity): boolean {

@@ -17,17 +17,21 @@ Distances are Euclidean (`dx² + dy² ≤ radius²`). Items in darkness are hidd
 
 Entity kinds and their props:
 
-| Kind          | Props                                                        | Notes                                               |
-| ------------- | ------------------------------------------------------------ | --------------------------------------------------- |
-| `lever`       | `targets`: entity ids                                        | Interact to pull (one-way); switches targets on     |
-| `door`        | —                                                            | Opens when a target of a lever; stays open on reset |
-| `locked_door` | `lock`: name                                                 | Opened by using a key whose `opens` matches         |
-| `item`        | `item`: `key` \| `torch` \| `weight`; keys also need `opens` | Picked up with Interact                             |
-| `sign`        | `text`                                                       | Interact shows the text                             |
-| `pit`         | `landing`: `{ floor, x, y }`                                 | Drops the hero to a lower floor                     |
-| `light`       | optional `radius` (defaults to the floor's radius)           | Light source for darkness; does not block           |
+| Kind          | Props                                                        | Notes                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lever`       | `targets`: entity ids                                        | Interact to pull (one-way); switches targets on                                                                                                            |
+| `door`        | —                                                            | Lever: opens for good (stays open on reset). Plate: open only while the plate is pressed, never closing on the hero or a block                             |
+| `block`       | —                                                            | Pushed one tile by moving into it (no chains, not onto stairs); can't be jumped over; fills lava or a pit it is pushed into; returns to its start on death |
+| `plate`       | `targets`: entity ids                                        | Walkable; pressed by the hero, a block, or a weight stone; switches targets on while pressed, off when released                                            |
+| `locked_door` | `lock`: name                                                 | Opened by using a key whose `opens` matches                                                                                                                |
+| `item`        | `item`: `key` \| `torch` \| `weight`; keys also need `opens` | Picked up with Interact                                                                                                                                    |
+| `sign`        | `text`                                                       | Interact shows the text                                                                                                                                    |
+| `pit`         | `landing`: `{ floor, x, y }`                                 | Drops the hero to a lower floor                                                                                                                            |
+| `light`       | optional `radius` (defaults to the floor's radius)           | Light source for darkness; does not block                                                                                                                  |
 
 Using a torch while facing an open tile places a light there; the torch is returned and the light removed if the hero dies on that floor.
+
+Using a weight stone while facing an empty plate places it there (pressing the plate); Interact while facing the plate picks it back up. A stone left on a plate returns to the inventory if the hero dies on that floor.
 
 Each legend character may appear once in the grid. Validate and solve every floor with `pnpm --filter @inferno/tools solve`.
 

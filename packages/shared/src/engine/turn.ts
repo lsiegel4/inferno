@@ -1,7 +1,7 @@
 import type { Action } from "../protocol.js";
 import { TERRAIN, terrainAt } from "../floor.js";
 import { TurnContext } from "./context.js";
-import { blocksJump, entityType, itemType } from "./registry.js";
+import { blocksJump, blocksMove, entityType, isRemoved, itemType } from "./registry.js";
 import { isBlocked, moveHeroTo } from "./transitions.js";
 import { DELTAS, type GameState, type RuntimeEntity, type TurnResult } from "./types.js";
 
@@ -19,6 +19,7 @@ export function applyTurn(state: GameState, action: Action): TurnResult {
 
   const effective = perform(ctx, action);
   if (!effective) ctx.setOutcome("no_effect");
+  endTurn(ctx);
   next.turn += 1;
 
   return {
@@ -36,7 +37,10 @@ function perform(ctx: TurnContext, action: Action): boolean {
     case "move": {
       hero.facing = action.dir;
       const [dx, dy] = DELTAS[action.dir];
-      if (isBlocked(ctx, hero.x + dx, hero.y + dy)) {
+      const tx = hero.x + dx,
+        ty = hero.y + dy;
+      if (isBlocked(ctx, tx, ty)) push(ctx, tx, ty, dx, dy);
+      if (isBlocked(ctx, tx, ty)) {
         ctx.emit({ type: "turned" }); // turn in place; still uses the turn
       } else {
         moveHeroTo(ctx, hero.x + dx, hero.y + dy);
@@ -70,6 +74,19 @@ function perform(ctx: TurnContext, action: Action): boolean {
     }
     case "wait":
       return true;
+  }
+}
+
+/** Let blocking entities in the way move aside (pushable blocks). Only the first one is tried. */
+function push(ctx: TurnContext, x: number, y: number, dx: number, dy: number): void {
+  const blocker = ctx.entitiesAt(x, y).find(blocksMove);
+  if (blocker) entityType(blocker.kind).onPushed?.(ctx, blocker, dx, dy);
+}
+
+/** End-of-turn hooks (pressure plates, doors waiting to close) on the current floor. */
+function endTurn(ctx: TurnContext): void {
+  for (const e of [...ctx.floor.entities]) {
+    if (!isRemoved(e)) entityType(e.kind).onTurnEnd?.(ctx, e);
   }
 }
 
