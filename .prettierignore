@@ -4,3 +4,4 @@ coverage
 cdk.out
 docs
 .claude
+.playwright-mcp

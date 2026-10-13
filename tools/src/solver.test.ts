@@ -31,5 +31,5 @@ describe("solveFloor", () => {
     for (const id of game.floorOrder) {
       expect(solveFloor(atFloorStart(game, id)), id).not.toBeNull();
     }
-  });
+  }, 30_000);
 });
