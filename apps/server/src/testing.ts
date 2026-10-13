@@ -1,5 +1,14 @@
-/** Test helpers: a controllable clock. */
+/** Test helpers: a controllable clock and a fake Google verifier. */
+import { InvalidIdTokenError, type IdTokenVerifier } from "./auth/google.js";
 import type { Clock } from "./clock.js";
+
+/** Accepts ID tokens of the form "good:<sub>". */
+export const fakeVerifier: IdTokenVerifier = {
+  async verify(idToken) {
+    if (!idToken.startsWith("good:")) throw new InvalidIdTokenError("bad");
+    return { sub: idToken.slice(5) };
+  },
+};
 
 interface Timer {
   id: number;
