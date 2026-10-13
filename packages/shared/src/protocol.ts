@@ -48,6 +48,8 @@ export const FloorStateSchema = z.object({
   height: z.number().int().min(1),
   /** Static terrain, one row per line. Unrevealed tiles are " " (see encodeTerrain). */
   tiles: z.string(),
+  /** Explored-floor map terrain, same encoding as `tiles`; unexplored tiles are " ". */
+  explored: z.string(),
   entities: z.array(EntitySchema),
   minimumPlayers: z.number().int().min(1),
 });
@@ -170,6 +172,9 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
         .array(z.object({ x: z.number().int(), y: z.number().int(), ch: z.string().length(1) }))
         .optional(),
       hidden: z.array(z.object({ x: z.number().int(), y: z.number().int() })).optional(),
+      explored: z
+        .array(z.object({ x: z.number().int(), y: z.number().int(), ch: z.string().length(1) }))
+        .optional(),
     }),
   ),
   envelope("floor_changed", z.object({ floor: FloorStateSchema, hero: HeroSchema })),

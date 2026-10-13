@@ -21,3 +21,4 @@ export {
   type GameSnapshot,
   type FloorSnapshot,
 } from "./engine/snapshot.js";
+export { VIEW_WIDTH, VIEW_HEIGHT, cameraOrigin } from "./engine/explored.js";

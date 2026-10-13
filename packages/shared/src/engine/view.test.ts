@@ -22,6 +22,7 @@ describe("view", () => {
       width: 5,
       height: 3,
       tiles: "#####\n#.S.#\n#####",
+      explored: "#####\n#.S.#\n#####",
       entities: [
         {
           id: "key-1",
@@ -81,7 +82,7 @@ describe("view", () => {
       ]);
     });
 
-    it("sends entities that come into view, and hides ones that leave it", () => {
+    it("sends entities that come into view; explored ones stay for the floor map", () => {
       let s = dark();
       for (let i = 0; i < 3; i++) s = applyTurn(s, right).state; // hero at (4,1)
       const into = applyTurn(s, right); // hero (5,1): key at (6,1) now lit
@@ -95,15 +96,19 @@ describe("view", () => {
         },
       ]);
       const back = applyTurn(into.state, { kind: "move", dir: "left" });
-      expect(turnDelta(into.state, back.state, back.changed).changes).toEqual([
-        { id: "key-1", kind: "item", x: 6, y: 1, state: { hidden: true } },
-      ]);
+      // The key's tile is now explored, so it stays on the floor map although it went dark.
+      expect(turnDelta(into.state, back.state, back.changed).changes).toEqual([]);
     });
 
     it("is empty in viewport mode", () => {
       const s = game();
       const r = applyTurn(s, right);
-      expect(turnDelta(s, r.state, r.changed)).toEqual({ changes: [], revealed: [], hidden: [] });
+      expect(turnDelta(s, r.state, r.changed)).toEqual({
+        changes: [],
+        revealed: [],
+        hidden: [],
+        explored: [],
+      });
     });
   });
 });

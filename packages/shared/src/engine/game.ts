@@ -1,5 +1,6 @@
 import "./entities/index.js";
 import { TERRAIN, type FloorDef } from "../floor.js";
+import { exploreAroundHero } from "./explored.js";
 import { entityType, hasEntityType } from "./registry.js";
 import type { FloorRuntime, GameState, RuntimeEntity } from "./types.js";
 
@@ -44,7 +45,7 @@ function loadFloor(def: FloorDef): FloorRuntime {
     props: p.props,
     state: entityType(p.kind).initialState?.(p) ?? {},
   }));
-  return { def, initial, entities: structuredClone(initial), spent: [] };
+  return { def, initial, entities: structuredClone(initial), spent: [], explored: [] };
 }
 
 /** A new game: hero at floor 1's start, empty inventory. Throws FloorSetError if invalid. */
@@ -53,7 +54,7 @@ export function createGame(floors: readonly FloorDef[]): GameState {
   if (problems.length) throw new FloorSetError(problems);
   const sorted = [...floors].sort((a, b) => a.index - b.index);
   const first = sorted[0]!;
-  return {
+  const state: GameState = {
     floorOrder: sorted.map((f) => f.id),
     floors: Object.fromEntries(sorted.map((f) => [f.id, loadFloor(f)])),
     currentFloor: first.id,
@@ -62,4 +63,6 @@ export function createGame(floors: readonly FloorDef[]): GameState {
     turn: 0,
     gameOver: false,
   };
+  exploreAroundHero(state);
+  return state;
 }

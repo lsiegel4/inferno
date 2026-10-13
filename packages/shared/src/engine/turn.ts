@@ -1,6 +1,7 @@
 import type { Action } from "../protocol.js";
 import { TERRAIN, terrainAt } from "../floor.js";
 import { TurnContext } from "./context.js";
+import { exploreAroundHero } from "./explored.js";
 import { blocksJump, entityType, itemType } from "./registry.js";
 import { isBlocked, moveHeroTo } from "./transitions.js";
 import { DELTAS, type GameState, type RuntimeEntity, type TurnResult } from "./types.js";
@@ -20,6 +21,7 @@ export function applyTurn(state: GameState, action: Action): TurnResult {
   const effective = perform(ctx, action);
   if (!effective) ctx.setOutcome("no_effect");
   next.turn += 1;
+  exploreAroundHero(next);
 
   return {
     state: next,
