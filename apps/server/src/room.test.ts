@@ -228,7 +228,7 @@ describe("vote ticks", () => {
 });
 
 describe("turn messages", () => {
-  it("sends floor changes, game over, and history", () => {
+  it("sends floor changes, game over, and history", async () => {
     const floors = [floor(1, ["#####", "#SU.#", "#####"]), floor(2, ["#####", "#SU.#", "#####"])];
     const { clock, player, room } = setup(floors);
     const a = player("ana");
@@ -242,8 +242,8 @@ describe("turn messages", () => {
     a.vote(2, right);
     expect(a.errors()).toEqual(["GAME_OVER"]);
 
-    expect(room.historyPage(0, 1)).toMatchObject({ turns: [{ turn: 1 }], nextCursor: "1" });
-    expect(room.historyPage(1, 10)).toMatchObject({ turns: [{ turn: 2 }], nextCursor: null });
+    expect(await room.historyPage(0, 1)).toMatchObject({ turns: [{ turn: 1 }], nextCursor: "1" });
+    expect(await room.historyPage(1, 10)).toMatchObject({ turns: [{ turn: 2 }], nextCursor: null });
   });
 
   it("includes sign text and inventory changes", () => {
