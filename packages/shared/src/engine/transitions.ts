@@ -1,12 +1,17 @@
 /** Hero movement onto tiles, floor transitions, and death with floor reset. */
 import { TERRAIN, terrainAt } from "../floor.js";
 import type { TurnContext } from "./context.js";
-import { blocksMove, entityType } from "./registry.js";
+import { blocksMove, coversHazard, entityType } from "./registry.js";
 
 /** True if the hero cannot enter this tile (wall or a blocking entity). Lava is enterable. */
 export function isBlocked(ctx: TurnContext, x: number, y: number): boolean {
   if (terrainAt(ctx.floor.def, x, y) === TERRAIN.wall) return true;
   return ctx.entitiesAt(x, y).some(blocksMove);
+}
+
+/** True if something (e.g. a block that filled it) turns this tile's hazard into plain floor. */
+export function isCovered(ctx: TurnContext, x: number, y: number): boolean {
+  return ctx.entitiesAt(x, y).some(coversHazard);
 }
 
 /** Move the hero onto a tile and apply whatever is there. */
@@ -18,6 +23,7 @@ export function moveHeroTo(ctx: TurnContext, x: number, y: number): void {
   ctx.emit({ type: "hero_moved" });
 
   const t = terrainAt(ctx.floor.def, x, y);
+  if (isCovered(ctx, x, y)) return;
   if (t === TERRAIN.lava) return die(ctx);
   if (t === TERRAIN.stairsUp) return climb(ctx);
   if (t === TERRAIN.stairsDown) return descend(ctx);

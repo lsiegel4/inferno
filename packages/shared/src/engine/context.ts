@@ -1,5 +1,5 @@
 import type { TurnOutcome } from "../protocol.js";
-import { entityType } from "./registry.js";
+import { entityType, type SignalSource } from "./registry.js";
 import type { FloorRuntime, GameEvent, GameState, InventoryItem, RuntimeEntity } from "./types.js";
 
 /** Mutable view of one turn in progress, handed to entity hooks. */
@@ -34,16 +34,22 @@ export class TurnContext {
     this.outcome ??= outcome;
   }
 
-  /** Send an on/off signal to each target entity id on the current floor. */
-  signal(targets: readonly string[], on: boolean): void {
+  /** Send an on/off signal from `source` to each target entity id on the current floor. */
+  signal(targets: readonly string[], on: boolean, source: SignalSource): void {
     for (const id of targets) {
       const target = this.entityById(id);
-      if (target) entityType(target.kind).onSignal?.(this, target, on);
+      if (target) entityType(target.kind).onSignal?.(this, target, on, source);
     }
   }
 
   giveItem(item: InventoryItem): void {
     this.state.inventory.push(item);
+  }
+
+  /** Take back an item that was spent on this floor (e.g. a weight stone picked up again). */
+  reclaimItem(item: InventoryItem): void {
+    this.floor.spent = this.floor.spent.filter((s) => s.item.id !== item.id);
+    this.giveItem(item);
   }
 
   /** Remove an item from the inventory and remember it for floor resets. */

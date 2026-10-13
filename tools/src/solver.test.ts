@@ -20,6 +20,26 @@ describe("solveFloor", () => {
     expect(solution.dangerSteps).toBeGreaterThan(0);
   });
 
+  it("solves a block-on-plate puzzle", () => {
+    // The door to the stairs opens only while the plate is pressed: push the block onto it.
+    const game = createGame([
+      floor(["#######", "#S.bp.#", "#....A#", "#####U#"], {
+        b: { id: "block", kind: "block" },
+        p: { id: "plate", kind: "plate", targets: ["door"] },
+        A: { id: "door", kind: "door" },
+      }),
+    ]);
+    const { actions } = solveFloor(game)!;
+    expect(actions.map((a) => (a.kind === "move" ? a.dir : a.kind))).toEqual([
+      "right",
+      "right",
+      "down",
+      "right",
+      "right",
+      "down",
+    ]);
+  });
+
   it("returns null when the stairs are unreachable", () => {
     const game = createGame([floor(["#####", "#S#U#", "#####"])]);
     expect(solveFloor(game)).toBeNull();
