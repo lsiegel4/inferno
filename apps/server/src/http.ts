@@ -66,7 +66,7 @@ export function buildHttp(deps: HttpDeps): FastifyInstance {
         limit >= 1 &&
         limit <= 500;
       if (!valid) return reply.code(400).send({ error: "BAD_REQUEST" });
-      return room.historyPage(cursor, limit);
+      return await room.historyPage(cursor, limit);
     },
   );
 

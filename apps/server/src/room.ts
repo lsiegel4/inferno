@@ -8,6 +8,7 @@ import {
   ClientMessageSchema,
   PROTOCOL_VERSION,
   resolveVotes,
+  serializeGame,
   tallyVotes,
   toFloorState,
   toProtocolHero,
@@ -22,8 +23,11 @@ import {
   type Tally,
   type TurnRecord,
 } from "@inferno/shared";
+import { randomUUID } from "node:crypto";
 import type { Clock } from "./clock.js";
 import { RULES } from "./config.js";
+import { MemoryGameLog } from "./persistence/memory.js";
+import { StaleLeaderError, type GameLog, type TurnWrite } from "./persistence/types.js";
 
 /** One WebSocket connection, as the room sees it. */
 export interface Conn {
@@ -59,6 +63,18 @@ interface OpenTick {
 
 type Data<T extends ServerMessage["type"]> = Extract<ServerMessage, { type: T }>["data"];
 
+export interface RoomOptions {
+  /** Durable log; defaults to in memory. */
+  log?: GameLog;
+  /** Save a snapshot every N turns (ADR-0009: 100). */
+  snapshotEvery?: number;
+  /** Called once if another server took over; the process should exit. */
+  onStale?: (error: StaleLeaderError) => void;
+  /** Recent turns and chat to show in `welcome` after a restart. */
+  recentTurns?: TurnRecord[];
+  recentChat?: ChatMessage[];
+}
+
 export class GameRoom {
   private state: GameState;
   private readonly conns = new Map<Conn, ConnState>();
@@ -67,24 +83,40 @@ export class GameRoom {
   private tallyDirty = false;
   private paused = true;
   private belowSince: number | null = null;
-  private readonly history: TurnRecord[] = [];
-  private readonly chat: ChatMessage[] = [];
-  private chatSeq = 0;
+  /** Most recent turns, for `welcome`. The full history lives in the game log. */
+  private readonly recentTurns: TurnRecord[];
+  private readonly chat: ChatMessage[];
   private lastPresence = "";
   private readonly housekeeping: unknown;
+  private readonly log: GameLog;
+  private readonly snapshotEvery: number;
+  /** A turn is being written to the log; nothing else may change the game until it lands. */
+  private committing = false;
+  private stopped = false;
 
   constructor(
     initial: GameState,
     private readonly clock: Clock,
     private readonly rng: () => number = Math.random,
+    private readonly options: RoomOptions = {},
   ) {
     this.state = initial;
+    this.log = options.log ?? new MemoryGameLog();
+    this.snapshotEvery = options.snapshotEvery ?? 100;
+    this.recentTurns = [...(options.recentTurns ?? [])].slice(-RULES.recentTurns);
+    this.chat = [...(options.recentChat ?? [])].slice(-RULES.recentChat);
     this.housekeeping = clock.setInterval(() => this.onHousekeeping(), RULES.broadcastIntervalMs);
   }
 
   stop(): void {
+    this.stopped = true;
     this.clock.clearInterval(this.housekeeping);
     this.discardTick();
+  }
+
+  /** The current game state (read-only use: tests and graceful shutdown snapshots). */
+  get gameState(): GameState {
+    return this.state;
   }
 
   // ---------------------------------------------------------------------------
@@ -158,7 +190,7 @@ export class GameRoom {
       inventory: toProtocolInventory(this.state),
       presence: this.presence(),
       tally: this.tally(),
-      recentTurns: this.history.slice(-RULES.recentTurns),
+      recentTurns: this.recentTurns,
       recentChat: this.chat.slice(-RULES.recentChat),
       gameOver: this.state.gameOver,
     });
@@ -172,7 +204,7 @@ export class GameRoom {
     if (!player) return this.error(conn, "NOT_AUTHENTICATED", "vote");
     if (this.state.gameOver) return this.error(conn, "GAME_OVER", "vote");
     if (this.paused) return this.error(conn, "PAUSED", "vote");
-    if (tick !== this.state.turn) return this.error(conn, "STALE_TICK", "vote");
+    if (tick !== this.state.turn || this.committing) return this.error(conn, "STALE_TICK", "vote");
     if (this.tick?.votes.has(player.userId)) return this.error(conn, "ALREADY_VOTED", "vote");
 
     this.markActive(player);
@@ -217,17 +249,14 @@ export class GameRoom {
 
   private closeTick(): void {
     const t = this.tick;
-    if (!t) return;
+    if (!t || this.stopped) return;
     this.discardTick();
     const action = resolveVotes([...t.votes.values()], this.rng);
-    if (action) this.playTurn(action);
-  }
+    if (!action) return;
 
-  private playTurn(action: Action): void {
+    // Compute the turn, write it durably, and only then apply it (ADR-0001).
     const before = this.state;
     const r = applyTurn(before, action);
-    this.state = r.state;
-
     const record: TurnRecord = {
       turn: r.state.turn,
       floorId: before.currentFloor,
@@ -235,7 +264,52 @@ export class GameRoom {
       at: new Date(this.clock.now()).toISOString(),
       ...(r.outcome ? { outcome: r.outcome } : {}),
     };
-    this.history.push(record);
+    const write: TurnWrite = {
+      record,
+      votes: [...t.votes].map(([userId, a]) => ({ userId, action: a })),
+    };
+    const commit = () => this.applyCommitted(before, r, record);
+    try {
+      const pending = this.log.appendTurn(write);
+      if (!pending) return commit(); // in-memory log: synchronous
+      this.committing = true;
+      pending.then(
+        () => {
+          this.committing = false;
+          if (!this.stopped) commit();
+        },
+        (e: unknown) => this.onWriteFailed(e),
+      );
+    } catch (e) {
+      this.onWriteFailed(e);
+    }
+  }
+
+  private onWriteFailed(e: unknown): void {
+    this.committing = false;
+    if (e instanceof StaleLeaderError) {
+      this.stop();
+      this.options.onStale?.(e);
+      return;
+    }
+    // Any other failure (e.g. a network error): the turn was not recorded, so it is not applied.
+    console.error("turn write failed; turn dropped", e);
+  }
+
+  private applyCommitted(
+    before: GameState,
+    r: ReturnType<typeof applyTurn>,
+    record: TurnRecord,
+  ): void {
+    this.state = r.state;
+    const action = record.action;
+    this.recentTurns.push(record);
+    if (this.recentTurns.length > RULES.recentTurns) this.recentTurns.shift();
+    if (r.state.turn % this.snapshotEvery === 0) {
+      this.log.saveSnapshot(serializeGame(r.state)).catch((e: unknown) => {
+        console.error("snapshot failed", e);
+      });
+    }
 
     const floorChanged = r.state.currentFloor !== before.currentFloor;
     const inventoryChanged = JSON.stringify(r.state.inventory) !== JSON.stringify(before.inventory);
@@ -369,13 +443,14 @@ export class GameRoom {
     if (wait > 0) return this.error(conn, "RATE_LIMITED", "chat_send", wait);
     player.lastChatAt = now;
     const msg: ChatMessage = {
-      id: String(++this.chatSeq),
+      id: randomUUID(),
       handle: player.handle,
       text,
       at: new Date(now).toISOString(),
     };
     this.chat.push(msg);
     if (this.chat.length > RULES.recentChat) this.chat.shift();
+    this.log.appendChat(msg).catch((e: unknown) => console.error("chat write failed", e));
     this.broadcast("chat_message", msg);
   }
 
@@ -389,9 +464,11 @@ export class GameRoom {
   // History (REST)
 
   /** Hero turns after `cursor` (a turn number), oldest first. */
-  historyPage(cursor: number, limit: number): { turns: TurnRecord[]; nextCursor: string | null } {
-    const start = this.history.findIndex((t) => t.turn > cursor);
-    const turns = start === -1 ? [] : this.history.slice(start, start + limit);
+  async historyPage(
+    cursor: number,
+    limit: number,
+  ): Promise<{ turns: TurnRecord[]; nextCursor: string | null }> {
+    const turns = await this.log.turnsAfter(cursor, limit);
     const last = turns.at(-1);
     const more = last !== undefined && last.turn < this.state.turn;
     return { turns, nextCursor: more ? String(last.turn) : null };

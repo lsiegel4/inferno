@@ -14,3 +14,10 @@ export { applyTurn } from "./engine/turn.js";
 export { actionKey, tallyVotes, resolveVotes, type VoteCount } from "./engine/votes.js";
 export * from "./engine/view.js";
 export { revealFor, clearLine } from "./engine/reveal.js";
+export {
+  serializeGame,
+  restoreGame,
+  SnapshotMismatchError,
+  type GameSnapshot,
+  type FloorSnapshot,
+} from "./engine/snapshot.js";

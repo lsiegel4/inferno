@@ -37,11 +37,18 @@ pnpm install
 
 `pnpm --filter @inferno/server dev` builds and runs the server on port 3000, loading variables from a `.env` file in the repo root if one exists (git-ignored). Environment variables:
 
-| Variable           | Default                 | Purpose                                                                                     |
-| ------------------ | ----------------------- | ------------------------------------------------------------------------------------------- |
-| `GOOGLE_CLIENT_ID` | (unset)                 | Google OAuth client id for sign-in. Unset: sign-in is disabled and everyone is a spectator. |
-| `ALLOWED_ORIGIN`   | `http://localhost:5173` | The game's origin; WebSocket upgrades and POST/PUT/DELETE from other origins are rejected.  |
-| `PORT`             | `3000`                  | HTTP and WebSocket port.                                                                    |
-| `FLOORS_DIR`       | `../../floors`          | Floor files to load.                                                                        |
+| Variable            | Default                 | Purpose                                                                                                                           |
+| ------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`  | (unset)                 | Google OAuth client id for sign-in. Unset: sign-in is disabled and everyone is a spectator.                                       |
+| `ALLOWED_ORIGIN`    | `http://localhost:5173` | The game's origin; WebSocket upgrades and POST/PUT/DELETE from other origins are rejected.                                        |
+| `PORT`              | `3000`                  | HTTP and WebSocket port.                                                                                                          |
+| `FLOORS_DIR`        | `../../floors`          | Floor files to load.                                                                                                              |
+| `STORAGE`           | `memory`                | `memory` (nothing survives a restart) or `dynamodb`.                                                                              |
+| `DYNAMODB_ENDPOINT` | (unset)                 | DynamoDB Local URL, e.g. `http://localhost:8000`; tables are created automatically. Unset with `STORAGE=dynamodb` means real AWS. |
+| `TABLE_PREFIX`      | `inferno-`              | Prefix for DynamoDB table names.                                                                                                  |
+
+### Local DynamoDB
+
+`pnpm db:up` starts DynamoDB Local in Docker on port 8000 (`pnpm db:down` stops it). The persistence tests use it and are skipped when it is not running (CI always runs them). To run the server against it: `STORAGE=dynamodb DYNAMODB_ENDPOINT=http://localhost:8000 pnpm --filter @inferno/server dev`.
 
 Packages that import `@inferno/shared` use its built output, so run `pnpm build` before `pnpm typecheck` or `pnpm test` on a fresh checkout.
