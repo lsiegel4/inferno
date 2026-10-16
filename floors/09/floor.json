@@ -1,0 +1,16 @@
+{
+  "id": "dis",
+  "index": 9,
+  "name": "The Gates of Dis",
+  "minimumPlayers": 4,
+  "legend": {
+    "s": {
+      "id": "sign-medusa",
+      "kind": "sign",
+      "text": "On the burning walls of Dis the Furies shriek: Let Medusa come, and turn him to stone! Here the stone turns on you. While you look at a watcher it is only stone, and can be pushed. Turn your back, or turn aside, and it comes for you."
+    },
+    "w": { "id": "fury", "kind": "statue", "many": true },
+    "p": { "id": "dis-plate", "kind": "plate", "targets": ["dis-gate"] },
+    "A": { "id": "dis-gate", "kind": "door" }
+  }
+}
