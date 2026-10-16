@@ -38,26 +38,6 @@
       "kind": "patrol",
       "route": "RRRRRUUUUULLLLLLLLLLDDDDDRRRRR"
     },
-    "*": {
-      "id": "whip-light-1",
-      "kind": "light",
-      "radius": 4
-    },
-    "+": {
-      "id": "whip-light-2",
-      "kind": "light",
-      "radius": 4
-    },
-    "%": {
-      "id": "whip-light-3",
-      "kind": "light",
-      "radius": 4
-    },
-    "&": {
-      "id": "whip-light-4",
-      "kind": "light",
-      "radius": 4
-    },
     "v": {
       "id": "no-return",
       "kind": "oneway",
@@ -92,6 +72,26 @@
       "id": "sign-malebolge",
       "kind": "sign",
       "text": "Malebolge: ten stone ditches of fraud. In the first, panderers and seducers march in two files, whipped by horned demons; walk with the march and never stop. In the second, the flatterers lie in filth, still flattering. Of their three signs, exactly one tells the truth."
+    },
+    "k": {
+      "id": "whip-light-1",
+      "kind": "light",
+      "radius": 4
+    },
+    "m": {
+      "id": "whip-light-2",
+      "kind": "light",
+      "radius": 4
+    },
+    "n": {
+      "id": "whip-light-3",
+      "kind": "light",
+      "radius": 4
+    },
+    "p": {
+      "id": "whip-light-4",
+      "kind": "light",
+      "radius": 4
     }
   }
 }
