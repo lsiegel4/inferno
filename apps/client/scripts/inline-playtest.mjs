@@ -1,3 +1,4 @@
+/* global console */
 // Inline the built floor lab's scripts and styles into one self-contained HTML file
 // (dist-playtest/floor-lab.html), easy to share or open without a server.
 import { readFileSync, writeFileSync } from "node:fs";

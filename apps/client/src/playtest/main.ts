@@ -49,7 +49,12 @@ export function roman(n: number): string {
     [1, "I"],
   ];
   let out = "";
-  for (const [v, s] of table) while (n >= v) ((out += s), (n -= v));
+  for (const [v, s] of table) {
+    while (n >= v) {
+      out += s;
+      n -= v;
+    }
+  }
   return out;
 }
 
