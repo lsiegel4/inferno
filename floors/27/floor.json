@@ -1,0 +1,173 @@
+{
+  "id": "judecca",
+  "index": 27,
+  "name": "Cocytus: Judecca",
+  "minimumPlayers": 20,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 3
+  },
+  "legend": {
+    "s": {
+      "id": "sign-judecca",
+      "kind": "sign",
+      "text": "Judecca, the last circle, where those who betrayed their lords are sealed whole in the ice like straws in glass. At its heart Lucifer chews Judas, Brutus and Cassius, and the beating of his six wings freezes the lake. The fire here rolls in waves: walk with it, every turn, and never leap; a leap lands you in the flame."
+    },
+    "e": {
+      "id": "wing-east-0",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 0,
+      "many": true
+    },
+    "f": {
+      "id": "wing-east-1",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 1,
+      "many": true
+    },
+    "g": {
+      "id": "wing-east-2",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 2,
+      "many": true
+    },
+    "h": {
+      "id": "wing-east-3",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 3,
+      "many": true
+    },
+    "w": {
+      "id": "wing-west-0",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 0,
+      "many": true
+    },
+    "x": {
+      "id": "wing-west-1",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 1,
+      "many": true
+    },
+    "y": {
+      "id": "wing-west-2",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 2,
+      "many": true
+    },
+    "z": {
+      "id": "wing-west-3",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 3,
+      "many": true
+    },
+    ">": {
+      "id": "no-way-back",
+      "kind": "oneway",
+      "dir": "right",
+      "many": true
+    },
+    "B": {
+      "id": "judas-flame",
+      "kind": "beam",
+      "dir": "up"
+    },
+    "a": {
+      "id": "mirror-of-judas",
+      "kind": "mirror",
+      "slant": "\\"
+    },
+    "b": {
+      "id": "mirror-of-brutus",
+      "kind": "mirror",
+      "slant": "/"
+    },
+    "A": {
+      "id": "eye-of-judas",
+      "kind": "receiver",
+      "targets": ["judas-door"]
+    },
+    "J": {
+      "id": "judas-door",
+      "kind": "door"
+    },
+    "u": {
+      "id": "brutus",
+      "kind": "statue"
+    },
+    "Y": {
+      "id": "brutus-cell",
+      "kind": "door"
+    },
+    "p": {
+      "id": "brutus-plate",
+      "kind": "plate",
+      "targets": ["lucifer-gate"]
+    },
+    "*": {
+      "id": "brutus-lamp",
+      "kind": "light",
+      "radius": 3
+    },
+    "m": {
+      "id": "lever-brutus",
+      "kind": "lever",
+      "targets": ["brutus-cell"]
+    },
+    "r": {
+      "id": "cassius",
+      "kind": "statue"
+    },
+    "q": {
+      "id": "cassius-plate",
+      "kind": "plate",
+      "targets": ["lucifer-gate"]
+    },
+    "G": {
+      "id": "lucifer-gate",
+      "kind": "door",
+      "need": 2
+    },
+    "v": {
+      "id": "last-vigil",
+      "kind": "vigil",
+      "turns": 10,
+      "targets": ["star-door"]
+    },
+    "V": {
+      "id": "star-door",
+      "kind": "door"
+    },
+    "t": {
+      "id": "altar-of-judecca",
+      "kind": "altar",
+      "threshold": 0.9,
+      "targets": ["last-door"]
+    },
+    "X": {
+      "id": "last-door",
+      "kind": "door"
+    },
+    "n": {
+      "id": "sign-stars",
+      "kind": "sign",
+      "text": "Below Lucifer the way turns upward, through the rock, along a hidden stream, to the surface of the world. One vigil and one voice remain. Then you will see the stars again."
+    }
+  }
+}

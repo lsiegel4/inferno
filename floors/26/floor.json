@@ -1,0 +1,86 @@
+{
+  "id": "ptolomea",
+  "index": 26,
+  "name": "Cocytus: Ptolomea",
+  "minimumPlayers": 18,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 2
+  },
+  "legend": {
+    "E": {
+      "id": "fallen-soul",
+      "kind": "echo"
+    },
+    "s": {
+      "id": "sign-alberigo",
+      "kind": "sign",
+      "text": "Ptolomea, where traitors to their guests lie face up in the ice, their tears frozen over their eyes. Here a soul may fall before its body dies, while a demon wears the body above. The frozen tears are unseen until someone breaks them. Beyond the field your soul waits for you, and it will have to walk the flame with you."
+    },
+    "t": {
+      "id": "frozen-tear",
+      "kind": "trap",
+      "many": true
+    },
+    ">": {
+      "id": "downward",
+      "kind": "oneway",
+      "dir": "right",
+      "many": true
+    },
+    "b": {
+      "id": "frozen-flame",
+      "kind": "beam",
+      "dir": "down"
+    },
+    "p": {
+      "id": "near-plate",
+      "kind": "plate",
+      "targets": ["frozen-flame", "frozen-flame-2"]
+    },
+    "q": {
+      "id": "far-plate",
+      "kind": "plate",
+      "targets": ["frozen-flame", "frozen-flame-2"]
+    },
+    "v": {
+      "id": "vigil-of-tears",
+      "kind": "vigil",
+      "turns": 10,
+      "targets": ["soul-door"]
+    },
+    "V": {
+      "id": "soul-door",
+      "kind": "door"
+    },
+    "f": {
+      "id": "soul-plate",
+      "kind": "plate",
+      "targets": ["judas-gate"]
+    },
+    "g": {
+      "id": "body-plate",
+      "kind": "plate",
+      "targets": ["judas-gate"]
+    },
+    "X": {
+      "id": "judas-gate",
+      "kind": "door",
+      "need": 2
+    },
+    "c": {
+      "id": "frozen-flame-2",
+      "kind": "beam",
+      "dir": "down"
+    },
+    "K": {
+      "id": "soul-cell",
+      "kind": "door"
+    },
+    "k": {
+      "id": "soul-cell-plate",
+      "kind": "plate",
+      "targets": ["soul-cell"]
+    }
+  }
+}

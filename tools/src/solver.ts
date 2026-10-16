@@ -16,6 +16,9 @@ import { createHash } from "node:crypto";
 import {
   actionKey,
   applyTurn,
+  entityType,
+  TERRAIN,
+  terrainAt,
   UNANIMOUS,
   type Action,
   type Crowd,
@@ -78,8 +81,37 @@ function hashKey(s: GameState): string {
   return createHash("sha1").update(stateKey(s)).digest("base64");
 }
 
-function hasEcho(s: GameState): boolean {
-  return s.floors[s.currentFloor]!.entities.some((e) => e.kind === "echo");
+const ECHO_INTERACTS = new Set(["lever", "switch", "mirror"]);
+
+/**
+ * Is there an echo that the runner-up vote can do anything with? An echo sealed in a cell (every
+ * neighbour a wall or something solid it cannot push or work) can only turn on the spot, so the
+ * search does not branch on dissent for it. (Its facing is still tracked; the search may then miss
+ * routes that depend on the way a sealed echo faces when released, which floors avoid.)
+ */
+function echoCanAct(s: GameState): boolean {
+  const floor = s.floors[s.currentFloor]!;
+  for (const e of floor.entities) {
+    if (e.kind !== "echo" || e.state.removed) continue;
+    for (const [dx, dy] of [
+      [0, -1],
+      [0, 1],
+      [-1, 0],
+      [1, 0],
+    ] as const) {
+      const x = e.x + dx,
+        y = e.y + dy;
+      if (terrainAt(floor.def, x, y) === TERRAIN.wall) continue;
+      const here = floor.entities.filter((o) => o.x === x && o.y === y && !o.state.removed);
+      if (
+        here.some((o) => ECHO_INTERACTS.has(o.kind) || o.kind === "block" || o.kind === "statue")
+      ) {
+        return true;
+      }
+      if (!here.some((o) => entityType(o.kind).blocksMove?.(o) ?? false)) return true;
+    }
+  }
+  return false;
 }
 
 export function movesFor(s: GameState): Move[] {
@@ -88,7 +120,7 @@ export function movesFor(s: GameState): Move[] {
     ...s.inventory.map((i): Action => ({ kind: "use", itemId: i.id })),
   ];
   const unanimous = actions.map((action) => ({ action, crowd: UNANIMOUS }));
-  if (!hasEcho(s)) return unanimous;
+  if (!echoCanAct(s)) return unanimous;
   const split: Move[] = [];
   for (const action of actions) {
     for (const dissent of DISSENT_ACTIONS) {
