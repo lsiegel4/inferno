@@ -1,0 +1,23 @@
+{
+  "id": "geryon",
+  "index": 14,
+  "name": "Geryon's Cliff",
+  "minimumPlayers": 6,
+  "reveal": { "mode": "torchlight", "radius": 3 },
+  "legend": {
+    "s": {
+      "id": "sign-geryon",
+      "kind": "sign",
+      "text": "Welcome, traveller. I am Geryon, and my face is the face of a just man. Take the first way down; it is shorter, and nothing lies at the end of the ledge."
+    },
+    "t": {
+      "id": "sign-cliff",
+      "kind": "sign",
+      "text": "From here every way leads down, and none leads back. The ledges crumble behind you. Fraud begins below."
+    },
+    "v": { "id": "drop", "kind": "oneway", "dir": "down", "many": true },
+    "c": { "id": "ledge", "kind": "crumble", "many": true },
+    "k": { "id": "key-geryon", "kind": "item", "item": "key", "opens": "fraud" },
+    "X": { "id": "fraud-door", "kind": "locked_door", "lock": "fraud" }
+  }
+}

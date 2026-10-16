@@ -296,6 +296,11 @@ export function solveFloor(start: GameState, maxStates = 2_000_000): Solution | 
   return explore(start, { full: false, maxStates }).solution;
 }
 
+/** Shortest route with the search figures, without the softlock check. */
+export function solveFloorWithStats(start: GameState, maxStates = 2_000_000): Analysis {
+  return explore(start, { full: false, maxStates });
+}
+
 /** Shortest route plus a softlock check over every reachable state. */
 export function analyseFloor(start: GameState, maxStates = 1_500_000): Analysis {
   return explore(start, { full: true, maxStates });
@@ -323,7 +328,15 @@ export interface FloorReport extends Analysis {
  */
 export function solveCampaign(
   game: GameState,
-  opts: { softlocks: boolean; maxStates?: number; onFloor?: (r: FloorReport) => void },
+  opts: {
+    softlocks: boolean;
+    maxStates?: number;
+    /** Only analyse floors this accepts; the others are just solved, to carry their state on. */
+    analyse?: (floorId: string) => boolean;
+    /** Stop once this floor is done. */
+    stopAfter?: (floorId: string) => boolean;
+    onFloor?: (r: FloorReport) => void;
+  },
 ): FloorReport[] {
   const reports: FloorReport[] = [];
   let state = atFloorStart(game, game.floorOrder[0]!);
@@ -331,15 +344,17 @@ export function solveCampaign(
     if (state.currentFloor !== floorId) state = atFloorStart(state, floorId);
     let report: FloorReport;
     try {
-      report = opts.softlocks
-        ? { floorId, ...analyseFloor(state, opts.maxStates) }
-        : { floorId, ...explore(state, { full: false, maxStates: opts.maxStates ?? 2_000_000 }) };
+      report =
+        opts.softlocks && (opts.analyse?.(floorId) ?? true)
+          ? { floorId, ...analyseFloor(state, opts.maxStates) }
+          : { floorId, ...explore(state, { full: false, maxStates: opts.maxStates ?? 2_000_000 }) };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);
       report = { floorId, ...explore(state, { full: false, maxStates: 4_000_000 }), error };
     }
     reports.push(report);
     opts.onFloor?.(report);
+    if (opts.stopAfter?.(floorId)) break;
     if (report.solution) {
       for (const m of report.solution.moves) state = applyTurn(state, m.action, m.crowd).state;
     }

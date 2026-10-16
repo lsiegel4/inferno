@@ -5,11 +5,19 @@
  *   node dist/solve-floors.js [dir] [--softlocks] [--only <floor id or index>]
  *
  * --softlocks also explores every reachable state of each floor (slow on big floors) and fails if
- * any of them can no longer reach the stairs.
+ * any of them can no longer reach the stairs. --only starts the floor fresh (empty inventory)
+ * unless --campaign is given, in which case the earlier floors are played first.
  */
 import { createGame, FloorSetError } from "@inferno/shared";
 import { loadFloorsFromDir } from "@inferno/shared/node";
-import { formatMove, solveCampaign, type FloorReport } from "./solver.js";
+import {
+  analyseFloor,
+  atFloorStart,
+  formatMove,
+  solveCampaign,
+  solveFloorWithStats as analyseQuick,
+  type FloorReport,
+} from "./solver.js";
 
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(name);
@@ -20,6 +28,7 @@ const option = (name: string) => {
 const dir = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--only") ?? "floors";
 const only = option("--only");
 const softlocks = flag("--softlocks");
+const campaign = flag("--campaign");
 
 try {
   const floors = loadFloorsFromDir(dir);
@@ -51,7 +60,21 @@ try {
     console.log(`  ${moves.map(formatMove).join(" ")}`);
     if (r.softlockRoute) console.log(`  softlock: ${r.softlockRoute.map(formatMove).join(" ")}`);
   };
-  solveCampaign(game, { softlocks, onFloor: print });
+  const wanted = (id: string) => !only || only === id || only === String(byId.get(id)!.index);
+  if (only && !campaign) {
+    for (const f of floors.filter((f) => wanted(f.id))) {
+      const start = atFloorStart(game, f.id);
+      print({ floorId: f.id, ...(softlocks ? analyseFloor(start) : analyseQuick(start)) });
+    }
+  } else {
+    const last = Math.max(...floors.filter((f) => wanted(f.id)).map((f) => f.index));
+    solveCampaign(game, {
+      softlocks,
+      analyse: wanted,
+      onFloor: print,
+      stopAfter: (id) => byId.get(id)!.index >= last,
+    });
+  }
   process.exitCode = failed ? 1 : 0;
 } catch (e) {
   if (e instanceof FloorSetError) {

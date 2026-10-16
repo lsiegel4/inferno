@@ -9,7 +9,7 @@ import {
   isHazardEntity,
   isRemoved,
 } from "./registry.js";
-import { cloneEntity, cloneJson } from "./clone.js";
+import { cloneEntity, cloneJson, sameJson } from "./clone.js";
 import { DELTAS } from "./types.js";
 
 /**
@@ -131,12 +131,15 @@ export function die(ctx: TurnContext): void {
   const { state } = ctx;
   const floor = ctx.floor;
   const previous = floor.entities;
+  const byId = new Map(previous.map((e) => [e.id, e]));
   floor.entities = floor.initial.map((initial) => {
-    const current = previous.find((e) => e.id === initial.id) ?? initial;
+    const current = byId.get(initial.id) ?? initial;
     const t = entityType(initial.kind);
     const kept = t.onFloorReset ? t.onFloorReset(current, initial) : initial;
     const copy = cloneEntity(kept);
-    if (JSON.stringify(copy) !== JSON.stringify(current)) ctx.changed.add(copy.id);
+    if (copy.x !== current.x || copy.y !== current.y || !sameJson(copy.state, current.state)) {
+      ctx.changed.add(copy.id);
+    }
     return copy;
   });
   // Entities placed during play (not in the floor file, e.g. a torch's light) are removed. They
