@@ -51,8 +51,6 @@ export interface EntityType {
   onTurnEnd?(ctx: TurnContext, e: RuntimeEntity): void;
   /** Order of onTurnEnd calls, ascending (default 0). Beams run late, after doors settle. */
   endPhase?: number;
-  /** For entities placed during play: keep it through floor resets (a laid plank). */
-  keepOnReset?(e: RuntimeEntity): boolean;
   /** Light this entity casts, for darkness (lamps, beams). Default: none. */
   lights?(e: RuntimeEntity): { x: number; y: number; radius?: number }[];
   /**

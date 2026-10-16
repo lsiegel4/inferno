@@ -1,0 +1,93 @@
+{
+  "id": "false-counsellors",
+  "index": 21,
+  "name": "Malebolge: the False Counsellors",
+  "minimumPlayers": 12,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 3
+  },
+  "legend": {
+    "1": {
+      "id": "tongue-1",
+      "kind": "beam",
+      "dir": "right"
+    },
+    "a": {
+      "id": "counsel-mirror-1",
+      "kind": "mirror",
+      "slant": "/"
+    },
+    "A": {
+      "id": "counsel-eye-1",
+      "kind": "receiver",
+      "targets": ["counsel-door-1"]
+    },
+    "p": {
+      "id": "counsel-door-1",
+      "kind": "door"
+    },
+    "2": {
+      "id": "tongue-2",
+      "kind": "beam",
+      "dir": "down"
+    },
+    "b": {
+      "id": "counsel-mirror-2",
+      "kind": "mirror",
+      "slant": "/"
+    },
+    "B": {
+      "id": "counsel-eye-2",
+      "kind": "receiver",
+      "targets": ["counsel-door-2"]
+    },
+    "q": {
+      "id": "counsel-door-2",
+      "kind": "door"
+    },
+    "k": {
+      "id": "counsel-stone",
+      "kind": "block"
+    },
+    "3": {
+      "id": "tongue-3",
+      "kind": "beam",
+      "dir": "left"
+    },
+    "c": {
+      "id": "counsel-mirror-3",
+      "kind": "mirror",
+      "slant": "/"
+    },
+    "d": {
+      "id": "counsel-mirror-4",
+      "kind": "mirror",
+      "slant": "\\"
+    },
+    "C": {
+      "id": "counsel-eye-3",
+      "kind": "receiver",
+      "targets": ["counsel-door-3"]
+    },
+    "r": {
+      "id": "counsel-door-3",
+      "kind": "door"
+    },
+    "e": {
+      "id": "counsel-mirror-5",
+      "kind": "mirror",
+      "slant": "/"
+    },
+    "4": {
+      "id": "tongue-4",
+      "kind": "beam",
+      "dir": "left"
+    },
+    "s": {
+      "id": "sign-ulysses",
+      "kind": "sign",
+      "text": "In the eighth ditch each false counsellor walks wrapped in a tongue of flame. Ulysses, who talked his crew past the edge of the world, burns in a flame with two horns. These flames can be turned with mirrors, and they light their own way. Never stand where a flame is about to go."
+    }
+  }
+}

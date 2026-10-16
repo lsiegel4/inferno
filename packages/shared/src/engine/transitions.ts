@@ -143,15 +143,10 @@ export function die(ctx: TurnContext): void {
     return copy;
   });
   // Entities placed during play (not in the floor file, e.g. a torch's light) are removed. They
-  // are kept as tombstones (state.removed) so clients can be told they disappeared. A few (a laid
-  // plank) are permanent and survive the reset unchanged.
+  // are kept as tombstones (state.removed) so clients can be told they disappeared.
   const initialIds = new Set(floor.initial.map((e) => e.id));
   for (const e of previous) {
     if (initialIds.has(e.id) || e.state.removed === true) continue;
-    if (entityType(e.kind).keepOnReset?.(e)) {
-      floor.entities.push(cloneEntity(e));
-      continue;
-    }
     floor.entities.push({ ...cloneEntity(e), state: { ...cloneJson(e.state), removed: true } });
     ctx.changed.add(e.id);
   }

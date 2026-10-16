@@ -489,7 +489,7 @@ describe("weight stone", () => {
 });
 
 describe("items: plank and hourglass", () => {
-  it("a plank bridges lava for good, surviving deaths", () => {
+  it("a plank bridges lava until a death, which returns it", () => {
     const s = game(["#######", "#SpL.L#", "#######"], {
       p: { id: "plank", kind: "item", item: "plank" },
     });
@@ -501,10 +501,10 @@ describe("items: plank and hourglass", () => {
     expect(pos(st)).toEqual([4, 1]);
     const died = applyTurn(st, right);
     expect(died.outcome).toBe("died");
-    expect(died.state.inventory).toEqual([]);
+    expect(died.state.inventory.map((i) => i.type)).toEqual(["plank"]);
     expect(
       died.state.floors.f1!.entities.some((e) => e.kind === "bridge" && !e.state.removed),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("an hourglass freezes the world for three steps", () => {

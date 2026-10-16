@@ -2,8 +2,9 @@ import type { EntityType, ItemType } from "../registry.js";
 import { isHazardTile } from "../transitions.js";
 
 /**
- * Plank: `use` while facing lava or a hole lays a bridge over it for good. The bridge survives
- * deaths and the plank is never returned, so a plank laid in the wrong place is lost.
+ * Plank: `use` while facing lava or a hole lays a bridge over it. The bridge stays for the rest of
+ * the attempt; if the hero dies on this floor the bridge is removed and the plank returned (like
+ * a torch), so a plank laid in the wrong place costs a death, never the game.
  */
 export const plank: ItemType = {
   type: "plank",
@@ -12,17 +13,16 @@ export const plank: ItemType = {
     const id = `${item.id}-bridge`;
     ctx.floor.entities.push({ id, kind: "bridge", x, y, props: {}, state: { placed: true } });
     ctx.changed.add(id);
-    ctx.spendItem(item, false);
+    ctx.spendItem(item, true);
     ctx.emit({ type: "item_used", itemId: item.id, on: id });
     return true;
   },
 };
 
-/** A laid plank: covers the lava or hole under it, permanently. */
+/** A laid plank: covers the lava or hole under it until the floor resets. */
 export const bridge: EntityType = {
   kind: "bridge",
   coversHazard: () => true,
-  keepOnReset: () => true,
 };
 
 export const HOURGLASS_TURNS = 3;
