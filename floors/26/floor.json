@@ -8,14 +8,10 @@
     "radius": 2
   },
   "legend": {
-    "E": {
-      "id": "fallen-soul",
-      "kind": "echo"
-    },
     "s": {
       "id": "sign-alberigo",
       "kind": "sign",
-      "text": "Ptolomea, where traitors to their guests lie face up in the ice, their tears frozen over their eyes. Here a soul may fall before its body dies, while a demon wears the body above. The frozen tears are unseen until someone breaks them. Beyond the field your soul waits for you, and it will have to walk the flame with you."
+      "text": "Ptolomea, where traitors to their guests lie face up in the ice, their tears frozen over their eyes. Here a soul may fall before its body dies, while a demon wears the body above. The frozen tears are unseen until someone breaks them. Keep vigil, and your soul will be returned to you; then walk the twin flame together, each holding it back for the other."
     },
     "t": {
       "id": "frozen-tear",
@@ -28,73 +24,48 @@
       "dir": "right",
       "many": true
     },
-    "b": {
-      "id": "frozen-flame",
-      "kind": "beam",
-      "dir": "down"
-    },
-    "p": {
-      "id": "near-plate",
-      "kind": "plate",
-      "targets": [
-        "frozen-flame",
-        "frozen-flame-2"
-      ]
-    },
-    "q": {
-      "id": "far-plate",
-      "kind": "plate",
-      "targets": [
-        "frozen-flame",
-        "frozen-flame-2"
-      ]
-    },
     "v": {
       "id": "vigil-of-tears",
       "kind": "vigil",
       "turns": 7,
-      "targets": [
-        "soul-door"
-      ]
+      "targets": ["soul-cell"]
     },
-    "V": {
-      "id": "soul-door",
+    "E": {
+      "id": "fallen-soul",
+      "kind": "echo"
+    },
+    "K": {
+      "id": "soul-cell",
       "kind": "door"
     },
-    "f": {
-      "id": "soul-plate",
-      "kind": "plate",
-      "targets": [
-        "judas-gate"
-      ]
-    },
-    "g": {
-      "id": "body-plate",
-      "kind": "plate",
-      "targets": [
-        "judas-gate"
-      ]
-    },
-    "X": {
-      "id": "judas-gate",
-      "kind": "door",
-      "need": 2
+    "b": {
+      "id": "frozen-flame",
+      "kind": "beam",
+      "dir": "down"
     },
     "c": {
       "id": "frozen-flame-2",
       "kind": "beam",
       "dir": "down"
     },
-    "K": {
-      "id": "soul-cell",
+    "p": {
+      "id": "near-plate",
+      "kind": "plate",
+      "targets": ["frozen-flame", "frozen-flame-2"]
+    },
+    "q": {
+      "id": "far-plate",
+      "kind": "plate",
+      "targets": ["frozen-flame", "frozen-flame-2"]
+    },
+    "X": {
+      "id": "soul-gate",
       "kind": "door"
     },
-    "k": {
-      "id": "soul-cell-plate",
+    "f": {
+      "id": "soul-plate",
       "kind": "plate",
-      "targets": [
-        "soul-cell"
-      ]
+      "targets": ["soul-gate"]
     }
   }
 }
