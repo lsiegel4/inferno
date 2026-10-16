@@ -12,7 +12,7 @@ import { lockedDoor } from "./locked-door.js";
 import { oneway } from "./oneway.js";
 import { patrol } from "./patrol.js";
 import { pit } from "./pit.js";
-import { plate } from "./plate.js";
+import { plate, weight } from "./plate.js";
 import { platform } from "./platform.js";
 import { portal } from "./portal.js";
 import { sign } from "./sign.js";
@@ -53,4 +53,4 @@ for (const t of [
 ]) {
   registerEntityType(t);
 }
-for (const t of [torch, plank, hourglass]) registerItemType(t);
+for (const t of [torch, plank, hourglass, weight]) registerItemType(t);

@@ -474,6 +474,20 @@ describe("one-way tiles", () => {
   });
 });
 
+describe("weight stone", () => {
+  it("can be put down on the plate the hero stands on, and stays when the hero leaves", () => {
+    const s = game(["#######", "#Swp..#", "####A##"], {
+      w: { id: "stone", kind: "item", item: "weight" },
+      p: { id: "p", kind: "plate", targets: ["A"] },
+      A: { id: "A", kind: "door" },
+    });
+    let st = play(s, [right, interact]).state; // face the stone (it blocks) and take it
+    st = play(st, [right, right, use("stone"), right]).state; // onto the plate, drop it, walk off
+    expect(entity(st, "p").state.stone).not.toBeNull();
+    expect(entity(st, "A").state.open).toBe(true);
+  });
+});
+
 describe("items: plank and hourglass", () => {
   it("a plank bridges lava for good, surviving deaths", () => {
     const s = game(["#######", "#SpL.L#", "#######"], {
