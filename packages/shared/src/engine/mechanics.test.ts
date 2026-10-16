@@ -156,14 +156,14 @@ describe("patrols", () => {
     expect(applyTurn(s, right).outcome).toBe("died");
   });
 
-  it("can be jumped over", () => {
+  it("cannot be jumped over", () => {
     const s = game(["######", "#Sp..#", "######"], { p: { id: "p", kind: "patrol", route: "W" } });
     const turned = applyTurn(s, { kind: "move", dir: "up" }).state; // face up (wall)
     expect(turned.hero.facing).toBe("up");
     const facing = { ...turned, hero: { ...turned.hero, facing: "right" as const } };
     const r = applyTurn(facing, jump);
-    expect(r.outcome).toBeUndefined();
-    expect(pos(r.state)).toEqual([3, 1]);
+    expect(r.outcome).toBe("no_effect");
+    expect(pos(r.state)).toEqual([1, 1]);
   });
 
   it("wait when blocked, so a block pins them", () => {

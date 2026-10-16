@@ -16,7 +16,7 @@ const STEPS: Record<string, Direction | null> = {
 /**
  * Patrol (a demon on its rounds). Walks its `route`, a looping string of steps (U, D, L, R, or W
  * to wait), one step per world step. Touching it kills: walking into it, or it walking into you.
- * It does not block a jump, so the hero can leap over it. It is a body: it weighs down plates and
+ * It cannot be jumped over (nor can any enemy). It is a body: it weighs down plates and
  * holds doors. When its next tile is blocked (a wall, a closed door, a block, the echo...) or is
  * lava or a hole, it waits there and tries again next turn, so a pushed block can pin it in place.
  * Clients see only `next`, the step it will try next turn, not the whole route. Resets on death.
@@ -26,6 +26,7 @@ export const patrol: EntityType = {
   worldPhase: WORLD_PHASE.patrol,
   initialState: (p) => ({ i: 0, next: nextStep(p.props, 0) }),
   isBody: () => true,
+  blocksJump: () => true,
   onEnter: (ctx) => die(ctx),
   killsHero: () => true,
   onWorldStep(ctx, e) {
