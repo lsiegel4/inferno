@@ -1,0 +1,180 @@
+{
+  "id": "sorcerers",
+  "index": 17,
+  "name": "Malebolge: the Sorcerers",
+  "minimumPlayers": 8,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 3
+  },
+  "legend": {
+    "a": {
+      "id": "pad-A22",
+      "kind": "portal",
+      "to": "pad-K20"
+    },
+    "b": {
+      "id": "pad-K20",
+      "kind": "portal",
+      "to": "pad-A22"
+    },
+    "c": {
+      "id": "pad-K02",
+      "kind": "portal",
+      "to": "pad-C00"
+    },
+    "d": {
+      "id": "pad-C00",
+      "kind": "portal",
+      "to": "pad-K02"
+    },
+    "e": {
+      "id": "pad-C22",
+      "kind": "portal",
+      "to": "pad-H20"
+    },
+    "f": {
+      "id": "pad-H20",
+      "kind": "portal",
+      "to": "pad-C22"
+    },
+    "g": {
+      "id": "pad-H02",
+      "kind": "portal",
+      "to": "pad-E00"
+    },
+    "h": {
+      "id": "pad-E00",
+      "kind": "portal",
+      "to": "pad-H02"
+    },
+    "i": {
+      "id": "pad-E22",
+      "kind": "portal",
+      "to": "pad-B20"
+    },
+    "j": {
+      "id": "pad-B20",
+      "kind": "portal",
+      "to": "pad-E22"
+    },
+    "m": {
+      "id": "pad-B02",
+      "kind": "portal",
+      "to": "pad-I00"
+    },
+    "n": {
+      "id": "pad-I00",
+      "kind": "portal",
+      "to": "pad-B02"
+    },
+    "o": {
+      "id": "pad-I22",
+      "kind": "portal",
+      "to": "pad-F20"
+    },
+    "p": {
+      "id": "pad-F20",
+      "kind": "portal",
+      "to": "pad-I22"
+    },
+    "q": {
+      "id": "pad-F02",
+      "kind": "portal",
+      "to": "pad-D00"
+    },
+    "r": {
+      "id": "pad-D00",
+      "kind": "portal",
+      "to": "pad-F02"
+    },
+    "t": {
+      "id": "pad-D22",
+      "kind": "portal",
+      "to": "pad-G20"
+    },
+    "u": {
+      "id": "pad-G20",
+      "kind": "portal",
+      "to": "pad-D22"
+    },
+    "w": {
+      "id": "pad-G02",
+      "kind": "portal",
+      "to": "pad-L00"
+    },
+    "y": {
+      "id": "pad-L00",
+      "kind": "portal",
+      "to": "pad-G02"
+    },
+    "z": {
+      "id": "pad-F10",
+      "kind": "portal",
+      "to": "pad-J12"
+    },
+    "0": {
+      "id": "pad-J12",
+      "kind": "portal",
+      "to": "pad-F10"
+    },
+    "2": {
+      "id": "pad-K10",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "3": {
+      "id": "pad-H12",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "4": {
+      "id": "pad-B10",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "5": {
+      "id": "pad-I21",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "6": {
+      "id": "pad-D01",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "7": {
+      "id": "pad-G12",
+      "kind": "portal",
+      "to": "pad-A12"
+    },
+    "1": {
+      "id": "pad-A12",
+      "kind": "portal",
+      "to": "pad-A22"
+    },
+    "k": {
+      "id": "key-sorcery",
+      "kind": "item",
+      "item": "key",
+      "opens": "sorcery"
+    },
+    "X": {
+      "id": "sorcery-door",
+      "kind": "locked_door",
+      "lock": "sorcery"
+    },
+    "v": {
+      "id": "augury",
+      "kind": "vent",
+      "period": 3,
+      "burn": 2,
+      "many": true
+    },
+    "s": {
+      "id": "sign-sorcerers",
+      "kind": "sign",
+      "text": "The sorcerers walk with their heads twisted round, weeping down their backs: they would see too far ahead, so now they see only behind. Here no circle goes where it seems, and some lead only home. Step off a circle and back on to travel again."
+    }
+  }
+}

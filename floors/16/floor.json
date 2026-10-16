@@ -1,0 +1,75 @@
+{
+  "id": "simoniacs",
+  "index": 16,
+  "name": "Malebolge: the Simoniacs",
+  "minimumPlayers": 8,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 3
+  },
+  "legend": {
+    "s": {
+      "id": "sign-simony",
+      "kind": "sign",
+      "text": "Here the simoniacs, who sold holy things, are thrust head-first into holes in the rock, their feet aflame. The floor is riddled with mouths, and not all of them are open. Fall, and you climb back up through the ditch above. A plank laid over a hole stays laid; it is yours only once."
+    },
+    "o": {
+      "id": "hole",
+      "kind": "pit",
+      "many": true,
+      "landing": {
+        "floor": "malebolge-first",
+        "x": 3,
+        "y": 12
+      }
+    },
+    "f": {
+      "id": "false-floor",
+      "kind": "trap",
+      "effect": "fall",
+      "many": true,
+      "landing": {
+        "floor": "malebolge-first",
+        "x": 3,
+        "y": 12
+      }
+    },
+    "p": {
+      "id": "plank-west",
+      "kind": "item",
+      "item": "plank"
+    },
+    "q": {
+      "id": "plank-east",
+      "kind": "item",
+      "item": "plank"
+    },
+    "k": {
+      "id": "key-copper",
+      "kind": "item",
+      "item": "key",
+      "opens": "copper"
+    },
+    "m": {
+      "id": "key-silver",
+      "kind": "item",
+      "item": "key",
+      "opens": "silver"
+    },
+    "X": {
+      "id": "copper-door",
+      "kind": "locked_door",
+      "lock": "copper"
+    },
+    "Y": {
+      "id": "silver-door",
+      "kind": "locked_door",
+      "lock": "silver"
+    },
+    "c": {
+      "id": "causeway",
+      "kind": "crumble",
+      "many": true
+    }
+  }
+}

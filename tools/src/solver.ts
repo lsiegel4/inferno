@@ -46,7 +46,7 @@ export interface Move {
 export interface Solution {
   actions: Action[];
   moves: Move[];
-  /** Steps on the route where at least one available move would kill the hero. */
+  /** Steps on the route where at least one available move would kill the hero or drop it a floor. */
   dangerSteps: number;
   /** Steps on the route that need a deliberate runner-up vote (to drive the echo). */
   splitSteps: number;
@@ -280,8 +280,11 @@ function countDanger(start: GameState, moves: Move[]): number {
   let state = start;
   let danger = 0;
   for (const move of moves) {
-    if (movesFor(state).some((m) => applyTurn(state, m.action, m.crowd).outcome === "died"))
-      danger++;
+    const deadly = (m: Move) => {
+      const outcome = applyTurn(state, m.action, m.crowd).outcome;
+      return outcome === "died" || outcome === "fell";
+    };
+    if (movesFor(state).some(deadly)) danger++;
     state = applyTurn(state, move.action, move.crowd).state;
   }
   return danger;
