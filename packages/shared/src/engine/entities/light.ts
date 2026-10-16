@@ -7,6 +7,9 @@ import { blocksMove, isRemoved, type EntityType, type ItemType } from "../regist
  */
 export const light: EntityType = {
   kind: "light",
+  lights: (e) => [
+    { x: e.x, y: e.y, ...(typeof e.props.radius === "number" ? { radius: e.props.radius } : {}) },
+  ],
   validate(e) {
     const r = e.props.radius;
     if (r === undefined || (typeof r === "number" && Number.isInteger(r) && r >= 0)) return [];

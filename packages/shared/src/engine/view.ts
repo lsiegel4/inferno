@@ -1,7 +1,7 @@
 /** Convert engine state into protocol shapes sent to clients. */
 import type { Entity, FloorState, Hero, InventoryItemView } from "../protocol.js";
 import type { FloorDef } from "../floor.js";
-import { isHidden } from "./registry.js";
+import { entityType, isHidden } from "./registry.js";
 import { revealFor } from "./reveal.js";
 import type { GameState, RuntimeEntity } from "./types.js";
 
@@ -16,8 +16,18 @@ export function encodeTerrain(def: FloorDef, reveal: RevealFn = revealAll): stri
     .join("\n");
 }
 
+/**
+ * Props that describe hidden wiring rather than what can be seen: which doors a lever, plate or
+ * switch drives, where a portal leads, a patrol's whole route. Clients are not sent them; the
+ * crowd has to find out by trying (game design: non-local consequences).
+ */
+const WIRING_PROPS = new Set(["targets", "to", "route", "landing", "on"]);
+
 export function toProtocolEntity(e: RuntimeEntity): Entity {
-  return { id: e.id, kind: e.kind, x: e.x, y: e.y, state: { ...e.props, ...e.state } };
+  const custom = entityType(e.kind).view?.(e);
+  if (custom) return { id: e.id, kind: custom.kind, x: e.x, y: e.y, state: custom.state };
+  const props = Object.fromEntries(Object.entries(e.props).filter(([k]) => !WIRING_PROPS.has(k)));
+  return { id: e.id, kind: e.kind, x: e.x, y: e.y, state: { ...props, ...e.state } };
 }
 
 function visibleEntities(entities: readonly RuntimeEntity[], reveal: RevealFn): Entity[] {

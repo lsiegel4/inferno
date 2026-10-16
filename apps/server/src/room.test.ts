@@ -9,6 +9,8 @@ import {
 } from "@inferno/shared";
 import { describe, expect, it } from "vitest";
 import { RULES } from "./config.js";
+import { MemoryGameLog } from "./persistence/memory.js";
+import { recoverGame } from "./recovery.js";
 import { GameRoom, type Conn } from "./room.js";
 import { FakeClock } from "./testing.js";
 
@@ -21,9 +23,13 @@ function floor(index: number, rows: string[], minimumPlayers = 1, legend = {}): 
 
 const corridor = (min = 1) => [floor(1, ["#######", "#S...U#", "#######"], min)];
 
-function setup(floors: FloorDef[] = corridor(), rng: () => number = () => 0) {
+function setup(
+  floors: FloorDef[] = corridor(),
+  rng: () => number = () => 0,
+  log = new MemoryGameLog(),
+) {
   const clock = new FakeClock();
-  const room = new GameRoom(createGame(floors), clock, rng);
+  const room = new GameRoom(createGame(floors), clock, rng, { log });
 
   function client(name: string | null) {
     const inbox: ServerMessage[] = [];
@@ -195,6 +201,25 @@ describe("vote ticks", () => {
     d.vote(0, left);
     second.clock.advance(RULES.tickMinMs);
     expect(c.of("turn")[0]!.data.action).toEqual(left);
+  });
+
+  it("passes the crowd's support and runner-up to the engine, records and replays it", async () => {
+    const floors = [
+      floor(1, ["########", "#S...e.#", "########"], 3, { e: { id: "e", kind: "echo" } }),
+    ];
+    const log = new MemoryGameLog();
+    const { clock, player, room } = setup(floors, () => 0, log);
+    const [a, b, c] = [player("ana"), player("bo"), player("cy")];
+    a.vote(0, { kind: "wait" });
+    b.vote(0, { kind: "wait" });
+    c.vote(0, left);
+    clock.advance(RULES.tickMinMs);
+    const turn = a.of("turn")[0]!.data;
+    expect(turn.crowd).toEqual({ support: 2 / 3, dissent: left });
+    expect(turn.changes).toContainEqual(expect.objectContaining({ id: "e", x: 4, y: 1 }));
+    expect(log.turns[0]!.record.crowd).toEqual({ support: 2 / 3, dissent: left });
+    const recovered = await recoverGame(floors, log);
+    expect(recovered.state).toEqual(room.gameState);
   });
 
   it("one vote per tick, for the current tick only", () => {

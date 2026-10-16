@@ -4,9 +4,11 @@
  * Grid terrain characters are fixed:
  *   #  wall        .  floor       L  lava
  *   S  start       U  stairs up   D  stairs down
+ *   I  ice (the hero, blocks and statues slide across it)
  * Every other character must be defined in the JSON `legend`, which places an entity of the
- * given kind on that tile (the tile underneath is floor). Each legend character may appear
- * at most once in the grid, so every entity has a stable id.
+ * given kind on that tile. The tile underneath is floor, or the terrain named by the entry's
+ * optional `on` (e.g. "L" for a ferry floating on lava, "I" for a plate on ice). Each legend
+ * character may appear at most once in the grid, so every entity has a stable id.
  */
 import { z } from "zod";
 
@@ -17,6 +19,7 @@ export const TERRAIN = {
   start: "S",
   stairsUp: "U",
   stairsDown: "D",
+  ice: "I",
 } as const;
 export type TerrainChar = (typeof TERRAIN)[keyof typeof TERRAIN];
 const TERRAIN_CHARS = new Set<string>(Object.values(TERRAIN));
@@ -132,9 +135,16 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
         }
         if (seenLegend.has(ch)) problems.push(`legend character "${ch}" appears more than once`);
         seenLegend.add(ch);
-        const { id, kind, ...props } = entry;
+        const { id, kind, on, ...props } = entry;
         entities.push({ id, kind, x, y, props });
-        return TERRAIN.floor;
+        if (on === undefined) return TERRAIN.floor;
+        if (on !== TERRAIN.floor && on !== TERRAIN.lava && on !== TERRAIN.ice) {
+          problems.push(
+            `legend "${ch}": on must be "${TERRAIN.floor}", "${TERRAIN.lava}" or "${TERRAIN.ice}"`,
+          );
+          return TERRAIN.floor;
+        }
+        return on;
       })
       .join(""),
   );

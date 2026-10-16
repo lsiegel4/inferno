@@ -27,8 +27,39 @@ export interface EntityType {
    * moved out of the way (e.g. a pushed block); the hero then enters the tile.
    */
   onPushed?(ctx: TurnContext, e: RuntimeEntity, dx: number, dy: number): boolean;
-  /** Called for every entity on the current floor after the hero's action, each turn. */
+  /**
+   * Directional blocking (one-way tiles): may something travelling (dx, dy) enter this tile?
+   * Checked in addition to blocksMove. Default: no extra restriction.
+   */
+  blocksEntry?(e: RuntimeEntity, dx: number, dy: number): boolean;
+  /**
+   * Is this a body: something solid that occupies its tile, weighs down pressure plates and keeps
+   * doors from closing on it (blocks, statues, patrols, the echo)? Default: false.
+   */
+  isBody?(e: RuntimeEntity): boolean;
+  /** Is this tile a hole (pit, trap, collapsed floor)? Pushed blocks fill holes. Default: false. */
+  isHazard?(e: RuntimeEntity): boolean;
+  /**
+   * The world's move, after the hero acts (turn order: hero first, then the world). Entities
+   * step in ascending `worldPhase` (default 0); see turn.ts for the phases.
+   */
+  worldPhase?: number;
+  onWorldStep?(ctx: TurnContext, e: RuntimeEntity): void;
+  /** After the world step: does this entity kill the hero standing on its tile? */
+  killsHero?(ctx: TurnContext, e: RuntimeEntity): boolean;
+  /** Called for every entity on the current floor after the world step, each turn. */
   onTurnEnd?(ctx: TurnContext, e: RuntimeEntity): void;
+  /** Order of onTurnEnd calls, ascending (default 0). Beams run late, after doors settle. */
+  endPhase?: number;
+  /** For entities placed during play: keep it through floor resets (a laid plank). */
+  keepOnReset?(e: RuntimeEntity): boolean;
+  /** Light this entity casts, for darkness (lamps, beams). Default: none. */
+  lights?(e: RuntimeEntity): { x: number; y: number; radius?: number }[];
+  /**
+   * What clients see. Default: the entity's kind with its props and state, minus wiring props
+   * (see view.ts). Return a different kind to disguise it (a hinted trap looks like a crack).
+   */
+  view?(e: RuntimeEntity): { kind: string; state: Record<string, unknown> };
   /**
    * Does this entity cover its tile's hazard (e.g. a block that filled lava or a pit)? A covered
    * tile is plain floor: lava does not kill and other entities there do not trigger.
@@ -106,6 +137,21 @@ export function blocksJump(e: RuntimeEntity): boolean {
 export function coversHazard(e: RuntimeEntity): boolean {
   if (isRemoved(e)) return false;
   return entityType(e.kind).coversHazard?.(e) ?? false;
+}
+
+export function isBody(e: RuntimeEntity): boolean {
+  if (isRemoved(e)) return false;
+  return entityType(e.kind).isBody?.(e) ?? false;
+}
+
+export function isHazardEntity(e: RuntimeEntity): boolean {
+  if (isRemoved(e)) return false;
+  return entityType(e.kind).isHazard?.(e) ?? false;
+}
+
+export function blocksEntry(e: RuntimeEntity, dx: number, dy: number): boolean {
+  if (isRemoved(e)) return false;
+  return entityType(e.kind).blocksEntry?.(e, dx, dy) ?? false;
 }
 
 export function isHidden(e: RuntimeEntity): boolean {

@@ -1,11 +1,14 @@
+import { bodyAt } from "../bodies.js";
 import type { InventoryItem } from "../types.js";
 import type { EntityType } from "../registry.js";
+import { validateTargets } from "./props.js";
 import { stringListProp } from "./props.js";
 
 /**
- * Pressure plate (walkable). Weighed down by the hero standing on it, a block on it, or a weight
- * stone placed on it. While weighed down it switches its `targets` on; when released, off.
- * Evaluated at the end of every turn; signals are sent only when the state changes.
+ * Pressure plate (walkable). Weighed down by the hero standing on it, a body on it (block,
+ * statue, patrol, the echo), or a weight stone placed on it. While weighed down it switches its
+ * `targets` on; when released, off. Evaluated at the end of every turn; signals are sent only
+ * when the state changes.
  *
  * Weight stone: `use(weight)` while facing the plate places the stone; Interact while facing it
  * picks the stone back up. A stone left on a plate returns to the inventory on death (the plate
@@ -15,10 +18,7 @@ export const plate: EntityType = {
   kind: "plate",
   initialState: () => ({ pressed: false, stone: null }),
   onTurnEnd(ctx, e) {
-    const pressed =
-      (ctx.state.hero.x === e.x && ctx.state.hero.y === e.y) ||
-      e.state.stone !== null ||
-      ctx.entitiesAt(e.x, e.y).some((o) => o.kind === "block" && !o.state.filled);
+    const pressed = ctx.heroAt(e.x, e.y) || e.state.stone !== null || bodyAt(ctx, e.x, e.y);
     if (pressed === e.state.pressed) return;
     e.state.pressed = pressed;
     ctx.markChanged(e);
@@ -41,10 +41,5 @@ export const plate: EntityType = {
     ctx.emit({ type: "item_picked_up", itemId: stone.id });
     return true;
   },
-  validate(e, floor) {
-    const targets = stringListProp(e.props, "targets");
-    if (targets.length === 0) return [`plate "${e.id}" has no targets`];
-    const ids = new Set(floor.entities.map((x) => x.id));
-    return targets.filter((t) => !ids.has(t)).map((t) => `plate "${e.id}" targets unknown "${t}"`);
-  },
+  validate: (e, floor, all) => validateTargets("plate", e, floor, all, false),
 };

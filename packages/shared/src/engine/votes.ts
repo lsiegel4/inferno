@@ -1,4 +1,5 @@
 import type { Action } from "../protocol.js";
+import type { Crowd } from "./types.js";
 
 /** Stable key identifying a vote option: each direction, jump, interact, wait, and use(itemId). */
 export function actionKey(a: Action): string {
@@ -40,4 +41,17 @@ export function resolveVotes(votes: readonly Action[], rng: () => number): Actio
   if (!top) return null;
   const leaders = tally.filter((c) => c.votes === top.votes);
   return leaders[Math.floor(rng() * leaders.length)]!.action;
+}
+
+/**
+ * The crowd behind a winning action: its share of the votes and the runner-up (the most-voted
+ * other action, first cast on a tie; null if every vote was for the winner).
+ */
+export function crowdOf(votes: readonly Action[], winner: Action): Crowd {
+  if (votes.length === 0) return { support: 1, dissent: null };
+  const key = actionKey(winner);
+  const tally = tallyVotes(votes);
+  const won = tally.find((c) => actionKey(c.action) === key)?.votes ?? 0;
+  const runnerUp = tally.find((c) => actionKey(c.action) !== key);
+  return { support: won / votes.length, dissent: runnerUp?.action ?? null };
 }
