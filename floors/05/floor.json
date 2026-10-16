@@ -1,0 +1,13 @@
+{
+  "id": "lust",
+  "index": 5,
+  "name": "The Tempest of Lust",
+  "minimumPlayers": 2,
+  "legend": {
+    "s": {
+      "id": "sign-tempest",
+      "kind": "sign",
+      "text": "The tempest of Hell never rests; it hurls the lustful about, as their desire once hurled them. On the ice, whoever starts moving does not stop until something stops them."
+    }
+  }
+}

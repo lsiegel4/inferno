@@ -4,3 +4,5 @@ coverage
 cdk.out
 docs
 .claude
+dist-playtest
+apps/client/solutions.json

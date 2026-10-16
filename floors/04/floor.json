@@ -1,0 +1,20 @@
+{
+  "id": "limbo",
+  "index": 4,
+  "name": "Limbo",
+  "minimumPlayers": 2,
+  "reveal": { "mode": "torchlight", "radius": 2 },
+  "legend": {
+    "t": { "id": "torch-limbo", "kind": "item", "item": "torch" },
+    "k": { "id": "key-limbo", "kind": "item", "item": "key", "opens": "limbo" },
+    "m": { "id": "key-limbo-spare", "kind": "item", "item": "key", "opens": "limbo" },
+    "X": { "id": "gate-west", "kind": "locked_door", "lock": "limbo" },
+    "Y": { "id": "gate-east", "kind": "locked_door", "lock": "limbo" },
+    "*": { "id": "brazier-limbo", "kind": "light", "radius": 3 },
+    "s": {
+      "id": "sign-limbo",
+      "kind": "sign",
+      "text": "Here sit the virtuous who lived before the faith, without torment, without hope. They sit at the left hand forever. The way down lies at the right."
+    }
+  }
+}

@@ -44,6 +44,8 @@ export type Entity = z.infer<typeof EntitySchema>;
 export const FloorStateSchema = z.object({
   floorId: z.string(),
   index: z.number().int().min(1),
+  /** Display name, e.g. "The Gate" (absent on unnamed floors). */
+  name: z.string().optional(),
   width: z.number().int().min(1),
   height: z.number().int().min(1),
   /** Static terrain, one row per line. Unrevealed tiles are " " (see encodeTerrain). */

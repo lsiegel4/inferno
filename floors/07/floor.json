@@ -1,0 +1,41 @@
+{
+  "id": "greed",
+  "index": 7,
+  "name": "The Hoarders and the Wasters",
+  "minimumPlayers": 3,
+  "legend": {
+    "s": {
+      "id": "sign-greed",
+      "kind": "sign",
+      "text": "The hoarders and the wasters roll great weights with their chests, and crash them together, crying: why do you hoard? Why do you squander? A weight pushed into lava fills it. A weight pushed into a corner is lost until you die."
+    },
+    "c": {
+      "id": "weight-south",
+      "kind": "block"
+    },
+    "d": {
+      "id": "weight-east",
+      "kind": "block"
+    },
+    "p": {
+      "id": "plate-hoard",
+      "kind": "plate",
+      "targets": ["greed-door"]
+    },
+    "q": {
+      "id": "plate-waste",
+      "kind": "plate",
+      "targets": ["greed-door"]
+    },
+    "w": {
+      "id": "stone-greed",
+      "kind": "item",
+      "item": "weight"
+    },
+    "A": {
+      "id": "greed-door",
+      "kind": "door",
+      "need": 2
+    }
+  }
+}

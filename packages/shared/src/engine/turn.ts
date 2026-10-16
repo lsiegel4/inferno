@@ -1,5 +1,6 @@
 import type { Action } from "../protocol.js";
 import { TERRAIN, terrainAt } from "../floor.js";
+import { cloneItem } from "./clone.js";
 import { TurnContext } from "./context.js";
 import { blocksJump, blocksMove, entityType, isRemoved, itemType } from "./registry.js";
 import { die, isBlocked, moveHeroTo } from "./transitions.js";
@@ -22,7 +23,13 @@ import {
  * (support for the winner, the runner-up action); crowd-driven mechanics read it.
  */
 export function applyTurn(state: GameState, action: Action, crowd: Crowd = UNANIMOUS): TurnResult {
-  const next = structuredClone(state);
+  // Copy-on-write: floors are copied when the turn first touches them (TurnContext.floor).
+  const next: GameState = {
+    ...state,
+    hero: { ...state.hero },
+    inventory: state.inventory.map(cloneItem),
+    floors: { ...state.floors },
+  };
   const ctx = new TurnContext(next, action, crowd);
 
   if (next.gameOver) {

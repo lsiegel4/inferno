@@ -9,6 +9,7 @@ import {
   isHazardEntity,
   isRemoved,
 } from "./registry.js";
+import { cloneEntity, cloneJson } from "./clone.js";
 import { DELTAS } from "./types.js";
 
 /**
@@ -134,7 +135,7 @@ export function die(ctx: TurnContext): void {
     const current = previous.find((e) => e.id === initial.id) ?? initial;
     const t = entityType(initial.kind);
     const kept = t.onFloorReset ? t.onFloorReset(current, initial) : initial;
-    const copy = structuredClone(kept);
+    const copy = cloneEntity(kept);
     if (JSON.stringify(copy) !== JSON.stringify(current)) ctx.changed.add(copy.id);
     return copy;
   });
@@ -145,10 +146,10 @@ export function die(ctx: TurnContext): void {
   for (const e of previous) {
     if (initialIds.has(e.id) || e.state.removed === true) continue;
     if (entityType(e.kind).keepOnReset?.(e)) {
-      floor.entities.push(structuredClone(e));
+      floor.entities.push(cloneEntity(e));
       continue;
     }
-    floor.entities.push({ ...structuredClone(e), state: { ...e.state, removed: true } });
+    floor.entities.push({ ...cloneEntity(e), state: { ...cloneJson(e.state), removed: true } });
     ctx.changed.add(e.id);
   }
   for (const s of floor.spent) if (s.returnOnReset) state.inventory.push(s.item);

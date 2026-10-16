@@ -52,6 +52,13 @@ export const FloorMetaSchema = z.object({
   minimumPlayers: z.number().int().min(1),
   legend: z.record(z.string().length(1), LegendEntrySchema).default({}),
   reveal: RevealSchema.default({ mode: "viewport" }),
+  /** Display name, e.g. "The Gate". */
+  name: z.string().min(1).optional(),
+  /**
+   * Item ids the crowd must still hold when leaving this floor, because a later floor needs them.
+   * Not enforced in play; the solver treats leaving without them as failing the floor.
+   */
+  carry: z.array(z.string().min(1)).default([]),
 });
 export type FloorMeta = z.infer<typeof FloorMetaSchema>;
 
@@ -69,6 +76,8 @@ export interface FloorDef {
   index: number;
   minimumPlayers: number;
   reveal: Reveal;
+  name?: string;
+  carry: string[];
   width: number;
   height: number;
   /** Terrain rows; legend characters are replaced with ".". */
@@ -167,6 +176,8 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
     index: meta.index,
     minimumPlayers: meta.minimumPlayers,
     reveal: meta.reveal,
+    ...(meta.name ? { name: meta.name } : {}),
+    carry: meta.carry,
     width,
     height: rows.length,
     terrain,

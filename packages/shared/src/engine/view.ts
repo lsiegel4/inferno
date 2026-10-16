@@ -41,6 +41,7 @@ export function toFloorState(state: GameState, reveal: RevealFn = revealFor(stat
   return {
     floorId: def.id,
     index: def.index,
+    ...(def.name ? { name: def.name } : {}),
     width: def.width,
     height: def.height,
     tiles: encodeTerrain(def, reveal),

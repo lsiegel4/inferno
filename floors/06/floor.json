@@ -1,0 +1,37 @@
+{
+  "id": "gluttony",
+  "index": 6,
+  "name": "Gluttony",
+  "minimumPlayers": 2,
+  "legend": {
+    "s": {
+      "id": "sign-cerberus",
+      "kind": "sign",
+      "text": "Cerberus, the great worm, guards the gluttons in the filthy rain, its three throats barking. One touch of a head is death, but a jump carries you clean over it. Each head shows the way it will step next."
+    },
+    "p": {
+      "id": "cerberus-left",
+      "kind": "patrol",
+      "route": "DDDDDDUUUUUU"
+    },
+    "q": {
+      "id": "cerberus-middle",
+      "kind": "patrol",
+      "route": "UUUUUUDDDDDD"
+    },
+    "r": {
+      "id": "cerberus-right",
+      "kind": "patrol",
+      "route": "DDDDUUUUUUDD"
+    },
+    "a": {
+      "id": "lever-gluttony",
+      "kind": "lever",
+      "targets": ["gluttony-door"]
+    },
+    "A": {
+      "id": "gluttony-door",
+      "kind": "door"
+    }
+  }
+}

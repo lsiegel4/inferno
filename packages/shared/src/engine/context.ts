@@ -1,4 +1,5 @@
 import type { Action, TurnOutcome } from "../protocol.js";
+import { cloneEntity, cloneItem } from "./clone.js";
 import { entityType, type SignalSource } from "./registry.js";
 import {
   UNANIMOUS,
@@ -20,6 +21,8 @@ export class TurnContext {
   outcome: TurnOutcome | undefined;
   /** While set, `floor` is this floor instead of the hero's (cross-floor signals). */
   private remoteFloor: string | null = null;
+  /** Floors whose mutable parts this turn has already copied (see `floor`). */
+  private readonly owned = new Set<string>();
 
   constructor(
     readonly state: GameState,
@@ -27,8 +30,23 @@ export class TurnContext {
     readonly crowd: Crowd = UNANIMOUS,
   ) {}
 
+  /**
+   * The floor hooks are working on. Floors are copy-on-write: `applyTurn` starts from a shallow
+   * copy of the state, and a floor's entities and spent items are copied the first time a turn
+   * touches it. Floor definitions and reset baselines never change and stay shared.
+   */
   get floor(): FloorRuntime {
-    return this.state.floors[this.remoteFloor ?? this.state.currentFloor]!;
+    const id = this.remoteFloor ?? this.state.currentFloor;
+    if (!this.owned.has(id)) {
+      const f = this.state.floors[id]!;
+      this.state.floors[id] = {
+        ...f,
+        entities: f.entities.map(cloneEntity),
+        spent: f.spent.map((sp) => ({ item: cloneItem(sp.item), returnOnReset: sp.returnOnReset })),
+      };
+      this.owned.add(id);
+    }
+    return this.state.floors[id]!;
   }
 
   /** True if the hero stands on (x, y) of the floor hooks are currently working on. */
