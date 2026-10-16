@@ -570,6 +570,18 @@ describe("beams and mirrors", () => {
     expect(tiles[1]!.slice(2, 4)).toBe("..");
   });
 
+  it("a beam is in view wherever its path is lit, even with the emitter in the dark", () => {
+    const s = game(
+      ["##########", "#>.......#", "#.......S#", "##########"],
+      {
+        ">": { id: "b", kind: "beam", dir: "right" },
+      },
+      { mode: "torchlight", radius: 1 },
+    );
+    const st = applyTurn(s, wait).state;
+    expect(toFloorState(st).entities.map((e) => e.id)).toContain("b");
+  });
+
   it("a lever switches the beam off", () => {
     const s = game(["#######", "#>....#", "#Sa...#", "#######"], {
       ">": { id: "b", kind: "beam", dir: "right" },

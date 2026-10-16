@@ -41,6 +41,7 @@ export const beam: EntityType = {
   /** A lever's latch survives the reset (the lever stays pulled); everything else resets. */
   onFloorReset: (current, initial) =>
     current.state.latched ? { ...initial, state: { ...initial.state, latched: true } } : initial,
+  extent: (e) => (e.state.firing ? (e.state.path as Tile[]) : []),
   lights: (e) => (e.state.path as Tile[]).map(([x, y]) => ({ x, y, radius: 0 })),
   view: (e) => ({
     kind: "beam",

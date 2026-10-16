@@ -51,6 +51,8 @@ export interface EntityType {
   onTurnEnd?(ctx: TurnContext, e: RuntimeEntity): void;
   /** Order of onTurnEnd calls, ascending (default 0). Beams run late, after doors settle. */
   endPhase?: number;
+  /** Other tiles this entity covers (a beam's path): it is in view if any of them is. */
+  extent?(e: RuntimeEntity): [number, number][];
   /** Light this entity casts, for darkness (lamps, beams). Default: none. */
   lights?(e: RuntimeEntity): { x: number; y: number; radius?: number }[];
   /**

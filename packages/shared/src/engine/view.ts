@@ -31,7 +31,17 @@ export function toProtocolEntity(e: RuntimeEntity): Entity {
 }
 
 function visibleEntities(entities: readonly RuntimeEntity[], reveal: RevealFn): Entity[] {
-  return entities.filter((e) => !isHidden(e) && reveal(e.x, e.y)).map(toProtocolEntity);
+  return entities.filter((e) => isVisible(e, reveal)).map(toProtocolEntity);
+}
+
+/**
+ * Is the entity in view? Its own tile must be revealed, or, for something that reaches across the
+ * floor (a beam), any tile it covers.
+ */
+export function isVisible(e: RuntimeEntity, reveal: RevealFn): boolean {
+  if (isHidden(e)) return false;
+  if (reveal(e.x, e.y)) return true;
+  return (entityType(e.kind).extent?.(e) ?? []).some(([x, y]) => reveal(x, y));
 }
 
 /** The current floor as clients see it: unrevealed terrain and entities are left out. */
@@ -90,14 +100,12 @@ export function turnDelta(
     }
   }
 
-  const wasVisible = new Map(
-    floorBefore.entities.map((e) => [e.id, !isHidden(e) && rb(e.x, e.y)] as const),
-  );
+  const wasVisible = new Map(floorBefore.entities.map((e) => [e.id, isVisible(e, rb)] as const));
   const changedIds = new Set(changed);
   const changes: Entity[] = [];
   for (const e of floorAfter.entities) {
     const was = wasVisible.get(e.id) ?? false;
-    const now = !isHidden(e) && ra(e.x, e.y);
+    const now = isVisible(e, ra);
     if (now && (!was || changedIds.has(e.id))) changes.push(toProtocolEntity(e));
     else if (!now && was)
       changes.push({ id: e.id, kind: e.kind, x: e.x, y: e.y, state: { hidden: true } });
