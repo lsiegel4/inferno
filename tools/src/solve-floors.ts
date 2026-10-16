@@ -16,6 +16,7 @@ import {
   formatMove,
   solveCampaign,
   solveFloorWithStats as analyseQuick,
+  stuckPatrols,
   type FloorReport,
 } from "./solver.js";
 
@@ -38,6 +39,11 @@ try {
   const print = (r: FloorReport) => {
     const def = byId.get(r.floorId)!;
     if (only && only !== r.floorId && only !== String(def.index)) return;
+    const stuck = stuckPatrols(atFloorStart(game, r.floorId));
+    if (stuck.length) {
+      failed = true;
+      console.log(`✗ ${r.floorId}: patrols never move: ${stuck.join(", ")}`);
+    }
     const title = `${String(def.index).padStart(2)} ${r.floorId}${def.name ? ` (${def.name})` : ""}`;
     if (!r.solution) {
       failed = true;

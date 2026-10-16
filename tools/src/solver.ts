@@ -412,3 +412,24 @@ export function formatMove(m: Move): string {
   const a = formatAction(m.action);
   return m.crowd.dissent ? `${a}|${formatAction(m.crowd.dissent)}` : a;
 }
+
+/**
+ * Design lint: patrols that never move while the hero stands at the start (jammed against each
+ * other or a wall). The search cannot flag these; a stuck patrol is a legal state.
+ */
+export function stuckPatrols(start: GameState): string[] {
+  let state = trimState(start);
+  const floor = () => state.floors[state.currentFloor]!;
+  const patrols = floor().entities.filter((e) => e.kind === "patrol");
+  if (!patrols.length) return [];
+  const longest = Math.max(...patrols.map((e) => String(e.props.route ?? "").length));
+  const moved = new Set<string>();
+  const startPos = new Map(patrols.map((e) => [e.id, `${e.x},${e.y}`]));
+  for (let t = 0; t < longest * 2 && moved.size < patrols.length; t++) {
+    state = applyTurn(state, { kind: "wait" }).state;
+    for (const e of floor().entities) {
+      if (e.kind === "patrol" && `${e.x},${e.y}` !== startPos.get(e.id)) moved.add(e.id);
+    }
+  }
+  return patrols.filter((e) => !moved.has(e.id)).map((e) => e.id);
+}

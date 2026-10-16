@@ -36,18 +36,26 @@
     "p": {
       "id": "near-plate",
       "kind": "plate",
-      "targets": ["frozen-flame", "frozen-flame-2"]
+      "targets": [
+        "frozen-flame",
+        "frozen-flame-2"
+      ]
     },
     "q": {
       "id": "far-plate",
       "kind": "plate",
-      "targets": ["frozen-flame", "frozen-flame-2"]
+      "targets": [
+        "frozen-flame",
+        "frozen-flame-2"
+      ]
     },
     "v": {
       "id": "vigil-of-tears",
       "kind": "vigil",
-      "turns": 10,
-      "targets": ["soul-door"]
+      "turns": 7,
+      "targets": [
+        "soul-door"
+      ]
     },
     "V": {
       "id": "soul-door",
@@ -56,12 +64,16 @@
     "f": {
       "id": "soul-plate",
       "kind": "plate",
-      "targets": ["judas-gate"]
+      "targets": [
+        "judas-gate"
+      ]
     },
     "g": {
       "id": "body-plate",
       "kind": "plate",
-      "targets": ["judas-gate"]
+      "targets": [
+        "judas-gate"
+      ]
     },
     "X": {
       "id": "judas-gate",
@@ -80,7 +92,9 @@
     "k": {
       "id": "soul-cell-plate",
       "kind": "plate",
-      "targets": ["soul-cell"]
+      "targets": [
+        "soul-cell"
+      ]
     }
   }
 }

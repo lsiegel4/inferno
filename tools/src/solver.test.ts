@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { createGame, parseFloor } from "@inferno/shared";
 import { describe, expect, it } from "vitest";
 import { loadFloorsFromDir } from "@inferno/shared/node";
-import { atFloorStart, solveFloor } from "./solver.js";
+import { atFloorStart, solveFloor, stuckPatrols } from "./solver.js";
 
 const floor = (rows: string[], legend: Record<string, Record<string, unknown>> = {}) =>
   parseFloor(rows.join("\n"), { id: "f1", index: 1, minimumPlayers: 1, legend });
@@ -45,11 +45,18 @@ describe("solveFloor", () => {
     expect(solveFloor(game)).toBeNull();
   });
 
-  it("solves the checked-in floors", () => {
+  it("validates every checked-in floor, and no patrol is jammed", () => {
     const dir = fileURLToPath(new URL("../../floors", import.meta.url));
     const game = createGame(loadFloorsFromDir(dir));
-    for (const id of game.floorOrder) {
+    for (const id of game.floorOrder) expect(stuckPatrols(atFloorStart(game, id)), id).toEqual([]);
+  });
+
+  it("solves the early checked-in floors", () => {
+    // The later floors take minutes each; `pnpm --filter @inferno/tools solve` checks them all.
+    const dir = fileURLToPath(new URL("../../floors", import.meta.url));
+    const game = createGame(loadFloorsFromDir(dir));
+    for (const id of game.floorOrder.slice(0, 6)) {
       expect(solveFloor(atFloorStart(game, id)), id).not.toBeNull();
     }
-  });
+  }, 60_000);
 });
