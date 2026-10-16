@@ -1,0 +1,87 @@
+{
+  "id": "caina-antenora",
+  "index": 25,
+  "name": "Cocytus: Caina and Antenora",
+  "minimumPlayers": 15,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 4
+  },
+  "legend": {
+    ">": {
+      "id": "onto-antenora",
+      "kind": "oneway",
+      "dir": "right",
+      "many": true
+    },
+    "s": {
+      "id": "sign-caina",
+      "kind": "sign",
+      "text": "Cocytus: the frozen lake at the bottom of Hell, where traitors are locked in the ice. Here in Caina lie those who betrayed their own blood. The ice is dark; a step becomes a slide, and a slide does not stop until something stops it."
+    },
+    "E": {
+      "id": "traitor-shade",
+      "kind": "echo"
+    },
+    "K": {
+      "id": "shade-cell",
+      "kind": "door"
+    },
+    "k": {
+      "id": "shade-plate",
+      "kind": "plate",
+      "targets": ["shade-cell"]
+    },
+    "f": {
+      "id": "ice-plate",
+      "kind": "plate",
+      "targets": ["last-gate"]
+    },
+    "X": {
+      "id": "last-gate",
+      "kind": "door"
+    },
+    "u": {
+      "id": "ugolino",
+      "kind": "statue"
+    },
+    "Y": {
+      "id": "ugolino-cell",
+      "kind": "door"
+    },
+    "p": {
+      "id": "ugolino-plate",
+      "kind": "plate",
+      "targets": ["antenora-gate"]
+    },
+    "*": {
+      "id": "ugolino-lamp",
+      "kind": "light",
+      "radius": 3
+    },
+    "m": {
+      "id": "lever-ugolino",
+      "kind": "lever",
+      "targets": ["ugolino-cell"]
+    },
+    "r": {
+      "id": "ruggieri",
+      "kind": "statue"
+    },
+    "q": {
+      "id": "ruggieri-plate",
+      "kind": "plate",
+      "targets": ["antenora-gate"]
+    },
+    "G": {
+      "id": "antenora-gate",
+      "kind": "door",
+      "need": 2
+    },
+    "t": {
+      "id": "sign-ugolino",
+      "kind": "sign",
+      "text": "Antenora, where traitors to their city lie. Count Ugolino gnaws the skull of Archbishop Ruggieri, who walled him up to starve. Both are stone now, and both turn toward whoever turns away. The gate opens only while each of them stands on his stone, and it shuts behind whoever looks away."
+    }
+  }
+}
