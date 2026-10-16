@@ -8,7 +8,8 @@
  * Every other character must be defined in the JSON `legend`, which places an entity of the
  * given kind on that tile. The tile underneath is floor, or the terrain named by the entry's
  * optional `on` (e.g. "L" for a ferry floating on lava, "I" for a plate on ice). Each legend
- * character may appear at most once in the grid, so every entity has a stable id.
+ * character may appear at most once in the grid, so every entity has a stable id, unless its
+ * entry has `"many": true`: then every copy is its own entity with id "<id>-<x>-<y>".
  */
 import { z } from "zod";
 
@@ -142,9 +143,12 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
           problems.push(`unknown character "${ch}" at ${x},${y}`);
           return TERRAIN.floor;
         }
-        if (seenLegend.has(ch)) problems.push(`legend character "${ch}" appears more than once`);
+        const { id: baseId, kind, on, many, ...props } = entry;
+        if (seenLegend.has(ch) && many !== true) {
+          problems.push(`legend character "${ch}" appears more than once`);
+        }
         seenLegend.add(ch);
-        const { id, kind, on, ...props } = entry;
+        const id = many === true ? `${baseId}-${x}-${y}` : baseId;
         entities.push({ id, kind, x, y, props });
         if (on === undefined) return TERRAIN.floor;
         if (on !== TERRAIN.floor && on !== TERRAIN.lava && on !== TERRAIN.ice) {
