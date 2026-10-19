@@ -129,7 +129,8 @@ need a deliberate runner-up vote. A real crowd takes many times longer and dies 
 - **The echo and doors**: the hero and the echo cannot walk through a one-tile door together (they
   never move the same way on the same turn). Give them separate routes, or latch the door.
 - **Watchers do not wait**: they move from turn one, wherever the hero is. Lock a watcher in until
-  the hero arrives.
+  the hero arrives, and release it with a switch, not a lever: a lever stays pulled after a death,
+  so every later attempt would start with the watcher already loose.
 - **Search size**: the solver explores every state. Two free bodies (hero and echo, or two
   watchers) in an open room multiply; keep those areas small and corridor-shaped, and split long
   floors into sections joined by one-way tiles.

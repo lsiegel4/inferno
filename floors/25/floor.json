@@ -61,7 +61,7 @@
     },
     "m": {
       "id": "lever-ugolino",
-      "kind": "lever",
+      "kind": "switch",
       "targets": ["ugolino-cell"]
     },
     "r": {
