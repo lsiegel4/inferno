@@ -88,6 +88,44 @@
       "id": "sign-ulysses",
       "kind": "sign",
       "text": "In the eighth ditch each false counsellor walks wrapped in a tongue of flame. Ulysses, who talked his crew past the edge of the world, burns in a flame with two horns. These flames can be turned with mirrors, and they light their own way. Never stand where a flame is about to go."
+    },
+    "5": {
+      "id": "tongue-5",
+      "kind": "beam",
+      "dir": "left"
+    },
+    "f": {
+      "id": "counsel-mirror-6",
+      "kind": "mirror",
+      "slant": "\\"
+    },
+    "g": {
+      "id": "counsel-stone-2",
+      "kind": "block"
+    },
+    "6": {
+      "id": "tongue-6",
+      "kind": "beam",
+      "dir": "up"
+    },
+    "7": {
+      "id": "tongue-7",
+      "kind": "beam",
+      "dir": "up"
+    },
+    "P": {
+      "id": "counsel-plate",
+      "kind": "plate",
+      "targets": ["tongue-6", "tongue-7"]
+    },
+    "h": {
+      "id": "counsel-door-4",
+      "kind": "door"
+    },
+    "Q": {
+      "id": "counsel-eye-4",
+      "kind": "receiver",
+      "targets": ["counsel-door-4"]
     }
   }
 }

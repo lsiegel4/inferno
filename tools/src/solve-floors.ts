@@ -8,7 +8,7 @@
  * any of them can no longer reach the stairs. --only starts the floor fresh (empty inventory)
  * unless --campaign is given, in which case the earlier floors are played first.
  */
-import { createGame, FloorSetError } from "@inferno/shared";
+import { createGame, FloorFormatError, FloorSetError } from "@inferno/shared";
 import { loadFloorsFromDir } from "@inferno/shared/node";
 import {
   analyseFloor,
@@ -83,7 +83,7 @@ try {
   }
   process.exitCode = failed ? 1 : 0;
 } catch (e) {
-  if (e instanceof FloorSetError) {
+  if (e instanceof FloorSetError || e instanceof FloorFormatError) {
     console.error(e.message);
     process.exitCode = 1;
   } else {
