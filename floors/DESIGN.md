@@ -112,7 +112,7 @@ need a deliberate runner-up vote. A real crowd takes many times longer and dies 
 | XVIII | Malebolge: the Boiling Pitch     | 10  | demons circling a dark lake; a lying niche                            |    45 |     25 |       |
 | XIX   | Malebolge: the Hypocrites        | 10  | a lights-out cloister with one solution                               |    64 |     14 |       |
 | XX    | Malebolge: the Thieves           | 10  | serpents sweeping a dark pit, keys, portals                           |    52 |      4 |       |
-| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    68 |     17 |       |
+| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    78 |     22 |       |
 | XXII  | Malebolge: the Sowers of Discord | 12  | **the echo**                                                          |    49 |     10 |    25 |
 | XXIII | Malebolge: the Falsifiers        | 12  | the echo freed, held, and kept during a vigil                         |    70 |     12 |    27 |
 | XXIV  | The Well of the Giants           | 15  | **altars** (66/80/90%); a 199-tile spiral                             |   226 |     37 |       |
@@ -131,8 +131,10 @@ need a deliberate runner-up vote. A real crowd takes many times longer and dies 
   crossed in one direction only; separate them with floor or a faster vent. Two adjacent
   same-rhythm vents at a corner can never be crossed: stagger them one beat apart, the second
   _behind_ the first.
-- **Beams**: a beam cannot be jumped either. If turning a mirror lights the receiver and also cuts
-  the hero off, latch the receiver (`latch: true`) so the crowd can turn the mirror back.
+- **Beams**: a beam cannot be jumped either. The hero turns a mirror from beside it, outside the
+  corner the beam makes, so the exit must be reachable from that side: stop the beam's arms one
+  tile short of a wall (a receiver with floor behind it) so the crowd can walk round the end.
+  Receivers hold doors only while lit; don't latch them, or eyes behave two different ways.
 - **Doors held by two things**: a door that needs two plates closes the moment either holder leaves.
   The hero's plate must be next to the door, so the hero steps from the plate into the doorway.
 - **The echo and doors**: the hero and the echo cannot walk through a one-tile door together (they
