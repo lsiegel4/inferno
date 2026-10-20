@@ -332,6 +332,11 @@ label input {
 .pad button:active {
   border-color: var(--ember);
 }
+.pad button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  border-color: var(--line);
+}
 .row {
   display: flex;
   flex-wrap: wrap;

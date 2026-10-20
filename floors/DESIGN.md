@@ -37,7 +37,10 @@ Answers to the open questions in the design notes. All of these are implemented 
 2. Ferries (`platform`) carry the hero standing on them.
 3. A patrol walking into the hero kills, the same as the hero walking into a patrol. Patrols, and
    all enemies, cannot be jumped over.
-4. Getting past roadblocks, each its own rule to work out:
+4. Jumping clears only lava and holes the crowd can see (pits, sprung traps, collapsed ledges).
+   Beams, vents, enemies, plain floor and unsprung traps cannot be jumped, so a jump never gives a
+   hidden trap away. Clients offer Jump only when it would work (`canJump`).
+5. Getting past roadblocks, each its own rule to work out:
    - **timing**: patrols telegraph only their next step, and wait when blocked;
    - **blocking**: a pushed block pins a patrol in place;
    - **switches**: levers and plates stop beams;
@@ -89,41 +92,47 @@ need a deliberate runner-up vote. A real crowd takes many times longer and dies 
 
 | #     | Floor                            | Min | New                                                                   | Turns | Deadly | Split |
 | ----- | -------------------------------- | --- | --------------------------------------------------------------------- | ----: | -----: | ----: |
-| I     | The Gate                         | 1   | moving, signs, levers, lava                                           |    16 |      3 |       |
-| II    | Vestibule of the Uncommitted     | 1   | jumping, the vigil (Wait)                                             |    22 |     11 |       |
-| III   | Acheron                          | 1   | ferries; a lever there opens a door here                              |    26 |      6 |       |
-| IV    | Limbo                            | 2   | darkness, torches, keys; two identical gates                          |    27 |     12 |       |
+| I     | The Gate                         | 1   | moving, signs, levers, lava                                           |    21 |      5 |       |
+| II    | Vestibule of the Uncommitted     | 1   | jumping, the vigil (Wait)                                             |    27 |     11 |       |
+| III   | Acheron                          | 1   | ferries; a lever there opens a door here                              |    36 |     12 |       |
+| IV    | Limbo                            | 2   | darkness, torches, keys; two identical gates                          |    36 |     17 |       |
 | V     | The Tempest of Lust              | 2   | ice                                                                   |    19 |      4 |       |
-| VI    | Gluttony                         | 2   | patrols (Cerberus), timing                                            |    29 |      8 |       |
-| VII   | The Hoarders and the Wasters     | 3   | push blocks, plates, two at once, the stone                           |    28 |      7 |       |
-| VIII  | The Marsh of Styx                | 3   | hinted traps among identical cracks                                   |    30 |     13 |       |
-| IX    | The Gates of Dis                 | 4   | watchers                                                              |    23 |      9 |       |
-| X     | The Burning Tombs                | 4   | fire vents on two rhythms                                             |    36 |     13 |       |
-| XI    | Phlegethon                       | 5   | beams, mirrors, receivers; centaur patrols                            |    33 |      7 |       |
-| XII   | The Wood of the Suicides         | 5   | line of sight; switches; lights-out; hidden traps                     |    95 |      1 |       |
-| XIII  | The Burning Sands                | 6   | rolling fire waves; the hourglass                                     |    50 |     33 |       |
-| XIV   | Geryon's Cliff                   | 6   | one-way drops, crumbling ledges, a lying sign                         |    48 |      2 |       |
-| XV    | Malebolge: Panderers, Flatterers | 8   | marching demons; a three-sign logic puzzle                            |    51 |      8 |       |
-| XVI   | Malebolge: the Simoniacs         | 8   | holes back to XV, false floors, planks                                |    45 |     20 |       |
-| XVII  | Malebolge: the Sorcerers         | 8   | hidden portal network, one-way decoys                                 |    44 |      3 |       |
-| XVIII | Malebolge: the Boiling Pitch     | 10  | demons circling a dark lake; a lying niche                            |    44 |     26 |       |
-| XIX   | Malebolge: the Hypocrites        | 10  | a lights-out cloister with one solution                               |    39 |      7 |       |
-| XX    | Malebolge: the Thieves           | 10  | serpents sweeping a dark pit, keys, portals                           |    34 |      2 |       |
-| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    58 |     24 |       |
-| XXII  | Malebolge: the Sowers of Discord | 12  | **the echo**                                                          |    29 |      7 |    19 |
-| XXIII | Malebolge: the Falsifiers        | 12  | the echo freed, held, and kept during a vigil                         |    58 |     19 |    19 |
-| XXIV  | The Well of the Giants           | 15  | **altars** (66/80/90%); a 199-tile spiral                             |   138 |     21 |       |
-| XXV   | Cocytus: Caina and Antenora      | 15  | dark ice; watchers timed onto plates; echo ice                        |    55 |      9 |    18 |
-| XXVI  | Cocytus: Ptolomea                | 18  | hidden traps blind; beams shared with the echo                        |    41 |     15 |    11 |
-| XXVII | Cocytus: Judecca                 | 20  | everything: five fire lanes, dark ice, mirrors, watchers, a 90% altar |   191 |    136 |       |
+| VI    | Gluttony                         | 2   | patrols (Cerberus), timing                                            |    30 |      5 |       |
+| VII   | The Hoarders and the Wasters     | 3   | push blocks, plates, two at once, the stone                           |    31 |      5 |       |
+| VIII  | The Marsh of Styx                | 3   | hinted traps among identical cracks                                   |    38 |     21 |       |
+| IX    | The Gates of Dis                 | 4   | watchers                                                              |    24 |     10 |       |
+| X     | The Burning Tombs                | 4   | fire vents on two rhythms                                             |    59 |     24 |       |
+| XI    | Phlegethon                       | 5   | beams, mirrors, receivers; centaur patrols                            |    60 |      9 |       |
+| XII   | The Wood of the Suicides         | 5   | line of sight; switches; lights-out; hidden traps                     |   119 |      0 |       |
+| XIII  | The Burning Sands                | 6   | rolling fire waves; the hourglass                                     |    57 |     34 |       |
+| XIV   | Geryon's Cliff                   | 6   | one-way drops, crumbling ledges, a lying sign                         |    79 |      5 |       |
+| XV    | Malebolge: Panderers, Flatterers | 8   | marching demons; a three-sign logic puzzle                            |    58 |     12 |       |
+| XVI   | Malebolge: the Simoniacs         | 8   | holes back to XV, false floors, planks                                |    68 |     35 |       |
+| XVII  | Malebolge: the Sorcerers         | 8   | hidden portal network, one-way decoys                                 |    48 |      7 |       |
+| XVIII | Malebolge: the Boiling Pitch     | 10  | demons circling a dark lake; a lying niche                            |    45 |     25 |       |
+| XIX   | Malebolge: the Hypocrites        | 10  | a lights-out cloister with one solution                               |    64 |     14 |       |
+| XX    | Malebolge: the Thieves           | 10  | serpents sweeping a dark pit, keys, portals                           |    52 |      4 |       |
+| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    68 |     17 |       |
+| XXII  | Malebolge: the Sowers of Discord | 12  | **the echo**                                                          |    49 |     10 |    25 |
+| XXIII | Malebolge: the Falsifiers        | 12  | the echo freed, held, and kept during a vigil                         |    70 |     12 |    27 |
+| XXIV  | The Well of the Giants           | 15  | **altars** (66/80/90%); a 199-tile spiral                             |   226 |     37 |       |
+| XXV   | Cocytus: Caina and Antenora      | 15  | dark ice; watchers timed onto plates; echo ice                        |    62 |     11 |    18 |
+| XXVI  | Cocytus: Ptolomea                | 18  | hidden traps blind; beams shared with the echo                        |    67 |     24 |    14 |
+| XXVII | Cocytus: Judecca                 | 20  | everything: five fire lanes, dark ice, mirrors, watchers, a 90% altar |   215 |    137 |       |
 
 ## Design rules learned the hard way
 
 - **Facing**: the hero turns only by bumping something. A tile you must face to jump, use an item
-  on, or interact with needs a run-up tile or a wall to bump. Never put a hidden trap on the first
-  tile after a corner (the crowd cannot turn to jump it).
-- **Fire at corners**: two adjacent same-rhythm vents at a corner can never be crossed (you cannot
-  jump around a corner). Stagger them one beat apart, the second _behind_ the first.
+  on, or interact with needs a run-up tile or a wall to bump.
+- **Traps off forced tiles**: an unsprung trap cannot be jumped, so a trap (hinted or not) on a
+  tile every route crosses costs a death per attempt until it is found. Always leave a way round.
+- **Fire**: vents cannot be jumped, so every vent line must be crossable on foot in each direction
+  the route crosses it. Two adjacent vents of the same slow rhythm (period 3, burning 2) can be
+  crossed in one direction only; separate them with floor or a faster vent. Two adjacent
+  same-rhythm vents at a corner can never be crossed: stagger them one beat apart, the second
+  _behind_ the first.
+- **Beams**: a beam cannot be jumped either. If turning a mirror lights the receiver and also cuts
+  the hero off, latch the receiver (`latch: true`) so the crowd can turn the mirror back.
 - **Doors held by two things**: a door that needs two plates closes the moment either holder leaves.
   The hero's plate must be next to the door, so the hero steps from the plate into the doorway.
 - **The echo and doors**: the hero and the echo cannot walk through a one-tile door together (they

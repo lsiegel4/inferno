@@ -68,6 +68,7 @@
     "C": {
       "id": "counsel-eye-3",
       "kind": "receiver",
+      "latch": true,
       "targets": ["counsel-door-3"]
     },
     "r": {
@@ -87,7 +88,7 @@
     "s": {
       "id": "sign-ulysses",
       "kind": "sign",
-      "text": "In the eighth ditch each false counsellor walks wrapped in a tongue of flame. Ulysses, who talked his crew past the edge of the world, burns in a flame with two horns. These flames can be turned with mirrors, and they light their own way. Never stand where a flame is about to go."
+      "text": "In the eighth ditch each false counsellor walks wrapped in a tongue of flame. Ulysses, who talked his crew past the edge of the world, burns in a flame with two horns. These flames can be turned with mirrors, and they light their own way. Never stand where a flame is about to go. Some eyes, once opened, stay open: counsel given can be taken back."
     },
     "5": {
       "id": "tongue-5",
@@ -125,6 +126,7 @@
     "Q": {
       "id": "counsel-eye-4",
       "kind": "receiver",
+      "latch": true,
       "targets": ["counsel-door-4"]
     }
   }

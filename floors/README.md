@@ -22,7 +22,7 @@ Distances are Euclidean (`dx² + dy² ≤ radius²`). Items in darkness are hidd
 
 ## Turn order
 
-The hero acts first; then the world moves (ferries, the echo, patrols, statues, fire vents, in that order); then plates, doors and beams settle. An action with no effect still uses the turn, and the world still moves.
+The hero acts first; then the world moves (ferries, the echo, patrols, statues, fire vents, in that order); then plates, doors and beams settle. An action with no effect still uses the turn, and the world still moves. Jump clears exactly one tile, and only lava or a visible hole (a pit, a sprung trap, a collapsed ledge); it lands two tiles ahead.
 
 ## Entity kinds
 

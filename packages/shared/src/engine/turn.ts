@@ -1,9 +1,8 @@
 import type { Action } from "../protocol.js";
-import { TERRAIN, terrainAt } from "../floor.js";
 import { cloneItem } from "./clone.js";
 import { TurnContext } from "./context.js";
 import { blocksJump, blocksMove, entityType, isRemoved, itemType } from "./registry.js";
-import { die, isBlocked, moveHeroTo } from "./transitions.js";
+import { die, isBlocked, isHazardTile, moveHeroTo } from "./transitions.js";
 import {
   DELTAS,
   UNANIMOUS,
@@ -68,16 +67,9 @@ function perform(ctx: TurnContext, action: Action): boolean {
       return true;
     }
     case "jump": {
-      const [dx, dy] = DELTAS[hero.facing];
-      const mx = hero.x + dx,
-        my = hero.y + dy;
-      const lx = hero.x + 2 * dx,
-        ly = hero.y + 2 * dy;
-      const midBlocked =
-        terrainAt(ctx.floor.def, mx, my) === TERRAIN.wall ||
-        ctx.entitiesAt(mx, my).some((e) => !isRemoved(e) && blocksJump(e));
-      if (midBlocked || isBlocked(ctx, lx, ly, dx, dy)) return false;
-      moveHeroTo(ctx, lx, ly);
+      const landing = jumpLanding(ctx);
+      if (!landing) return false;
+      moveHeroTo(ctx, landing[0], landing[1]);
       return true;
     }
     case "interact": {
@@ -160,4 +152,27 @@ function facedEntities(ctx: TurnContext): RuntimeEntity[] {
   const { x, y, facing } = ctx.state.hero;
   const [dx, dy] = DELTAS[facing];
   return ctx.entitiesAt(x + dx, y + dy);
+}
+
+/**
+ * Where a jump from the hero's tile would land, or null if it cannot be made. Only lava and
+ * visible holes can be jumped (an unsprung trap is not a hole yet), never anything that blocks
+ * jumps, and the landing tile must be enterable.
+ */
+function jumpLanding(ctx: TurnContext): [number, number] | null {
+  const { hero } = ctx.state;
+  const [dx, dy] = DELTAS[hero.facing];
+  const mx = hero.x + dx,
+    my = hero.y + dy;
+  const lx = mx + dx,
+    ly = my + dy;
+  if (!isHazardTile(ctx, mx, my)) return null;
+  if (ctx.entitiesAt(mx, my).some((e) => !isRemoved(e) && blocksJump(e))) return null;
+  return isBlocked(ctx, lx, ly, dx, dy) ? null : [lx, ly];
+}
+
+/** True if a jump would do something now: what clients use to offer the Jump action. */
+export function canJump(state: GameState): boolean {
+  if (state.gameOver) return false;
+  return jumpLanding(new TurnContext({ ...state, floors: { ...state.floors } })) !== null;
 }

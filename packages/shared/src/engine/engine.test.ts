@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseFloor, type FloorDef } from "../floor.js";
 import type { Action } from "../protocol.js";
 import { createGame, validateFloorSet } from "./game.js";
-import { applyTurn } from "./turn.js";
+import { applyTurn, canJump } from "./turn.js";
 import type { GameState } from "./types.js";
 
 const up: Action = { kind: "move", dir: "up" };
@@ -80,9 +80,9 @@ describe("lava and death", () => {
     expect(safe.outcome).toBeUndefined();
     expect(hero(safe.state)).toEqual([4, 2, "right"]);
 
-    const t = game();
+    const t = createGame([floor(1, ["#####", "#LL.#", "#S..#", "#####"])]);
     t.hero = { x: 3, y: 1, facing: "left", stairsLock: false };
-    expect(applyTurn(t, jump).outcome).toBe("died"); // lands on (1,1) lava
+    expect(applyTurn(t, jump).outcome).toBe("died"); // over (2,1) lava onto (1,1) lava
   });
 });
 
@@ -110,6 +110,32 @@ describe("jump", () => {
     expect(r.outcome).toBe("no_effect");
     expect(hero(r.state)).toEqual([3, 2, "right"]);
     expect(r.state.turn).toBe(1);
+  });
+
+  it("jumps only over lava or a visible hole, never plain floor", () => {
+    const s = game();
+    s.hero = { x: 1, y: 2, facing: "right", stairsLock: false };
+    expect(canJump(s)).toBe(true);
+    s.hero = { x: 1, y: 1, facing: "right", stairsLock: false };
+    expect(canJump(s)).toBe(false);
+    const r = applyTurn(s, jump); // (2,1) is plain floor
+    expect(r.outcome).toBe("no_effect");
+    expect(hero(r.state)).toEqual([1, 1, "right"]);
+  });
+
+  it("cannot jump an unsprung trap; once sprung it is a hole and can be jumped", () => {
+    const s = createGame([
+      floor(1, ["######", "#S.t.#", "######"], { t: { id: "t", kind: "trap" } }),
+    ]);
+    s.hero = { x: 2, y: 1, facing: "right", stairsLock: false };
+    expect(applyTurn(s, jump).outcome).toBe("no_effect");
+    const sprung = play(s, [right]); // steps on it and dies
+    expect(sprung.outcome).toBe("died");
+    const t = sprung.state;
+    t.hero = { x: 2, y: 1, facing: "right", stairsLock: false };
+    const r = applyTurn(t, jump);
+    expect(r.outcome).toBeUndefined();
+    expect(hero(r.state)).toEqual([4, 1, "right"]);
   });
 
   it("cannot jump over a blocking entity, or land on one", () => {

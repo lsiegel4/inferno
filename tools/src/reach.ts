@@ -1,5 +1,6 @@
 /**
- * CLI: show which tiles of a floor the hero can reach from its start (deaths are dead ends).
+ * CLI: show which tiles of a floor the hero can reach from its start. Deaths reset the floor
+ * and falls return to its start (as the solver assumes), so revealed traps count.
  * A design aid for floors the solver reports as unfinishable:
  *   node dist/reach.js <floors dir> <floor id or index> [max states]
  * Prints the grid with reached tiles as "*".
@@ -21,11 +22,17 @@ for (let head = 0; head < queue.length && seen.size < Number(max); head++) {
   reached.add(`${s.hero.x},${s.hero.y}`);
   for (const m of movesFor(s)) {
     const r = applyTurn(s, m.action, m.crowd);
-    if (r.outcome && r.outcome !== "no_effect") continue;
-    const k = stateKey(r.state);
+    let next = r.state;
+    if (r.outcome === "floor_up") continue;
+    if (r.outcome === "fell" || r.outcome === "floor_down") {
+      next = structuredClone(r.state);
+      next.currentFloor = def.id;
+      next.hero = { x: def.start.x, y: def.start.y, facing: "up", stairsLock: false };
+    }
+    const k = stateKey(next);
     if (seen.has(k)) continue;
     seen.add(k);
-    queue.push(r.state);
+    queue.push(next);
   }
 }
 console.log(`${seen.size} states`);

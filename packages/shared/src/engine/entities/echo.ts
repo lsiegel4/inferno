@@ -1,7 +1,6 @@
 import { bodyCanEnter } from "../bodies.js";
 import type { TurnContext } from "../context.js";
 import { blocksJump, blocksMove, entityType, isRemoved, type EntityType } from "../registry.js";
-import { TERRAIN, terrainAt } from "../../floor.js";
 import { isCovered, isHazardTile, isIce } from "../transitions.js";
 import { DELTAS, WORLD_PHASE, type RuntimeEntity } from "../types.js";
 import type { Direction } from "../../protocol.js";
@@ -49,7 +48,7 @@ export const echo: EntityType = {
         const mx = e.x + dx,
           my = e.y + dy;
         const mid =
-          terrainAt(ctx.floor.def, mx, my) === TERRAIN.wall ||
+          !isHazardTile(ctx, mx, my) ||
           ctx.heroAt(mx, my) ||
           ctx.entitiesAt(mx, my).some((o) => !isRemoved(o) && blocksJump(o));
         if (mid || !bodyCanEnter(ctx, e.x + 2 * dx, e.y + 2 * dy, dx, dy, e)) return;

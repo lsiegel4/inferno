@@ -5,6 +5,7 @@
 import {
   actionKey,
   applyTurn,
+  canJump,
   createGame,
   crowdOf,
   resolveVotes,
@@ -482,6 +483,8 @@ function renderHud() {
       ),
   );
   $<HTMLButtonElement>("btn-solution").disabled = !sol;
+  // Jump is offered only when it would clear lava or a visible hole.
+  document.querySelector<HTMLButtonElement>('[data-act="jump"]')!.disabled = !canJump(lab.game);
 }
 
 // ---------------------------------------------------------------------------
@@ -581,7 +584,7 @@ window.addEventListener("keydown", (ev) => {
       if (ev.shiftKey) {
         lab.dissent = { kind: "jump" };
         renderHud();
-      } else act({ kind: "jump" });
+      } else if (canJump(lab.game)) act({ kind: "jump" });
       break;
     case "e":
     case "Enter":
