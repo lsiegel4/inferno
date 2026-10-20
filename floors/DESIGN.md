@@ -104,17 +104,17 @@ need a deliberate runner-up vote. A real crowd takes many times longer and dies 
 | XIII  | The Burning Sands                | 6   | rolling fire waves; the hourglass                                     |    50 |     33 |       |
 | XIV   | Geryon's Cliff                   | 6   | one-way drops, crumbling ledges, a lying sign                         |    48 |      2 |       |
 | XV    | Malebolge: Panderers, Flatterers | 8   | marching demons; a three-sign logic puzzle                            |    51 |      8 |       |
-| XVI   | Malebolge: the Simoniacs         | 8   | holes back to XV, false floors, planks                                |    35 |     15 |       |
+| XVI   | Malebolge: the Simoniacs         | 8   | holes back to XV, false floors, planks                                |    45 |     20 |       |
 | XVII  | Malebolge: the Sorcerers         | 8   | hidden portal network, one-way decoys                                 |    44 |      3 |       |
 | XVIII | Malebolge: the Boiling Pitch     | 10  | demons circling a dark lake; a lying niche                            |    44 |     26 |       |
 | XIX   | Malebolge: the Hypocrites        | 10  | a lights-out cloister with one solution                               |    39 |      7 |       |
 | XX    | Malebolge: the Thieves           | 10  | serpents sweeping a dark pit, keys, portals                           |    34 |      2 |       |
-| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    42 |     18 |       |
+| XXI   | Malebolge: the False Counsellors | 12  | mirror rooms in the dark                                              |    58 |     24 |       |
 | XXII  | Malebolge: the Sowers of Discord | 12  | **the echo**                                                          |    29 |      7 |    19 |
 | XXIII | Malebolge: the Falsifiers        | 12  | the echo freed, held, and kept during a vigil                         |    58 |     19 |    19 |
 | XXIV  | The Well of the Giants           | 15  | **altars** (66/80/90%); a 199-tile spiral                             |   138 |     21 |       |
 | XXV   | Cocytus: Caina and Antenora      | 15  | dark ice; watchers timed onto plates; echo ice                        |    55 |      9 |    18 |
-| XXVI  | Cocytus: Ptolomea                | 18  | hidden traps blind; beams shared with the echo                        |     ? |      ? |     ? |
+| XXVI  | Cocytus: Ptolomea                | 18  | hidden traps blind; beams shared with the echo                        |    41 |     15 |    11 |
 | XXVII | Cocytus: Judecca                 | 20  | everything: five fire lanes, dark ice, mirrors, watchers, a 90% altar |   191 |    136 |       |
 
 ## Design rules learned the hard way
