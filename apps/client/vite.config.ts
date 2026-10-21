@@ -25,6 +25,8 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: "jsdom",
       setupFiles: ["./src/test-setup.ts"],
+      // Let tests read the stylesheet as text (the palette test checks its colour tokens).
+      css: { include: [/styles\.css/] },
     },
   };
 });

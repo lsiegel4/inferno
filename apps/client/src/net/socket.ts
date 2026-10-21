@@ -7,11 +7,25 @@ import {
 
 export type SocketStatus = "connecting" | "open" | "closed";
 
+/** A connection to a game room: the real WebSocket, or the floor lab's in-browser room. */
+export interface Transport {
+  connect(): void;
+  send(msg: ClientMessage): void;
+  /** Reconnect now (e.g. after signing in or out). */
+  reconnect(): void;
+  close(): void;
+}
+
+export type TransportFactory = (
+  onMessage: (msg: ServerMessage) => void,
+  onStatus: (s: SocketStatus) => void,
+) => Transport;
+
 /**
  * The game WebSocket. Sends `hello` on open, validates incoming messages, and reconnects with
  * backoff. The session cookie travels with the upgrade request, so no token is handled here.
  */
-export class GameSocket {
+export class GameSocket implements Transport {
   private ws: WebSocket | null = null;
   private retry = 0;
   private stopped = false;
@@ -65,3 +79,7 @@ export function socketUrl(): string {
   const { protocol, host } = window.location;
   return `${protocol === "https:" ? "wss" : "ws"}://${host}/ws`;
 }
+
+/** The production transport: a WebSocket to this origin's /ws. */
+export const webSocketTransport: TransportFactory = (onMessage, onStatus) =>
+  new GameSocket(socketUrl(), onMessage, onStatus);

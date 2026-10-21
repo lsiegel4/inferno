@@ -9,8 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview",
-    "playtest": "vite --config vite.playtest.config.ts --open /playtest.html",
-    "playtest:build": "vite build --config vite.playtest.config.ts && node scripts/inline-playtest.mjs"
+    "lab": "vite --config vite.lab.config.ts --open /lab.html",
+    "lab:build": "vite build --config vite.lab.config.ts && node scripts/inline-lab.mjs"
   },
   "dependencies": {
     "@inferno/shared": "workspace:*",

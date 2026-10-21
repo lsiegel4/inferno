@@ -11,7 +11,7 @@ export interface Clock {
 export const systemClock: Clock = {
   now: () => Date.now(),
   setTimeout: (fn, ms) => setTimeout(fn, ms),
-  clearTimeout: (h) => clearTimeout(h as NodeJS.Timeout),
+  clearTimeout: (h) => clearTimeout(h as ReturnType<typeof setTimeout>),
   setInterval: (fn, ms) => setInterval(fn, ms),
-  clearInterval: (h) => clearInterval(h as NodeJS.Timeout),
+  clearInterval: (h) => clearInterval(h as ReturnType<typeof setInterval>),
 };

@@ -14,22 +14,29 @@ describe("EventLog", () => {
         ]}
       />,
     );
-    expect(screen.getByText("↑")).toBeTruthy();
-    expect(screen.getByText("→ · the hero died")).toBeTruthy();
+    expect(screen.getByText("up")).toBeTruthy();
+    expect(screen.getByText("right · the hero died")).toBeTruthy();
     expect(screen.getByText("Mind the gap")).toBeTruthy();
   });
 });
 
 describe("EventLog auto-scroll", () => {
-  it("survives new turns when scrollIntoView returns a Promise (regression: black screen)", () => {
+  it("follows new turns inside its panel, without scrolling the page", () => {
+    const scrollIntoView = vi.fn();
     const original = Element.prototype.scrollIntoView;
-    Element.prototype.scrollIntoView = vi.fn(() => Promise.resolve()) as never;
+    Element.prototype.scrollIntoView = scrollIntoView as never;
     try {
       const turn = (n: number) => ({ turn: n, action: { kind: "wait" as const } });
-      const { rerender } = render(<EventLog log={[turn(1)]} />);
+      const panel = document.createElement("div");
+      panel.style.overflowY = "auto";
+      Object.defineProperty(panel, "scrollHeight", { value: 500 });
+      document.body.append(panel);
+      const { rerender } = render(<EventLog log={[turn(1)]} />, { container: panel });
       rerender(<EventLog log={[turn(1), turn(2)]} />);
-      rerender(<EventLog log={[turn(1), turn(2), turn(3)]} />);
-      expect(screen.getAllByText("wait")).toHaveLength(3);
+      expect(screen.getAllByText("wait")).toHaveLength(2);
+      expect(panel.scrollTop).toBe(500);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      panel.remove();
     } finally {
       Element.prototype.scrollIntoView = original;
     }

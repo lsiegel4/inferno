@@ -6,7 +6,7 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
-      "**/dist-playtest/**",
+      "**/dist-lab/**",
       "**/coverage/**",
       "**/cdk.out/**",
       "docs/**",

@@ -142,3 +142,18 @@ The current look is a starting point ("engraved manuscript": an old-print displa
 - how objects and the hero are drawn;
 - control layout on your phone;
 - what the record and chat show.
+
+**Decided (October 2026):**
+
+- **Interface:** the Manuscript look (engraved umber and parchment, gilt rules, IM Fell display
+  over Alegreya Sans). The Obsidian and Brimstone directions were tried and set aside.
+- **Art direction:** the map art is to be redrawn in the style of Gustave Doré's engravings for
+  the Inferno: ink linework, cross-hatched shadow, sepia and bone, with fire and ember the only
+  strong colours. It stays drawn in code (vector), so it scales and needs no asset pipeline.
+- **Enemies are themed by circle** (Cerberus in Gluttony, centaurs by Phlegethon, hooked demons
+  in the Malebolge, serpents among the thieves, and so on), so each circle looks distinct.
+- **First step:** one floor's worth of art (walls, floor, lava, the hero, one enemy, a sign, a
+  door, a lever) shown side by side with the current look, before redrawing the rest.
+- **Done:** the sample was approved and the whole map is now drawn engraved (the classic
+  drawings are gone). The lab's dev drawer has an **Art sheet** showing every terrain, thing,
+  state and creature.

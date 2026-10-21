@@ -25,7 +25,6 @@ import {
   type Tally,
   type TurnRecord,
 } from "@inferno/shared";
-import { randomUUID } from "node:crypto";
 import type { Clock } from "./clock.js";
 import { RULES } from "./config.js";
 import { MemoryGameLog } from "./persistence/memory.js";
@@ -452,7 +451,7 @@ export class GameRoom {
     if (wait > 0) return this.error(conn, "RATE_LIMITED", "chat_send", wait);
     player.lastChatAt = now;
     const msg: ChatMessage = {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       handle: player.handle,
       text,
       at: new Date(now).toISOString(),

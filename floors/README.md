@@ -64,6 +64,6 @@ Using a torch while facing an open tile places a light there. Using a plank whil
 | `node tools/dist/solve-floors.js floors --only 12 --softlocks` | One floor, from a fresh start, checking every reachable state for softlocks |
 | `node tools/dist/reach.js floors 12`                           | Show which tiles the hero can reach (for floors that can't be finished)     |
 | `pnpm --filter @inferno/tools export-solutions`                | Write the solver routes for the floor lab (cached per floor)                |
-| `pnpm --filter @inferno/client playtest`                       | The floor lab: play any floor with a simulated crowd                        |
+| `pnpm --filter @inferno/client lab`                            | The floor lab: the real client, any floor, with a simulated crowd           |
 
 See [DESIGN.md](DESIGN.md) for the campaign, the difficulty curve and the design decisions.

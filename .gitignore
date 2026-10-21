@@ -8,5 +8,5 @@ cdk.out/
 .DS_Store
 .claude/
 .playwright-mcp/
-dist-playtest/
+dist-lab/
 apps/client/solutions.json
