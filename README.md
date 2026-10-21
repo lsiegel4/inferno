@@ -23,6 +23,14 @@ corepack enable
 pnpm install
 ```
 
+### Running the game locally
+
+```sh
+pnpm dev      # builds shared, then runs the game server (:3000) and the client (:5173)
+```
+
+Open http://localhost:5173. The client proxies `/api` and `/ws` to the server, so the session cookie works like in production. Signing in needs `GOOGLE_CLIENT_ID` in the root `.env`, with `http://localhost:5173` added as an authorized JavaScript origin for that client in Google Cloud Console.
+
 | Command                              | What it does                                      |
 | ------------------------------------ | ------------------------------------------------- |
 | `pnpm build`                         | Build every package (shared first)                |

@@ -1,0 +1,503 @@
+/*
+ * Inferno: an engraved manuscript lit by lava. Ink on umber, hatched stone, a single ember accent.
+ * Layout: one portrait column (map → tally → controls → record/chat); wide screens move the
+ * record and chat into a side column.
+ */
+:root {
+  color-scheme: dark;
+  --ground: #15110e;
+  --stone: #2b241f;
+  --stone-light: #3b322b;
+  --floor: #211b17;
+  --ink: #0b0907;
+  --bone: #e6d9c0;
+  --ash: #a29482;
+  --ember: #d98a36;
+  --lava: #c4462b;
+  --verdigris: #6e9784;
+  --display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
+  --body: "Alegreya Sans", "Gill Sans", "Segoe UI", sans-serif;
+  --ledger: "Courier Prime", "Courier New", monospace;
+  --rule: 1px solid var(--stone-light);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--ground);
+  color: var(--bone);
+  font: 16px/1.45 var(--body);
+}
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.app {
+  display: grid;
+  gap: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 12px 24px;
+}
+@media (min-width: 880px) {
+  .app {
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.stage {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Header: a title plate with the floor's Roman numeral and the crowd counts. */
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 3px double var(--stone-light);
+  padding-bottom: 8px;
+}
+.title {
+  margin: 0;
+  font: 400 34px/1 var(--display);
+  letter-spacing: 0.04em;
+  color: var(--ember);
+}
+.floor-name {
+  margin: 2px 0 0;
+  font: italic 15px/1.2 var(--body);
+  color: var(--ash);
+}
+.stats {
+  display: flex;
+  gap: 14px;
+  margin: 0;
+}
+.stats div {
+  text-align: center;
+}
+.stats dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ash);
+}
+.stats dd {
+  margin: 0;
+  font: 700 18px/1.2 var(--body);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* The map: a framed plate. */
+.map-frame {
+  position: relative;
+  aspect-ratio: 9 / 13;
+  max-width: 100%;
+  border: 1px solid var(--ink);
+  outline: 1px solid var(--stone-light);
+  outline-offset: 3px;
+  background: var(--ink);
+  overflow: hidden;
+}
+.map-canvas,
+.floor-map-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.map-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: rgb(11 9 7 / 0.86);
+}
+.overlay h2 {
+  margin: 0;
+  font: 400 32px/1.1 var(--display);
+  color: var(--ember);
+  text-wrap: balance;
+}
+.overlay p {
+  margin: 0;
+  max-width: 28ch;
+}
+.overlay.sign {
+  inset: auto 16px 16px;
+  background: var(--bone);
+  color: var(--ink);
+  font: italic 18px/1.35 var(--body);
+  border: 1px solid var(--ink);
+  outline: 1px solid var(--bone);
+  outline-offset: -5px;
+}
+.overlay.connection {
+  inset: auto 0 0;
+  padding: 8px;
+  background: rgb(11 9 7 / 0.9);
+  color: var(--ash);
+}
+.floor-map {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  padding: 48px 12px 12px;
+  background: var(--ink);
+}
+.floor-map-canvas {
+  min-height: 0;
+}
+.floor-map-note {
+  margin: 0;
+  text-align: center;
+  color: var(--ash);
+  font-size: 14px;
+}
+
+/* Tally strip. */
+.tally {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-height: 1.5em;
+  font: 14px/1.4 var(--ledger);
+  color: var(--ash);
+}
+.tally-counts {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tally-counts b {
+  color: var(--bone);
+  font-weight: 400;
+}
+.tally-counts .lead b {
+  color: var(--ember);
+}
+.tally-meta {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keys: square, inked, with a carved lower edge. */
+.key {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--stone);
+  box-shadow:
+    inset 0 1px 0 var(--stone-light),
+    0 3px 0 var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 var(--stone-light),
+    0 1px 0 var(--ink);
+}
+.key:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.key.primary {
+  background: var(--ember);
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 3px 0 var(--ink);
+}
+.key.chosen {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+  opacity: 1;
+}
+.key:focus-visible,
+.link:focus-visible,
+.tabs button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ember);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 4px;
+}
+.dpad .key {
+  padding: 0;
+  font-size: 20px;
+}
+.dir-up {
+  grid-area: 1 / 2;
+}
+.dir-left {
+  grid-area: 2 / 1;
+}
+.dir-right {
+  grid-area: 2 / 3;
+}
+.dir-down {
+  grid-area: 3 / 2;
+}
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.actions .key {
+  font: 400 18px/1 var(--display);
+  letter-spacing: 0.04em;
+}
+.use {
+  position: relative;
+}
+.use .key {
+  width: 100%;
+}
+.use-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  z-index: 4;
+  min-width: 100%;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--bone);
+  border: 1px solid var(--ink);
+}
+.use-menu button {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.use-menu button:hover {
+  background: rgb(0 0 0 / 0.08);
+}
+.controls-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 13px;
+  color: var(--ash);
+}
+
+/* Side column: account, then the record (event log) and chat. */
+.side {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+@media (min-width: 880px) {
+  .side {
+    max-width: none;
+  }
+}
+.account {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: var(--rule);
+}
+.account p {
+  margin: 0;
+}
+.handle-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.handle-form input,
+.chat-form input {
+  min-width: 0;
+  flex: 1;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--stone-light);
+  border-radius: 2px;
+  background: var(--ink);
+}
+.error {
+  color: var(--lava);
+}
+.muted,
+.empty {
+  color: var(--ash);
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: var(--rule);
+}
+.tabs button {
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  color: var(--ash);
+  font: 400 18px/1 var(--display);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.tabs button[aria-selected="true"] {
+  color: var(--bone);
+  box-shadow: inset 0 -2px 0 var(--ember);
+}
+.panel {
+  height: 320px;
+  overflow-y: auto;
+}
+@media (min-width: 880px) {
+  .panel {
+    height: 560px;
+  }
+}
+.log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 14px/1.6 var(--ledger);
+}
+.log li {
+  display: flex;
+  gap: 12px;
+}
+.turn-no {
+  min-width: 4ch;
+  text-align: right;
+  color: var(--ash);
+  font-variant-numeric: tabular-nums;
+}
+.log .bad {
+  color: var(--lava);
+}
+.log .good {
+  color: var(--verdigris);
+}
+.sign-text {
+  display: block;
+  font-style: italic;
+  color: var(--bone);
+}
+.chat {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  height: 100%;
+}
+.chat-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+.chat-list b {
+  color: var(--ember);
+  font-weight: 700;
+}
+.chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.ad-slot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 320px;
+  min-height: 60px;
+  border: 1px dashed var(--stone-light);
+  color: var(--ash);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.crash {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  max-width: 440px;
+  margin: 48px auto;
+  padding-inline: 16px;
+}
+.crash h2 {
+  margin: 0;
+  font: 400 28px/1.1 var(--display);
+  color: var(--ember);
+}
+.crash pre {
+  max-width: 100%;
+  overflow-x: auto;
+  color: var(--ash);
+  font: 13px/1.4 var(--ledger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .key:active:not(:disabled) {
+    transform: none;
+  }
+}

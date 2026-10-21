@@ -31,6 +31,8 @@ export interface FloorRuntime {
   /** Entities as they were when the floor was first loaded; the baseline for floor resets. */
   initial: RuntimeEntity[];
   spent: SpentItem[];
+  /** Explored tile indices (y * width + x), sorted; see explored.ts. */
+  explored: number[];
   /** World steps still frozen by an hourglass (0 or absent: the world moves normally). */
   frozen?: number;
 }

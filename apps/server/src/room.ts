@@ -320,7 +320,7 @@ export class GameRoom {
     const sign = r.events.find((e) => e.type === "sign_read");
 
     const delta = floorChanged
-      ? { changes: [], revealed: [], hidden: [] }
+      ? { changes: [], revealed: [], hidden: [], explored: [] }
       : turnDelta(before, r.state, r.changed);
 
     this.broadcast("turn", {
@@ -331,6 +331,7 @@ export class GameRoom {
       changes: delta.changes,
       ...(delta.revealed.length ? { revealed: delta.revealed } : {}),
       ...(delta.hidden.length ? { hidden: delta.hidden } : {}),
+      ...(delta.explored.length ? { explored: delta.explored } : {}),
       ...(inventoryChanged ? { inventory: toProtocolInventory(r.state) } : {}),
       ...(r.outcome ? { outcome: r.outcome } : {}),
       ...(sign?.type === "sign_read" ? { sign: { text: sign.text } } : {}),

@@ -408,7 +408,7 @@ function lockColor(name: string): string {
   return colors[Math.abs(h) % colors.length]!;
 }
 
-function drawEntity(
+export function drawEntity(
   ctx: CanvasRenderingContext2D,
   e: Entity,
   sx: number,

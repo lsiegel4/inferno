@@ -4,5 +4,6 @@ coverage
 cdk.out
 docs
 .claude
+.playwright-mcp
 dist-playtest
 apps/client/solutions.json

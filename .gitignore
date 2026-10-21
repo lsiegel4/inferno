@@ -1,4 +1,3 @@
-docs/
 node_modules/
 dist/
 coverage/
@@ -8,5 +7,6 @@ cdk.out/
 .env.*
 .DS_Store
 .claude/
+.playwright-mcp/
 dist-playtest/
 apps/client/solutions.json

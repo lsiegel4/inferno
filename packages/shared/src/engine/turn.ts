@@ -1,6 +1,7 @@
 import type { Action } from "../protocol.js";
 import { cloneItem } from "./clone.js";
 import { TurnContext } from "./context.js";
+import { exploreAroundHero } from "./explored.js";
 import { blocksJump, blocksMove, entityType, isRemoved, itemType } from "./registry.js";
 import { die, isBlocked, isHazardTile, moveHeroTo } from "./transitions.js";
 import {
@@ -40,6 +41,7 @@ export function applyTurn(state: GameState, action: Action, crowd: Crowd = UNANI
   if (!effective) ctx.setOutcome("no_effect");
   endTurn(ctx);
   next.turn += 1;
+  exploreAroundHero(next);
 
   return {
     state: next,
