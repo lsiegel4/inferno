@@ -2,7 +2,7 @@
 import type { Action } from "@inferno/shared";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { toRoman } from "../components/Header.js";
-import { artStyle, setArtStyle, type ArtStyle } from "../render/engraved.js";
+import { ArtSheet } from "./ArtSheet.js";
 import type { LabServer } from "./server.js";
 
 const DISSENTS: { label: string; action: Action | null }[] = [
@@ -15,25 +15,9 @@ const DISSENTS: { label: string; action: Action | null }[] = [
   { label: "Interact", action: { kind: "interact" } },
 ];
 
-function savedArt(): ArtStyle {
-  try {
-    return localStorage.getItem("inferno.lab.art") === "engraved" ? "engraved" : "classic";
-  } catch {
-    return artStyle();
-  }
-}
-
 export function LabDrawer({ lab }: { lab: LabServer }) {
   const [open, setOpen] = useState(false);
-  const [art, setArt] = useState(savedArt);
-  useEffect(() => {
-    setArtStyle(art);
-    try {
-      localStorage.setItem("inferno.lab.art", art);
-    } catch {
-      // storage unavailable: the choice just won't be remembered
-    }
-  }, [art]);
+  const [sheet, setSheet] = useState(false);
 
   const status = useSyncExternalStore(
     (fn) => lab.subscribe(fn),
@@ -52,6 +36,7 @@ export function LabDrawer({ lab }: { lab: LabServer }) {
 
   return (
     <div className={`lab-drawer${open ? " open" : ""}`}>
+      {sheet && <ArtSheet onClose={() => setSheet(false)} />}
       <button
         type="button"
         className="lab-toggle"
@@ -62,13 +47,6 @@ export function LabDrawer({ lab }: { lab: LabServer }) {
       </button>
       {open && (
         <section className="lab-panel" aria-label="Floor lab">
-          <label className="lab-field">
-            <span>Art</span>
-            <select value={art} onChange={(e) => setArt(e.target.value as ArtStyle)}>
-              <option value="classic">Classic (current)</option>
-              <option value="engraved">Engraved (Doré sample)</option>
-            </select>
-          </label>
           <label className="lab-field">
             <span>Floor</span>
             <select value={status.floorId} onChange={(e) => lab.playFloor(e.target.value)}>
@@ -82,6 +60,9 @@ export function LabDrawer({ lab }: { lab: LabServer }) {
           <div className="lab-row">
             <button type="button" className="key" onClick={() => lab.restartFloor()}>
               Restart floor
+            </button>
+            <button type="button" className="key" onClick={() => setSheet(true)}>
+              Art sheet
             </button>
             {status.autoplay === null ? (
               <button

@@ -154,5 +154,6 @@ The current look is a starting point ("engraved manuscript": an old-print displa
   in the Malebolge, serpents among the thieves, and so on), so each circle looks distinct.
 - **First step:** one floor's worth of art (walls, floor, lava, the hero, one enemy, a sign, a
   door, a lever) shown side by side with the current look, before redrawing the rest.
-- **Not started yet:** the art pass waits until the latest interface changes have been played
-  and reviewed.
+- **Done:** the sample was approved and the whole map is now drawn engraved (the classic
+  drawings are gone). The lab's dev drawer has an **Art sheet** showing every terrain, thing,
+  state and creature.

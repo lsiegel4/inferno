@@ -76,3 +76,19 @@
   font-size: 12px;
   color: var(--ash);
 }
+.art-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+  overflow: auto;
+  background: rgb(11 9 7 / 0.96);
+}
+.art-sheet canvas {
+  max-width: 100%;
+  height: auto;
+}
