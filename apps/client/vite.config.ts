@@ -8,6 +8,8 @@ const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 export default defineConfig(({ mode }) => {
   // The Google client id is public; it comes from the repo-root .env (GOOGLE_CLIENT_ID).
   const env = loadEnv(mode, repoRoot, "");
+  // Where the game server runs in development (override with INFERNO_SERVER, e.g. a second copy).
+  const server = env.INFERNO_SERVER ?? "localhost:3000";
   return {
     plugins: [react()],
     define: {
@@ -16,8 +18,8 @@ export default defineConfig(({ mode }) => {
     server: {
       // One origin in development, like CloudFront in production (ADR-0018): cookies just work.
       proxy: {
-        "/api": "http://localhost:3000",
-        "/ws": { target: "ws://localhost:3000", ws: true },
+        "/api": `http://${server}`,
+        "/ws": { target: `ws://${server}`, ws: true },
       },
     },
     test: {

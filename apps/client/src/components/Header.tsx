@@ -4,7 +4,10 @@ export function Header({ view }: { view: GameView }) {
   const p = view.presence;
   return (
     <header className="header">
-      <h1 className="title">Inferno</h1>
+      <div>
+        <h1 className="title">Inferno</h1>
+        {view.floor?.name && <p className="floor-name">{view.floor.name}</p>}
+      </div>
       <dl className="stats">
         <div>
           <dt>Floor</dt>

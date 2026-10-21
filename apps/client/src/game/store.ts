@@ -20,6 +20,7 @@ export type You = { role: "player"; userId: string; handle: string } | { role: "
 export interface FloorView {
   floorId: string;
   index: number;
+  name?: string;
   width: number;
   height: number;
   minimumPlayers: number;
@@ -80,6 +81,7 @@ function toFloorView(f: FloorState): FloorView {
   return {
     floorId: f.floorId,
     index: f.index,
+    ...(f.name ? { name: f.name } : {}),
     width: f.width,
     height: f.height,
     minimumPlayers: f.minimumPlayers,

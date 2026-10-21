@@ -35,6 +35,12 @@ export function interactLabel(view: GameView): string {
         return s.open ? "Interact" : "Locked";
       case "plate":
         return s.stone ? "Take stone" : "Interact";
+      case "switch":
+        return "Flip";
+      case "mirror":
+        return "Turn mirror";
+      case "altar":
+        return "Invoke";
     }
   }
   return "Interact";
