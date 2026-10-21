@@ -294,6 +294,18 @@ describe("turn messages", () => {
   });
 });
 
+describe("jump availability", () => {
+  it("welcome and turn messages say whether Jump would work", () => {
+    const floors = [floor(1, ["#######", "#S.L.U#", "#######"])];
+    const { clock, player } = setup(floors);
+    const a = player("ana");
+    expect(a.of("welcome")[0]!.data.canJump).toBe(false); // starts facing up, at a wall
+    a.vote(0, right); // to (2,1), facing the lava at (3,1) with floor beyond
+    clock.advance(RULES.tickMinMs);
+    expect(a.of("turn")[0]!.data.canJump).toBe(true);
+  });
+});
+
 describe("darkness", () => {
   it("turn messages carry revealed and hidden tiles", () => {
     const dark = parseFloor("#######\n#S...U#\n#######", {

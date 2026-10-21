@@ -28,6 +28,7 @@ export function welcome(overrides: Partial<Welcome> = {}): ServerMessage {
       recentTurns: [],
       recentChat: [],
       gameOver: false,
+      canJump: true,
       ...overrides,
     },
   };

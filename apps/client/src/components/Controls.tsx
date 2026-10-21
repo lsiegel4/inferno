@@ -17,12 +17,12 @@ export function Controls({ view, onVote }: ControlsProps) {
   const paused = view.presence?.paused ?? true;
   const disabled = !isPlayer || paused || view.gameOver || view.myVote !== null;
 
-  const button = (action: Action, label: string, className: string, aria?: string) => (
+  const button = (action: Action, label: string, className: string, aria?: string, off = false) => (
     <button
       key={JSON.stringify(action)}
       type="button"
       className={`key ${className}${sameAction(view.myVote, action) ? " chosen" : ""}`}
-      disabled={disabled}
+      disabled={disabled || off}
       aria-label={aria ?? label}
       onClick={() => onVote(action)}
     >
@@ -39,7 +39,7 @@ export function Controls({ view, onVote }: ControlsProps) {
       </div>
       <div className="actions">
         {button({ kind: "interact" }, interactLabel(view), "primary")}
-        {button({ kind: "jump" }, "Jump", "")}
+        {button({ kind: "jump" }, "Jump", "", undefined, !view.canJump)}
         <div className="use">
           <button
             type="button"

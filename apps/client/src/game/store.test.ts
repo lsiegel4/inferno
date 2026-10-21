@@ -25,6 +25,7 @@ describe("game view", () => {
           turn: 4,
           action: { kind: "interact" },
           hero: { x: 2, y: 1, facing: "right" },
+          canJump: false,
           changes: [{ id: "lever-a", kind: "lever", x: 3, y: 1, state: { pulled: true } }],
           inventory: [{ id: "key-1", type: "key" }],
           outcome: "no_effect",
@@ -37,6 +38,7 @@ describe("game view", () => {
     expect(v.inventory).toEqual([{ id: "key-1", type: "key" }]);
     expect(v.log).toEqual([{ turn: 4, action: { kind: "interact" }, outcome: "no_effect" }]);
     expect(v.myVote).toBeNull();
+    expect(v.canJump).toBe(false);
   });
 
   it("removes entities sent as hidden, and updates revealed, hidden and explored tiles", () => {
@@ -48,6 +50,7 @@ describe("game view", () => {
           turn: 4,
           action: right,
           hero: { x: 3, y: 1, facing: "right" },
+          canJump: true,
           changes: [{ id: "lever-a", kind: "lever", x: 3, y: 1, state: { hidden: true } }],
           revealed: [{ x: 0, y: 0, ch: "L" }],
           hidden: [{ x: 4, y: 2 }],
@@ -70,6 +73,7 @@ describe("game view", () => {
           turn: 4,
           action: { kind: "interact" },
           hero: { x: 2, y: 1, facing: "right" },
+          canJump: true,
           changes: [],
           sign: { text: "Beware" },
         },

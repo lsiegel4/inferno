@@ -41,6 +41,21 @@ describe("Controls", () => {
     );
   });
 
+  it("disables Jump when the server says it would fail", () => {
+    const { unmount } = render(
+      <Controls view={viewFrom(welcome({ canJump: false }))} onVote={vi.fn()} />,
+    );
+    expect((screen.getByRole("button", { name: "Jump" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Move up" }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+    unmount();
+    render(<Controls view={viewFrom(welcome({ canJump: true }))} onVote={vi.fn()} />);
+    expect((screen.getByRole("button", { name: "Jump" }) as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+  });
+
   it("Use opens the inventory and votes use(itemId)", async () => {
     const onVote = vi.fn();
     render(

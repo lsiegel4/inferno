@@ -54,6 +54,7 @@ export function App() {
       if (key === "m") return setMapOpen((o) => !o);
       if (key === "Escape") return setMapOpen(false);
       const action = KEYS[key];
+      if (action?.kind === "jump" && !view.canJump) return;
       if (action && canVote) {
         e.preventDefault();
         game.vote(action);
@@ -61,7 +62,7 @@ export function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [canVote, game]);
+  }, [canVote, game, view.canJump]);
 
   return (
     <div className="app">

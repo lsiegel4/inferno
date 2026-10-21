@@ -4,6 +4,7 @@
  */
 import {
   applyTurn,
+  canJump,
   CHAT_MAX_LENGTH,
   crowdOf,
   ClientMessageSchema,
@@ -194,6 +195,7 @@ export class GameRoom {
       recentTurns: this.recentTurns,
       recentChat: this.chat.slice(-RULES.recentChat),
       gameOver: this.state.gameOver,
+      canJump: canJump(this.state),
     });
   }
 
@@ -328,6 +330,7 @@ export class GameRoom {
       action,
       ...(record.crowd ? { crowd: record.crowd } : {}),
       hero: toProtocolHero(r.state),
+      canJump: canJump(r.state),
       changes: delta.changes,
       ...(delta.revealed.length ? { revealed: delta.revealed } : {}),
       ...(delta.hidden.length ? { hidden: delta.hidden } : {}),

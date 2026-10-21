@@ -221,8 +221,10 @@ No hard per-user target (see [ADR-0016](adr/0016-bandwidth-approach.md)). Estima
 ## 17. Open items (not yet decided)
 
 1. **Profanity filter** library/service.
-2. **Jump availability in the game client.** The floor lab disables Jump when it would fail (`canJump`); the multiplayer client still offers it and an impossible jump uses the turn with no effect. Decide whether the client should compute this.
-3. **Minimum players per floor** ramp from 1 to 20 across the campaign: a starting point to tune against real traffic.
+
+**Confirmed 2026-10-20** (decided in the floor-design session, approved by the user): jump only over lava and visible holes; sprung traps stay revealed after a death; crowd-aware mechanics (echo, altar, vigil); turn order (hero, then world, then plates/doors/beams; ferries carry the hero; patrols kill on contact); planks returned on death and the weight stone placeable underfoot; 27 floors at launch. **Minimum players** (currently ramping 1 → 20) will change as the designer tunes them against real traffic.
+
+**Jump availability:** clients disable Jump when it would fail; the server sends `canJump` with every `welcome` and `turn`.
 
 ## 18. Under exploration (not decided)
 

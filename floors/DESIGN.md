@@ -28,7 +28,8 @@ floor relies on visible danger alone. Difficulty comes from:
 
 ## Decisions
 
-Answers to the open questions in the design notes. All of these are implemented and tested.
+Answers to the open questions in the design notes. All of these are implemented and tested, and
+were confirmed by the designer on 2026-10-20.
 
 **Turn cycles**
 
@@ -82,7 +83,8 @@ A permanent plank turned one wrong placement into a game-ending softlock.
 
 **Minimum players** ramp from 1 to 20: early floors are playable alone; crowd mechanics arrive
 when a crowd is required (the echo needs at least three voters to split 2 to 1). A minimum above
-the live audience pauses the game, so these are a starting point to tune against real traffic.
+the live audience pauses the game, so these are a starting point: **they will change as the
+designer tunes them against real traffic.**
 
 ## The campaign
 

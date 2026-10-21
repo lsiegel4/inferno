@@ -49,6 +49,8 @@ export interface GameView {
   log: LogEntry[];
   chat: ChatMessage[];
   gameOver: boolean;
+  /** Would Jump do anything right now (from the server)? */
+  canJump: boolean;
   /** The action this client voted for in the current tick, if any. */
   myVote: Action | null;
   /** Sign text to show as an overlay, and until when (ms since epoch). */
@@ -72,6 +74,7 @@ export const initialView: GameView = {
   log: [],
   chat: [],
   gameOver: false,
+  canJump: false,
   myVote: null,
   sign: null,
   notice: null,
@@ -134,6 +137,7 @@ export function reduce(view: GameView, msg: ServerMessage, now: number): GameVie
         })),
         chat: d.recentChat,
         gameOver: d.gameOver,
+        canJump: d.canJump,
       };
     }
     case "turn": {
@@ -159,6 +163,7 @@ export function reduce(view: GameView, msg: ServerMessage, now: number): GameVie
         floor,
         hero: d.hero,
         inventory: d.inventory ?? view.inventory,
+        canJump: d.canJump,
         tally: null,
         myVote: null,
         log: keep([...view.log, entry], LOG_LIMIT),

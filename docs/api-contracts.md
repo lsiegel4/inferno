@@ -224,6 +224,7 @@ interface Presence {
   recentTurns: TurnRecord[];         // to seed the event log
   recentChat: ChatMessage[];
   gameOver: boolean;
+  canJump: boolean;                  // would Jump do anything now? (clients disable the button)
 }
 ```
 
@@ -238,6 +239,7 @@ interface Presence {
   inventory?: InventoryItem[];       // present only if it changed
   sign?: { text: string };           // a sign was read this turn: show a 2 s overlay and log it
   crowd?: Crowd;                     // how the crowd split (the echo performed `dissent`)
+  canJump: boolean;                  // would Jump do anything after this turn?
   revealed?: { x: number; y: number; ch: string }[]; // darkness: tiles that became visible
   hidden?: { x: number; y: number }[];               // darkness: tiles that went dark
   explored?: { x: number; y: number; ch: string }[]; // tiles newly added to the explored floor map
