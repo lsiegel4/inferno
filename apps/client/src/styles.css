@@ -1,7 +1,6 @@
 /*
  * Inferno: an engraved manuscript lit by lava. Ink on umber, hatched stone, a single ember accent.
- * Layout: one portrait column (map → tally → controls → record/chat); wide screens move the
- * record and chat into a side column.
+ * Layout: see "One screen, no page scroll" below.
  */
 :root {
   color-scheme: dark;
@@ -45,88 +44,200 @@ input {
   clip-path: inset(50%);
 }
 
+/*
+ * One screen, no page scroll. Phones: top bar, the map filling what is left, the controls docked
+ * at the thumb; the record and chat slide up as a sheet. Desktop: the map takes the height of the
+ * window and a command rail (vote, record, chat) sits beside it.
+ */
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  overflow: hidden;
+}
 .app {
+  height: 100dvh;
+}
+.game {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
-  max-width: 960px;
-  margin: 0 auto;
-  padding-inline: 16px;
-  padding-block: 12px 24px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "top"
+    "map"
+    "command";
+  gap: 10px;
+  height: 100%;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
 }
-@media (min-width: 880px) {
-  .app {
-    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
-    align-items: start;
-  }
+.topbar {
+  grid-area: top;
 }
-.stage {
+.map-area {
+  grid-area: map;
+  container-type: size;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
+  place-items: center;
+  min-height: 0;
+}
+.command {
+  grid-area: command;
+  display: grid;
+  gap: 10px;
   width: 100%;
-  max-width: 440px;
-  margin: 0 auto;
+  max-width: 560px;
+  justify-self: center;
 }
 
-/* Header: a title plate with the floor's Roman numeral and the crowd counts. */
-.header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 8px 12px;
-  border-bottom: 3px double var(--stone-light);
-  padding-bottom: 8px;
+/* Wide screens: a command rail beside the map. */
+@media (min-width: 960px) {
+  .game {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "map command"
+      "map side";
+    column-gap: 24px;
+    row-gap: 16px;
+    padding-inline: 24px;
+  }
+  .command {
+    max-width: none;
+    align-self: start;
+  }
 }
-.title {
+/* Phones on their side: map left, controls right. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .game {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "map command";
+  }
+  .command {
+    align-self: center;
+  }
+}
+
+/* The top bar: the circle you are on and the crowd with you. */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.brand {
   margin: 0;
-  font: 400 34px/1 var(--display);
-  letter-spacing: 0.04em;
+  font: 400 22px/1 var(--display);
+  letter-spacing: 0.06em;
   color: var(--ember);
 }
-.floor-name {
-  margin: 2px 0 0;
-  font: italic 15px/1.2 var(--body);
+.circle {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 12px;
+  border-left: var(--rule);
+}
+.circle-numeral {
+  font: 400 20px/1 var(--display);
+  color: var(--bone);
+}
+.circle-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
   color: var(--ash);
 }
-.stats {
+.crowd {
   display: flex;
-  gap: clamp(8px, 3vw, 14px);
-  margin: 0;
+  gap: 6px;
+  margin: 0 0 0 auto;
 }
-/* Very narrow: the stats take their own row, spread evenly under the title. */
-@media (max-width: 360px) {
-  .stats {
-    flex: 1 1 100%;
-    justify-content: space-between;
+.crowd-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--stone);
+  font-variant-numeric: tabular-nums;
+}
+.crowd-chip dt {
+  display: flex;
+  color: var(--ember);
+}
+.crowd-chip dd {
+  margin: 0;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.crowd-chip.quiet dt {
+  color: var(--ash);
+}
+.crowd-chip.warn {
+  background: color-mix(in srgb, var(--lava) 30%, var(--stone));
+}
+.crowd-unit {
+  font-weight: 400;
+  color: var(--ash);
+}
+.topbar-button {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--stone-light);
+  border-radius: 10px;
+  background: var(--stone);
+  color: var(--bone);
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .topbar-button:hover {
+    background: var(--stone-light);
   }
 }
-.stats div {
-  text-align: center;
+.topbar-button:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
 }
-.stats dt {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ash);
+/* Narrow: drop the brand and the words; keep the numbers. */
+@media (max-width: 560px) {
+  .brand,
+  .crowd-unit {
+    display: none;
+  }
+  .circle {
+    padding-left: 0;
+    border-left: 0;
+  }
 }
-.stats dd {
-  margin: 0;
-  font: 700 18px/1.2 var(--body);
-  font-variant-numeric: lining-nums tabular-nums;
+@media (max-width: 380px) {
+  .crowd-chip.quiet {
+    display: none;
+  }
 }
 
-/* The map: a framed plate. */
+/* The map: as large as the space allows, always 9 × 13 tiles. */
 .map-frame {
   position: relative;
+  width: min(100cqw, calc(100cqh * 9 / 13));
   aspect-ratio: 9 / 13;
-  max-width: 100%;
-  border: 1px solid var(--ink);
-  outline: 1px solid var(--stone-light);
-  outline-offset: 3px;
+  border-radius: 14px;
   background: var(--ink);
   overflow: hidden;
+  box-shadow:
+    0 0 0 1px var(--stone-light),
+    0 24px 60px rgb(0 0 0 / 0.55);
 }
 .map-canvas,
 .floor-map-canvas {
@@ -136,9 +247,11 @@ input {
 }
 .map-button {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   z-index: 3;
+  background: rgb(21 17 14 / 0.75);
+  backdrop-filter: blur(6px);
 }
 .overlay {
   position: absolute;
@@ -834,19 +947,64 @@ input:focus-visible {
   }
 }
 
-/* Side column: account, then the record (event log) and chat. */
+/* Record and chat: a rail on wide screens, a sheet that slides up on small ones. */
 .side {
+  grid-area: side;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
-  width: 100%;
-  max-width: 440px;
-  margin: 0 auto;
+  min-height: 0;
 }
-@media (min-width: 880px) {
-  .side {
-    max-width: none;
+.side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.side-close,
+.scrim {
+  display: none;
+}
+@media (min-width: 960px) {
+  .side-toggle {
+    display: none;
   }
 }
+@media (max-width: 959px) {
+  .side {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 30;
+    height: min(72dvh, 560px);
+    padding: 16px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    border-radius: 18px 18px 0 0;
+    background: var(--ground);
+    box-shadow: 0 -20px 50px rgb(0 0 0 / 0.6);
+    transform: translateY(105%);
+    visibility: hidden;
+    transition:
+      transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      visibility 0s linear 260ms;
+  }
+  .side-open .side {
+    transform: none;
+    visibility: visible;
+    transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .side-close {
+    display: grid;
+  }
+  .side-open .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 29;
+    border: 0;
+    background: rgb(0 0 0 / 0.5);
+  }
+}
+
 .account {
   display: grid;
   gap: 8px;
@@ -898,14 +1056,10 @@ input:focus-visible {
   box-shadow: inset 0 -2px 0 var(--ember);
 }
 .panel {
-  height: 320px;
+  min-height: 0;
   overflow-y: auto;
 }
-@media (min-width: 880px) {
-  .panel {
-    height: 560px;
-  }
-}
+
 .log {
   margin: 0;
   padding: 0;
@@ -1003,6 +1157,10 @@ input:focus-visible {
   .descent-rule {
     width: min(220px, 60vw);
   }
+  .side,
+  .side-open .side {
+    transition: none;
+  }
   /* No iris: the card shows, then the dark simply fades. */
   .descent {
     -webkit-mask-image: none;
@@ -1017,4 +1175,9 @@ input:focus-visible {
   .key::after {
     transition: none;
   }
+}
+.side .account {
+  padding: 12px 0 0;
+  border-bottom: 0;
+  border-top: var(--rule);
 }

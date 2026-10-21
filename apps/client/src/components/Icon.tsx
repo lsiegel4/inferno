@@ -5,7 +5,17 @@
 import type { Action, Direction } from "@inferno/shared";
 
 export type IconName =
-  Direction | "jump" | "interact" | "wait" | "use" | "map" | "crowd" | "eye" | "flame";
+  | Direction
+  | "jump"
+  | "interact"
+  | "wait"
+  | "use"
+  | "map"
+  | "crowd"
+  | "eye"
+  | "flame"
+  | "scroll"
+  | "close";
 
 const PATHS: Record<IconName, string> = {
   // A chevron with a tail, pointing the way.
@@ -29,6 +39,10 @@ const PATHS: Record<IconName, string> = {
     "M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 12a2.5 2.5 0 1 0 0-5M18 12a2.5 2.5 0 1 0 0-5M6 20c0-3 2.7-5 6-5s6 2 6 5M2 19c0-2 1.5-3.5 4-4M22 19c0-2-1.5-3.5-4-4",
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
   flame: "M12 3c3 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-3-1-5 1-8z",
+  // A scroll: the record of turns.
+  scroll:
+    "M8 4h10a2 2 0 0 1 2 2v1h-4M8 4a2 2 0 0 0-2 2v12a2 2 0 0 1-2 2h11a2 2 0 0 0 2-2V7M8 4a2 2 0 0 1 2 2v1M10 11h5M10 15h5",
+  close: "M6 6l12 12M18 6L6 18",
 };
 
 export function Icon({ name, size = 24 }: { name: IconName; size?: number }) {

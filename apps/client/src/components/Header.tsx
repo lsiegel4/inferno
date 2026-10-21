@@ -1,31 +1,65 @@
 import type { GameView } from "../game/store.js";
+import { Icon } from "./Icon.js";
 
-export function Header({ view }: { view: GameView }) {
+export interface HeaderProps {
+  view: GameView;
+  /** Open the record and chat (a sheet on small screens). */
+  onOpenSide?: () => void;
+  sideOpen?: boolean;
+}
+
+/** The top bar: the circle you are on, and the crowd descending with you. */
+export function Header({ view, onOpenSide, sideOpen = false }: HeaderProps) {
   const p = view.presence;
+  const needed = p ? Math.max(0, p.minimum - p.active) : 0;
   return (
-    <header className="header">
-      <div>
-        <h1 className="title">Inferno</h1>
-        {view.floor?.name && <p className="floor-name">{view.floor.name}</p>}
+    <header className="topbar">
+      <p className="brand">Inferno</p>
+      <div className="circle">
+        <span className="circle-numeral" aria-label={`Floor ${view.floor?.index ?? ""}`}>
+          {view.floor ? toRoman(view.floor.index) : "—"}
+        </span>
+        <span className="circle-name">{view.floor?.name ?? "The descent"}</span>
       </div>
-      <dl className="stats">
-        <div>
-          <dt>Floor</dt>
-          <dd>{view.floor ? toRoman(view.floor.index) : "—"}</dd>
+      <dl className="crowd" aria-label="The crowd">
+        <div className="crowd-chip">
+          <dt>
+            <Icon name="crowd" size={18} />
+            <span className="sr-only">Playing</span>
+          </dt>
+          <dd>
+            {p ? p.active : "—"}
+            <span className="crowd-unit"> playing</span>
+          </dd>
         </div>
-        <div>
-          <dt>Playing</dt>
-          <dd>{p ? p.active : "—"}</dd>
+        <div className="crowd-chip quiet">
+          <dt>
+            <Icon name="eye" size={18} />
+            <span className="sr-only">Watching</span>
+          </dt>
+          <dd>
+            {p ? p.spectators : "—"}
+            <span className="crowd-unit"> watching</span>
+          </dd>
         </div>
-        <div>
-          <dt>Watching</dt>
-          <dd>{p ? p.spectators : "—"}</dd>
-        </div>
-        <div>
-          <dt>Needed</dt>
-          <dd>{p ? p.minimum : "—"}</dd>
-        </div>
+        {needed > 0 && (
+          <div className="crowd-chip warn">
+            <dt className="sr-only">Needed</dt>
+            <dd>needs {needed} more</dd>
+          </div>
+        )}
       </dl>
+      {onOpenSide && (
+        <button
+          type="button"
+          className="topbar-button side-toggle"
+          aria-expanded={sideOpen}
+          aria-label="Record and chat"
+          onClick={onOpenSide}
+        >
+          <Icon name="scroll" size={20} />
+        </button>
+      )}
     </header>
   );
 }

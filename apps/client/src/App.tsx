@@ -7,6 +7,7 @@ import { EventLog } from "./components/EventLog.js";
 import { FloorMap } from "./components/FloorMap.js";
 import { FloorTransition } from "./components/FloorTransition.js";
 import { Header } from "./components/Header.js";
+import { Icon } from "./components/Icon.js";
 import { Lobby } from "./components/Lobby.js";
 import { MapView } from "./components/MapView.js";
 import { PauseOverlay } from "./components/PauseOverlay.js";
@@ -37,6 +38,7 @@ export function App() {
   const [me, setMe] = useState<Me | null>(null);
   const [tab, setTab] = useState<"log" | "chat">("log");
   const [mapOpen, setMapOpen] = useState(false);
+  const [sideOpen, setSideOpen] = useState(false);
   // The lobby greets each new visit; within a tab session, a reload goes straight back in.
   const [entered, setEntered] = useState(() => {
     try {
@@ -77,7 +79,10 @@ export function App() {
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       if (!entered) return;
       if (key === "m") return setMapOpen((o) => !o);
-      if (key === "Escape") return setMapOpen(false);
+      if (key === "Escape") {
+        setSideOpen(false);
+        return setMapOpen(false);
+      }
       const action = KEYS[key];
       if (action?.kind === "jump" && !view.canJump) return;
       if (action && canVote) {
@@ -90,66 +95,89 @@ export function App() {
   }, [canVote, entered, game, view.canJump]);
 
   return (
-    <div className="app">
-      <main className="stage" inert={!entered}>
-        <Header view={view} />
-        <div className="map-frame">
-          <MapView view={view} />
-          <button
-            type="button"
-            className="key map-button"
-            aria-expanded={mapOpen}
-            onClick={() => setMapOpen((o) => !o)}
-          >
-            Map
-          </button>
-          {mapOpen && <FloorMap view={view} onClose={() => setMapOpen(false)} />}
-          {entered && <FloorTransition view={view} />}
-          <SignOverlay view={view} />
-          <PauseOverlay view={view} onReady={game.ready} />
-          {view.gameOver && (
-            <div className="overlay" role="status">
-              <h2>The descent is complete</h2>
-              <p>The crowd reached the bottom of the Inferno.</p>
+    <div className={`app${sideOpen ? " side-open" : ""}`}>
+      <div className="game" inert={!entered}>
+        <Header view={view} onOpenSide={() => setSideOpen((o) => !o)} sideOpen={sideOpen} />
+        <section className="map-area" aria-label="The dungeon">
+          <div className="map-frame">
+            <MapView view={view} />
+            <button
+              type="button"
+              className="topbar-button map-button"
+              aria-expanded={mapOpen}
+              aria-label="Floor map"
+              onClick={() => setMapOpen((o) => !o)}
+            >
+              <Icon name="map" size={20} />
+            </button>
+            {mapOpen && <FloorMap view={view} onClose={() => setMapOpen(false)} />}
+            {entered && <FloorTransition view={view} />}
+            <SignOverlay view={view} />
+            <PauseOverlay view={view} onReady={game.ready} />
+            {view.gameOver && (
+              <div className="overlay" role="status">
+                <h2>The descent is complete</h2>
+                <p>The crowd reached the bottom of the Inferno.</p>
+              </div>
+            )}
+            {game.status !== "open" && (
+              <div className="overlay connection" role="status">
+                <p>{game.status === "connecting" ? "Connecting…" : "Reconnecting…"}</p>
+              </div>
+            )}
+          </div>
+        </section>
+        <section className="command" aria-label="Your vote">
+          <Tally view={view} />
+          <Controls view={view} onVote={game.vote} />
+        </section>
+        <aside className="side" aria-label="Record and chat">
+          <div className="side-head">
+            <div className="tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "log"}
+                onClick={() => setTab("log")}
+              >
+                Record
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === "chat"}
+                onClick={() => setTab("chat")}
+              >
+                Chat
+              </button>
             </div>
-          )}
-          {game.status !== "open" && (
-            <div className="overlay connection" role="status">
-              <p>{game.status === "connecting" ? "Connecting…" : "Reconnecting…"}</p>
-            </div>
-          )}
-        </div>
-        <Tally view={view} />
-        <Controls view={view} onVote={game.vote} />
-      </main>
-      <aside className="side" inert={!entered}>
-        <Account me={me} googleClientId={googleClientId} onChange={onAccountChange} />
-        <div className="tabs" role="tablist">
+            <button
+              type="button"
+              className="topbar-button side-close"
+              aria-label="Close"
+              onClick={() => setSideOpen(false)}
+            >
+              <Icon name="close" size={20} />
+            </button>
+          </div>
+          <div className="panel">
+            {tab === "log" ? (
+              <EventLog log={view.log} />
+            ) : (
+              <Chat messages={view.chat} canChat={view.you?.role === "player"} onSend={game.chat} />
+            )}
+          </div>
+          <Account me={me} googleClientId={googleClientId} onChange={onAccountChange} />
+        </aside>
+        {sideOpen && (
           <button
             type="button"
-            role="tab"
-            aria-selected={tab === "log"}
-            onClick={() => setTab("log")}
-          >
-            Record
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "chat"}
-            onClick={() => setTab("chat")}
-          >
-            Chat
-          </button>
-        </div>
-        <div className="panel">
-          {tab === "log" ? (
-            <EventLog log={view.log} />
-          ) : (
-            <Chat messages={view.chat} canChat={view.you?.role === "player"} onSend={game.chat} />
-          )}
-        </div>
-      </aside>
+            className="scrim"
+            aria-label="Close record and chat"
+            onClick={() => setSideOpen(false)}
+          />
+        )}
+      </div>
       {!entered && (
         <Lobby
           view={view}

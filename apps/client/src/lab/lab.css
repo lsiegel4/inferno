@@ -1,15 +1,21 @@
 /* The floor lab's dev drawer: a small panel pinned to the corner, above the game. */
+/* Pinned to the left edge, halfway down, clear of the top bar and the controls. */
 .lab-drawer {
   position: fixed;
-  right: max(12px, env(safe-area-inset-right));
-  top: max(12px, env(safe-area-inset-top));
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 50;
-  display: grid;
-  justify-items: end;
+  display: flex;
+  align-items: center;
   gap: 8px;
   max-width: calc(100vw - 24px);
 }
 .lab-toggle {
+  writing-mode: vertical-rl;
+  border-radius: 0 999px 999px 0 !important;
+  border-left: 0 !important;
+  padding: 12px 6px !important;
   border: 1px solid var(--ember);
   background: var(--ink);
   color: var(--ember);
@@ -21,6 +27,7 @@
   cursor: pointer;
 }
 .lab-panel {
+  order: 2;
   display: grid;
   gap: 12px;
   width: min(340px, calc(100vw - 24px));
