@@ -1,7 +1,8 @@
-import { cameraOrigin, VIEW_HEIGHT, VIEW_WIDTH } from "@inferno/shared";
+import { VIEW_HEIGHT, VIEW_WIDTH } from "@inferno/shared";
 import { useEffect, useRef } from "react";
 import type { GameView } from "../game/store.js";
 import { useServices } from "../services.js";
+import { viewOrigin } from "../render/camera.js";
 import { HeroMotion, moveKind } from "../render/motion.js";
 import { drawScene, PALETTE } from "../render/renderer.js";
 import { toSceneFloor, visibleEntities } from "../render/scene.js";
@@ -54,7 +55,7 @@ export function MapView({ view }: { view: GameView }) {
       if (floor && hero) {
         const pose = motion.at(t);
         // The camera rides with the moving figure, so a step never jolts the view.
-        const target = cameraOrigin(pose, floor);
+        const target = viewOrigin(pose, floor);
         if (!cam || reduceMotion) cam = { ...target };
         else cam = { x: cam.x + (target.x - cam.x) * 0.35, y: cam.y + (target.y - cam.y) * 0.35 };
         const ts = el.width / VIEW_WIDTH;

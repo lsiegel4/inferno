@@ -110,6 +110,16 @@ body {
     align-self: start;
   }
 }
+/* Very wide: record and chat move to the left of the map, so the screen stays balanced. */
+@media (min-width: 1200px) {
+  .game {
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr) minmax(320px, 380px);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top top"
+      "side map command";
+  }
+}
 /* Phones on their side: map left, controls right. */
 @media (orientation: landscape) and (max-height: 520px) {
   .game {
@@ -784,7 +794,7 @@ input:focus-visible {
     overflow: visible;
     text-align: center;
     line-height: 1.05;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 }
 @container actions (max-width: 170px) {

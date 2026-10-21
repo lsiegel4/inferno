@@ -2,9 +2,10 @@
  * Arriving on a floor: the map goes dark, the circle's numeral and name rise out of it, then the
  * floor is revealed from the hero outward, like a lamp being lifted.
  */
-import { cameraOrigin, VIEW_HEIGHT, VIEW_WIDTH } from "@inferno/shared";
+import { VIEW_HEIGHT, VIEW_WIDTH } from "@inferno/shared";
 import { useRef, type CSSProperties } from "react";
 import type { GameView } from "../game/store.js";
+import { viewOrigin } from "../render/camera.js";
 import { toRoman } from "./Header.js";
 
 function arrival(view: GameView): string {
@@ -25,7 +26,7 @@ export function FloorTransition({ view }: { view: GameView }) {
   if (!floor || !shown.current) return null;
   // The lamp lifts from wherever the hero stands in the camera window.
   const hero = view.hero ?? { x: 0, y: 0 };
-  const cam = cameraOrigin(hero, floor);
+  const cam = viewOrigin(hero, floor);
   const at = {
     "--cx": `${((hero.x - cam.x + 0.5) / VIEW_WIDTH) * 100}%`,
     "--cy": `${((hero.y - cam.y + 0.5) / VIEW_HEIGHT) * 100}%`,

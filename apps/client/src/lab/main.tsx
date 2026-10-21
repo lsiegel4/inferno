@@ -5,6 +5,7 @@ import { App } from "../App.js";
 import { ErrorBoundary } from "../components/ErrorBoundary.js";
 import { ServicesProvider, type Services } from "../services.js";
 import "../styles.css";
+import "../themes.css";
 import { loadFloors, loadSolutions } from "./floors.js";
 import { LabDrawer } from "./LabDrawer.js";
 import "./lab.css";
