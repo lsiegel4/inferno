@@ -169,6 +169,8 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
       recentTurns: z.array(TurnRecordSchema),
       recentChat: z.array(ChatMessageSchema),
       gameOver: z.boolean(),
+      /** Would Jump do anything right now? Clients disable the Jump button when false. */
+      canJump: z.boolean(),
     }),
   ),
   envelope(
@@ -182,6 +184,8 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
       inventory: z.array(InventoryItemSchema).optional(),
       outcome: TurnOutcomeSchema.optional(),
       sign: z.object({ text: z.string() }).optional(),
+      /** Would Jump do anything after this turn? */
+      canJump: z.boolean(),
       revealed: z
         .array(z.object({ x: z.number().int(), y: z.number().int(), ch: z.string().length(1) }))
         .optional(),

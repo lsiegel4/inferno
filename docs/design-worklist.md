@@ -9,11 +9,9 @@ Everything we've discussed about puzzle mechanics and floor content, in one plac
 > - Turn cycles, hidden traps, every brainstormed mechanic except roadblock "behaviours" beyond watchers and patrols, the plank and the hourglass are implemented.
 > - The 7 blocks-and-plates choices stand.
 >
-> **Still open:**
-> - Confirm the decisions that session made (see "Decisions" in floors/DESIGN.md), especially **jump only over lava and visible holes** and **sprung traps stay revealed after a death**.
-> - Tune minimum players against real traffic.
-> - Look and feel (§6).
-> - Whether the multiplayer client should disable Jump when it would fail.
+> **Confirmed 2026-10-20:** all six decisions from that session (jump rule, revealed traps, crowd mechanics, turn order, planks and the weight stone, 27 floors). Minimum players will change with tuning. The client now disables Jump when it would fail.
+>
+> **Still open:** tune minimum players against real traffic; look and feel (§6), including **unifying the map's art style with the rest of the interface**.
 
 ---
 
