@@ -59,6 +59,7 @@ export function Controls({ view, onVote }: ControlsProps) {
       sameAction(view.myVote, action) ? "chosen" : "",
       lead ? "lead" : "",
       overruled?.key === key ? "overruled" : "",
+      off ? "unavailable" : "",
     ].filter(Boolean);
     return (
       <button
@@ -91,7 +92,7 @@ export function Controls({ view, onVote }: ControlsProps) {
           <div className="use">
             <button
               type="button"
-              className="key"
+              className={`key${view.inventory.length === 0 ? " unavailable" : ""}`}
               disabled={disabled || view.inventory.length === 0}
               aria-expanded={menu}
               onClick={() => setMenu((m) => !m)}

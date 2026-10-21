@@ -14,31 +14,9 @@ const DISSENTS: { label: string; action: Action | null }[] = [
   { label: "Interact", action: { kind: "interact" } },
 ];
 
-const LOOKS = [
-  { id: "manuscript", label: "Manuscript (engraved, umber)" },
-  { id: "obsidian", label: "Obsidian (glass, modern)" },
-  { id: "brimstone", label: "Brimstone (bold, molten)" },
-];
-
-function savedLook(): string {
-  try {
-    return localStorage.getItem("inferno.lab.look") ?? "manuscript";
-  } catch {
-    return "manuscript";
-  }
-}
-
 export function LabDrawer({ lab }: { lab: LabServer }) {
   const [open, setOpen] = useState(false);
-  const [look, setLook] = useState(savedLook);
-  useEffect(() => {
-    document.documentElement.dataset.theme = look;
-    try {
-      localStorage.setItem("inferno.lab.look", look);
-    } catch {
-      // storage unavailable: the look just won't be remembered
-    }
-  }, [look]);
+
   const status = useSyncExternalStore(
     (fn) => lab.subscribe(fn),
     () => lab.status(),
@@ -66,16 +44,6 @@ export function LabDrawer({ lab }: { lab: LabServer }) {
       </button>
       {open && (
         <section className="lab-panel" aria-label="Floor lab">
-          <label className="lab-field">
-            <span>Look</span>
-            <select value={look} onChange={(e) => setLook(e.target.value)}>
-              {LOOKS.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
-          </label>
           <label className="lab-field">
             <span>Floor</span>
             <select value={status.floorId} onChange={(e) => lab.playFloor(e.target.value)}>

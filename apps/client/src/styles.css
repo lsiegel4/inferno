@@ -14,9 +14,13 @@
   --ember: #d98a36;
   --lava: #c4462b;
   --verdigris: #6e9784;
+  --gilt: #b08a4a;
+  --gilt-dim: #6e5636;
+  --parchment: #ecdfc2;
+  --plate: linear-gradient(180deg, #342b25, #28211c 60%, #221c18);
   --display: "IM Fell English SC", "Iowan Old Style", Georgia, serif;
   --body: "Alegreya Sans", "Gill Sans", "Segoe UI", sans-serif;
-  --ledger: "Courier Prime", "Courier New", monospace;
+  --ledger: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --rule: 1px solid var(--stone-light);
 }
 
@@ -176,13 +180,17 @@ body {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--stone);
-  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: var(--plate);
+  box-shadow:
+    inset 0 1px 0 rgb(255 235 200 / 0.06),
+    inset 0 0 0 2px rgb(176 138 74 / 0.08);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .crowd-chip dt {
   display: flex;
-  color: var(--ember);
+  color: var(--gilt);
 }
 .crowd-chip dd {
   margin: 0;
@@ -193,10 +201,12 @@ body {
   color: var(--ash);
 }
 .crowd-chip.warn {
-  background: color-mix(in srgb, var(--lava) 30%, var(--stone));
+  background: linear-gradient(180deg, #5a2a1e, #43201a);
 }
 .crowd-unit {
   font-weight: 400;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
   color: var(--ash);
 }
 .topbar-button {
@@ -205,9 +215,10 @@ body {
   flex: none;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--stone-light);
-  border-radius: 10px;
-  background: var(--stone);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: var(--plate);
+  box-shadow: inset 0 1px 0 rgb(255 235 200 / 0.06);
   color: var(--bone);
   cursor: pointer;
 }
@@ -240,14 +251,35 @@ body {
 /* The map: as large as the space allows, always 9 × 13 tiles. */
 .map-frame {
   position: relative;
-  width: min(100cqw, calc(100cqh * 9 / 13));
+  width: min(calc(100cqw - 12px), calc((100cqh - 12px) * 9 / 13));
   aspect-ratio: 9 / 13;
-  border-radius: 14px;
+  border-radius: 3px;
   background: var(--ink);
   overflow: hidden;
+  /* An engraved mount: ink, a stone mat, a gilt rule, then shadow. */
   box-shadow:
-    0 0 0 1px var(--stone-light),
+    0 0 0 1px var(--ink),
+    0 0 0 5px #231c17,
+    0 0 0 6px var(--gilt-dim),
     0 24px 60px rgb(0 0 0 / 0.55);
+}
+/* The inner gilt rule and its corner ornaments, over the map. */
+.frame-ornament {
+  position: absolute;
+  inset: 6px;
+  z-index: 2;
+  border: 1px solid rgb(176 138 74 / 0.28);
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b08a4a' stroke-width='1.2'%3E%3Cpath d='M1 23V9a8 8 0 0 1 8-8h14'/%3E%3Cpath d='M5 13V9a4 4 0 0 1 4-4h4'/%3E%3Ccircle cx='9' cy='9' r='1.4' fill='%23b08a4a'/%3E%3C/svg%3E")
+      top -1px left -1px / 26px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b08a4a' stroke-width='1.2'%3E%3Cpath d='M23 23V9a8 8 0 0 0-8-8H1'/%3E%3Cpath d='M19 13V9a4 4 0 0 0-4-4h-4'/%3E%3Ccircle cx='15' cy='9' r='1.4' fill='%23b08a4a'/%3E%3C/svg%3E")
+      top -1px right -1px / 26px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b08a4a' stroke-width='1.2'%3E%3Cpath d='M1 1v14a8 8 0 0 0 8 8h14'/%3E%3Cpath d='M5 11v4a4 4 0 0 0 4 4h4'/%3E%3Ccircle cx='9' cy='15' r='1.4' fill='%23b08a4a'/%3E%3C/svg%3E")
+      bottom -1px left -1px / 26px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b08a4a' stroke-width='1.2'%3E%3Cpath d='M23 1v14a8 8 0 0 1-8 8H1'/%3E%3Cpath d='M19 11v4a4 4 0 0 1-4 4h-4'/%3E%3Ccircle cx='15' cy='15' r='1.4' fill='%23b08a4a'/%3E%3C/svg%3E")
+      bottom -1px right -1px / 26px no-repeat;
+  box-shadow: inset 0 0 40px rgb(0 0 0 / 0.5);
 }
 .map-canvas,
 .floor-map-canvas {
@@ -257,8 +289,8 @@ body {
 }
 .map-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 14px;
+  right: 14px;
   z-index: 3;
   background: rgb(21 17 14 / 0.75);
   backdrop-filter: blur(6px);
@@ -273,32 +305,155 @@ body {
   gap: 12px;
   padding: 24px;
   text-align: center;
-  background: rgb(11 9 7 / 0.86);
+  background: radial-gradient(ellipse at 50% 45%, rgb(11 9 7 / 0.72), rgb(11 9 7 / 0.94));
 }
 .overlay h2 {
   margin: 0;
-  font: 400 32px/1.1 var(--display);
+  font: 400 clamp(26px, 7cqw, 34px)/1.1 var(--display);
   color: var(--ember);
   text-wrap: balance;
 }
 .overlay p {
   margin: 0;
   max-width: 28ch;
+  text-wrap: balance;
 }
-.overlay.sign {
-  inset: auto 16px 16px;
-  background: var(--bone);
-  color: var(--ink);
-  font: italic 18px/1.35 var(--body);
+/* A plate: an engraved card for pause and finale. */
+.plate {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(100%, 320px);
+  padding: 22px 20px;
   border: 1px solid var(--ink);
-  outline: 1px solid var(--bone);
-  outline-offset: -5px;
+  border-radius: 4px;
+  background: var(--plate);
+  box-shadow:
+    inset 0 0 0 4px #231c17,
+    inset 0 0 0 5px rgb(176 138 74 / 0.35),
+    0 20px 50px rgb(0 0 0 / 0.6);
+}
+.plate-kicker {
+  font-size: 13px;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.18em;
+  color: var(--gilt);
+}
+.souls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.souls li {
+  width: 10px;
+  height: 14px;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  background: var(--stone-light);
+}
+.souls li.lit {
+  background: radial-gradient(circle at 50% 70%, #ffd08a, var(--ember) 60%, var(--lava));
+  box-shadow: 0 0 8px rgb(217 138 54 / 0.7);
+}
+.overlay.pause .ad-slot {
+  margin-top: 4px;
+}
+.overlay.finale h2 {
+  font-size: clamp(28px, 8cqw, 40px);
+}
+/* A sign: a parchment scroll unrolled over the floor. */
+.overlay.sign {
+  inset: auto 14px 14px;
+  z-index: 3;
+  padding: 18px 20px;
+  background:
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgb(120 90 50 / 0.18)),
+    linear-gradient(180deg, #efe3c7, var(--parchment) 40%, #dfcda6);
+  color: #2a1f14;
+  font: italic 18px/1.4 var(--body);
+  border-radius: 3px;
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.55);
+  animation: unroll 260ms ease-out;
+}
+.overlay.sign::before,
+.overlay.sign::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  height: 9px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #b79a6a, #8a6c42 60%, #6c5232);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.4);
+}
+.overlay.sign::before {
+  top: -5px;
+}
+.overlay.sign::after {
+  bottom: -5px;
+}
+.overlay.sign p {
+  max-width: 34ch;
+}
+@keyframes unroll {
+  from {
+    clip-path: inset(48% 0 48% 0);
+  }
+  to {
+    clip-path: inset(-10px -10px -10px -10px);
+  }
 }
 .overlay.connection {
   inset: auto 0 0;
   padding: 8px;
   background: rgb(11 9 7 / 0.9);
   color: var(--ash);
+}
+/* A death: the light reddens and a line is written, then the floor comes back. */
+.death-beat {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgb(120 14 10 / 0.55));
+  animation: death-beat 1700ms ease-out forwards;
+}
+.death-beat p {
+  margin: 0;
+  max-width: 80%;
+  text-align: center;
+  text-wrap: balance;
+  font: 400 clamp(22px, 6cqw, 32px)/1.15 var(--display);
+  color: #f3c6b0;
+  text-shadow: 0 0 18px rgb(160 20 10 / 0.9);
+  animation: death-line 1700ms ease-out forwards;
+}
+@keyframes death-beat {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes death-line {
+  0% {
+    transform: scale(1.06);
+    letter-spacing: 0.12em;
+  }
+  100% {
+    transform: scale(1);
+    letter-spacing: 0.04em;
+  }
 }
 .floor-map {
   position: absolute;
@@ -477,11 +632,34 @@ body {
   width: min(100%, 480px);
   text-align: center;
 }
+.lobby-gate {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  width: min(92vw, 560px);
+  height: auto;
+  transform: translateX(-50%);
+  fill: none;
+  stroke: var(--gilt-dim);
+  stroke-width: 1.2;
+  opacity: 0.32;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to top, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 40%, transparent 100%);
+}
 .lobby-kicker {
   margin: 0;
-  font: 400 12px/1 var(--body);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
+  max-width: 30ch;
+  font: 400 13px/1.4 var(--body);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.22em;
+  color: var(--gilt);
+  text-wrap: balance;
+}
+.lobby-translation {
+  margin: -10px 0 0;
+  font-style: italic;
+  font-size: 13px;
   color: var(--ash);
 }
 .lobby-title {
@@ -591,18 +769,21 @@ body {
   gap: 4px 12px;
   flex-wrap: wrap;
   min-height: 1.5em;
-  font: 14px/1.4 var(--ledger);
+  font: 15px/1.4 var(--body);
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
   color: var(--ash);
 }
 .tally b {
   color: var(--ember);
-  font-weight: 400;
+  font-weight: 700;
+  font-variant-caps: normal;
 }
 .tally-meta {
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Keys: square, inked, with a carved lower edge. */
+/* Keys: engraved stone plates with a carved inner rule; gilt when chosen. */
 .key {
   position: relative;
   display: inline-flex;
@@ -613,18 +794,30 @@ body {
   min-width: 0;
   padding: 0 14px;
   border: 1px solid var(--ink);
-  border-radius: 6px;
-  background: var(--stone);
+  border-radius: 4px;
+  background: var(--plate);
+  color: var(--bone);
   box-shadow:
-    inset 0 1px 0 var(--stone-light),
-    0 3px 0 var(--ink);
+    inset 0 1px 0 rgb(255 235 200 / 0.07),
+    0 3px 0 var(--ink),
+    0 6px 14px rgb(0 0 0 / 0.35);
   cursor: pointer;
   touch-action: manipulation;
   transition:
     transform 80ms ease-out,
-    box-shadow 80ms ease-out,
-    background-color 150ms ease-out;
+    box-shadow 120ms ease-out,
+    filter 150ms ease-out;
   -webkit-tap-highlight-color: transparent;
+}
+/* The carved inner rule. */
+.key::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgb(176 138 74 / 0.14);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: border-color 150ms ease-out;
 }
 .key .icon {
   flex: none;
@@ -636,48 +829,78 @@ body {
 }
 @media (hover: hover) {
   .key:hover:not(:disabled) {
-    background: var(--stone-light);
+    filter: brightness(1.18);
+  }
+  .key:hover:not(:disabled)::before {
+    border-color: rgb(176 138 74 / 0.32);
   }
 }
 .key:active:not(:disabled) {
   transform: translateY(2px);
   box-shadow:
-    inset 0 1px 0 var(--stone-light),
+    inset 0 1px 0 rgb(255 235 200 / 0.07),
     0 1px 0 var(--ink);
 }
+/* Waiting (you have voted, or the game is paused): the plates rest, dimmed. */
 .key:disabled {
-  opacity: 0.45;
   cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow:
+    inset 0 1px 0 rgb(255 235 200 / 0.05),
+    0 2px 0 var(--ink);
+}
+/* Unavailable (nothing to jump, nothing to use): a hatched, unlit plate. */
+.key.unavailable {
+  opacity: 1;
+  color: color-mix(in srgb, var(--ash) 65%, transparent);
+  background: repeating-linear-gradient(135deg, #211b17 0 4px, #1b1613 4px 8px);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.4);
+}
+.key.unavailable::before {
+  border-color: rgb(176 138 74 / 0.06);
 }
 .key.primary {
-  background: var(--ember);
+  background: linear-gradient(180deg, #e8a456, #d98a36 55%, #c0752a);
   color: var(--ink);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    0 3px 0 var(--ink);
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    0 3px 0 #4a2a10,
+    0 8px 20px rgb(217 138 54 / 0.25);
 }
-@media (hover: hover) {
-  .key.primary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--ember) 85%, white);
-  }
+.key.primary::before {
+  border-color: rgb(11 9 7 / 0.22);
+}
+.key.primary:disabled {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2),
+    0 2px 0 #4a2a10;
 }
 /* Your vote: lit at once, before the server answers. */
-.key.chosen {
-  outline: 2px solid var(--ember);
-  outline-offset: 2px;
+.key.chosen,
+.key.chosen:disabled {
   opacity: 1;
+  color: var(--bone);
+  background: var(--plate);
   box-shadow:
     0 0 0 1px var(--ink),
-    0 0 18px rgb(217 138 54 / 0.45);
+    0 0 0 3px var(--gilt),
+    0 0 22px rgb(217 138 54 / 0.45);
+}
+.key.chosen::before {
+  border-color: rgb(176 138 74 / 0.6);
+}
+.key.primary.chosen {
+  color: var(--ink);
+  background: linear-gradient(180deg, #e8a456, #d98a36 55%, #c0752a);
 }
 /* The crowd's lean: an ember bar along the key's lower edge. */
 .key::after {
   content: "";
   position: absolute;
-  left: 4px;
-  bottom: 3px;
+  left: 5px;
+  bottom: 4px;
   height: 3px;
-  width: calc((100% - 8px) * var(--share, 0));
+  width: calc((100% - 10px) * var(--share, 0));
   border-radius: 2px;
   background: linear-gradient(90deg, var(--lava), var(--ember));
   box-shadow: 0 0 8px rgb(217 138 54 / 0.6);
@@ -688,11 +911,11 @@ body {
   background: var(--ink);
   box-shadow: none;
 }
-.key.lead {
+.key.lead:not(.chosen) {
   box-shadow:
-    inset 0 1px 0 var(--stone-light),
+    inset 0 1px 0 rgb(255 235 200 / 0.07),
     0 3px 0 var(--ink),
-    0 0 14px rgb(217 138 54 / 0.35);
+    0 0 16px rgb(217 138 54 / 0.35);
 }
 /* Overruled: your key flinches when the crowd went another way. */
 .key.overruled {
@@ -1074,28 +1297,50 @@ input:focus-visible {
   margin: 0;
   padding: 0;
   list-style: none;
-  font: 14px/1.6 var(--ledger);
+  font: 15px/1.5 var(--body);
 }
 .log li {
   display: flex;
+  align-items: baseline;
   gap: 12px;
+  padding: 5px 2px;
+  border-bottom: 1px dotted rgb(59 50 43 / 0.9);
 }
 .turn-no {
-  min-width: 4ch;
+  min-width: 3.5ch;
   text-align: right;
+  font-style: italic;
   color: var(--ash);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: oldstyle-nums tabular-nums;
+}
+.log-entry {
+  min-width: 0;
+}
+.log-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.log-act .icon {
+  color: var(--gilt);
 }
 .log .bad {
-  color: var(--lava);
+  color: #e07a5f;
 }
 .log .good {
   color: var(--verdigris);
 }
 .sign-text {
   display: block;
+  margin-top: 2px;
   font-style: italic;
-  color: var(--bone);
+  color: var(--parchment);
+}
+.empty {
+  margin: 0;
+  padding: 24px 8px;
+  text-align: center;
+  font-style: italic;
 }
 .chat {
   display: grid;
@@ -1104,14 +1349,28 @@ input:focus-visible {
   height: 100%;
 }
 .chat-list {
+  display: grid;
+  align-content: start;
+  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
   overflow-y: auto;
 }
+.chat-list li {
+  padding: 6px 8px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.chat-list li:nth-child(odd) {
+  background: rgb(43 36 31 / 0.45);
+}
 .chat-list b {
+  margin-right: 6px;
   color: var(--ember);
   font-weight: 700;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
 }
 .chat-form {
   display: flex;
@@ -1160,6 +1419,8 @@ input:focus-visible {
   .fuse-halo,
   .lobby-embers span,
   .lobby-dot,
+  .death-beat p,
+  .overlay.sign,
   .descent-card,
   .descent-rule {
     animation: none;

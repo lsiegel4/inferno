@@ -46,8 +46,18 @@ export function Lobby({
           <span key={i} style={{ "--i": i } as CSSProperties} />
         ))}
       </div>
+      <svg className="lobby-gate" viewBox="0 0 300 420" aria-hidden="true">
+        {/* A pointed gate carved in the dark, its arch stones and threshold. */}
+        <path d="M30 420V190C30 95 90 40 150 14c60 26 120 81 120 176v230" />
+        <path d="M58 420V196c0-78 46-124 92-148 46 24 92 70 92 148v224" />
+        <path d="M150 14v34" />
+        <path d="M10 420h280" />
+      </svg>
       <div className="lobby-card">
-        <p className="lobby-kicker">Abandon all hope</p>
+        <p className="lobby-kicker" lang="it">
+          Lasciate ogne speranza, voi ch&rsquo;intrate
+        </p>
+        <p className="lobby-translation">Abandon all hope, ye who enter here</p>
         <h1 id="lobby-title" className="lobby-title">
           Inferno
         </h1>

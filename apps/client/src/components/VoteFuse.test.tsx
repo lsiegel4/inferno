@@ -65,3 +65,25 @@ describe("FloorTransition", () => {
     expect(screen.getByText("You enter")).toBeTruthy();
   });
 });
+
+describe("DeathBeat", () => {
+  it("writes a line when the last turn killed the hero, and nothing otherwise", async () => {
+    const { DeathBeat } = await import("./DeathBeat.js");
+    const turn = (outcome?: "died"): ServerMessage => ({
+      v: PROTOCOL_VERSION,
+      type: "turn",
+      data: {
+        turn: 4,
+        action: { kind: "wait" },
+        hero: { x: 2, y: 1, facing: "up" },
+        canJump: false,
+        changes: [],
+        ...(outcome ? { outcome } : {}),
+      },
+    });
+    const { container, rerender } = render(<DeathBeat view={viewFrom(welcome(), turn())} />);
+    expect(container.querySelector(".death-beat")).toBeNull();
+    rerender(<DeathBeat view={viewFrom(welcome(), turn("died"))} />);
+    expect(container.querySelector(".death-beat p")?.textContent).toMatch(/hero|Darkness/);
+  });
+});

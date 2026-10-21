@@ -6,30 +6,34 @@
 import type { Entity, FloorState, Hero } from "@inferno/shared";
 import { drawAtmosphere } from "./atmosphere.js";
 
+/**
+ * The Manuscript palette, shared with the interface: the colours marked "token" are the same as
+ * the custom properties of the same role in styles.css (a test keeps them in step).
+ */
 export const PALETTE = {
-  void: "#050303",
-  wallTop: "#3d2f29",
-  wallFace: "#170f0c",
-  wallEdge: "#54423a",
-  floorA: "#221a16",
-  floorB: "#1f1714",
-  grout: "#110b09",
-  lavaDeep: "#7a1606",
-  lava: "#d9420f",
-  lavaHot: "#ffb03a",
-  ice: "#9cc6d9",
-  iceDeep: "#5f8fa8",
-  ember: "#f0a23b",
-  bone: "#eadcc6",
-  blood: "#a3121c",
-  wood: "#5a3f2a",
-  woodDark: "#3a2717",
+  void: "#0b0907", // token --ink
+  wallTop: "#3b322b", // token --stone-light
+  wallFace: "#18130f",
+  wallEdge: "#4f433a",
+  floorA: "#211b17", // token --floor
+  floorB: "#1d1814",
+  grout: "#100c0a",
+  lavaDeep: "#6e1a08",
+  lava: "#c4462b", // token --lava
+  lavaHot: "#f0a04a",
+  ice: "#a9c4cc",
+  iceDeep: "#6a8f9a",
+  ember: "#d98a36", // token --ember
+  bone: "#e6d9c0", // token --bone
+  blood: "#9a2a1e",
+  wood: "#5a4030",
+  woodDark: "#3a2a1c",
   iron: "#6b6560",
-  stone: "#8a8178",
-  stoneDark: "#4d4641",
-  violet: "#a77cff",
-  teal: "#3fd1c2",
-  gold: "#e8c25a",
+  stone: "#8a8074",
+  stoneDark: "#4d453e",
+  violet: "#9b85d6",
+  teal: "#6e9784", // token --verdigris
+  gold: "#d4a94e",
 };
 
 export interface SceneView {

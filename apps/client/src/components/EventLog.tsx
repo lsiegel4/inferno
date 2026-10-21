@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { describeAction } from "../game/interact.js";
 import type { LogEntry } from "../game/store.js";
+import { actionIcon, Icon } from "./Icon.js";
 
 const OUTCOMES: Record<string, string> = {
   died: "the hero died",
@@ -13,6 +14,13 @@ const OUTCOMES: Record<string, string> = {
 export function describeEntry(e: LogEntry): string {
   const outcome = e.outcome ? ` · ${OUTCOMES[e.outcome] ?? e.outcome}` : "";
   return `${describeAction(e.action)}${outcome}`;
+}
+
+/** The turn in words, for the record ("down", "interact · the hero died"). */
+export function entryWords(e: LogEntry): string {
+  const outcome = e.outcome ? ` · ${OUTCOMES[e.outcome] ?? e.outcome}` : "";
+  const a = e.action;
+  return `${a.kind === "move" ? a.dir : a.kind === "use" ? `use ${a.itemId}` : a.kind}${outcome}`;
 }
 
 /** Hero turns, without player names (game design §9.3). */
@@ -43,8 +51,11 @@ export function EventLog({ log }: { log: LogEntry[] }) {
           className={e.outcome === "died" ? "bad" : e.outcome === "floor_up" ? "good" : ""}
         >
           <span className="turn-no">{e.turn}</span>
-          <span>
-            {describeEntry(e)}
+          <span className="log-entry">
+            <span className="log-act">
+              <Icon name={actionIcon(e.action)} size={16} />
+              <span>{entryWords(e)}</span>
+            </span>
             {e.sign && <q className="sign-text">{e.sign}</q>}
           </span>
         </li>

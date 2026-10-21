@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Account } from "./components/Account.js";
 import { Chat } from "./components/Chat.js";
 import { Controls } from "./components/Controls.js";
+import { DeathBeat } from "./components/DeathBeat.js";
 import { EventLog } from "./components/EventLog.js";
 import { FloorMap } from "./components/FloorMap.js";
 import { FloorTransition } from "./components/FloorTransition.js";
@@ -101,6 +102,7 @@ export function App() {
         <section className="map-area" aria-label="The dungeon">
           <div className="map-frame">
             <MapView view={view} />
+            <span className="frame-ornament" aria-hidden="true" />
             <button
               type="button"
               className="topbar-button map-button"
@@ -112,12 +114,18 @@ export function App() {
             </button>
             {mapOpen && <FloorMap view={view} onClose={() => setMapOpen(false)} />}
             {entered && <FloorTransition view={view} />}
+            <DeathBeat view={view} />
             <SignOverlay view={view} />
             <PauseOverlay view={view} onReady={game.ready} />
             {view.gameOver && (
-              <div className="overlay" role="status">
-                <h2>The descent is complete</h2>
-                <p>The crowd reached the bottom of the Inferno.</p>
+              <div className="overlay finale" role="status">
+                <div className="plate">
+                  <p className="plate-kicker">E quindi uscimmo a riveder le stelle</p>
+                  <h2>The descent is complete</h2>
+                  <p>
+                    The crowd reached the bottom of the Inferno, and climbed out to see the stars.
+                  </p>
+                </div>
               </div>
             )}
             {game.status !== "open" && (

@@ -14,8 +14,8 @@ describe("EventLog", () => {
         ]}
       />,
     );
-    expect(screen.getByText("↑")).toBeTruthy();
-    expect(screen.getByText("→ · the hero died")).toBeTruthy();
+    expect(screen.getByText("up")).toBeTruthy();
+    expect(screen.getByText("right · the hero died")).toBeTruthy();
     expect(screen.getByText("Mind the gap")).toBeTruthy();
   });
 });
