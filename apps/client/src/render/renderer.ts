@@ -5,6 +5,7 @@
  */
 import type { Entity, FloorState, Hero } from "@inferno/shared";
 import { drawAtmosphere } from "./atmosphere.js";
+import { artStyle, engravedEntity, engravedHero, engravedTerrain } from "./engraved.js";
 
 /**
  * The Manuscript palette, shared with the interface: the colours marked "token" are the same as
@@ -110,7 +111,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: SceneView, w: number
     })[e.kind] ?? 5;
   for (const e of [...floor.entities].sort((a, b) => order(a) - order(b))) {
     if (e.state?.hidden === true) continue;
-    drawEntity(ctx, e, px(e.x), py(e.y), ts, v.time, v.hero);
+    drawEntity(ctx, e, px(e.x), py(e.y), ts, v.time, v.hero, floor.index);
   }
   for (const e of v.xray) {
     ctx.save();
@@ -198,6 +199,7 @@ function drawTerrain(
     const c = rows[yy]?.[xx];
     return c && c !== " " ? c : remembered.get(key(xx, yy));
   };
+  if (artStyle() === "engraved" && engravedTerrain(ctx, ch, x, y, sx, sy, ts, t, at)) return;
   switch (ch) {
     case "#": {
       ctx.fillStyle = PALETTE.wallFace;
@@ -442,12 +444,18 @@ export function drawEntity(
   t: number,
   /** Where the hero stands (watchers' eyes follow it). */
   hero?: { x: number; y: number },
+  /** The floor's circle (index): enemies are drawn as that circle's creatures. */
+  circle = 0,
 ) {
   const s = e.state ?? {};
   const cx = sx + ts / 2,
     cy = sy + ts / 2;
   const lw = Math.max(1, ts / 16);
   ctx.lineWidth = lw;
+  if (artStyle() === "engraved" && engravedEntity(ctx, e, sx, sy, ts, t, circle)) {
+    if (e.kind === "patrol") patrolFootprint(ctx, e, cx, cy, ts, t);
+    return;
+  }
   switch (e.kind) {
     case "door": {
       if (s.open) {
@@ -604,32 +612,7 @@ export function drawEntity(
       ctx.fillStyle = PALETTE.lavaHot;
       ctx.fillRect(cx - ts * 0.13, cy - ts * 0.04 + bob, ts * 0.08, ts * 0.06);
       ctx.fillRect(cx + ts * 0.05, cy - ts * 0.04 + bob, ts * 0.08, ts * 0.06);
-      if (typeof s.next === "string" && s.next !== "wait") {
-        // Where it will tread next: a faint scorch on that tile, breathing with its stride.
-        const n = s.next;
-        const fx = cx + DX(n) * ts,
-          fy = cy + DY(n) * ts;
-        const pulse = 0.5 + 0.5 * Math.sin(t / 220 + e.x + e.y);
-        const scorch = ctx.createRadialGradient(fx, fy, 0, fx, fy, ts * 0.42);
-        scorch.addColorStop(0, `rgba(170,30,20,${0.22 + 0.12 * pulse})`);
-        scorch.addColorStop(1, "rgba(170,30,20,0)");
-        ctx.fillStyle = scorch;
-        ctx.fillRect(fx - ts / 2, fy - ts / 2, ts, ts);
-        // Two claw marks, turned the way it is heading.
-        ctx.save();
-        ctx.translate(fx, fy);
-        ctx.rotate(Math.atan2(DY(n), DX(n)) + Math.PI / 2);
-        ctx.strokeStyle = `rgba(40,6,4,${0.35 + 0.2 * pulse})`;
-        ctx.lineWidth = Math.max(1, ts / 22);
-        ctx.lineCap = "round";
-        for (const ox of [-0.09, 0.09]) {
-          ctx.beginPath();
-          ctx.moveTo(ts * ox, ts * 0.12);
-          ctx.lineTo(ts * ox * 1.2, -ts * 0.1);
-          ctx.stroke();
-        }
-        ctx.restore();
-      }
+      patrolFootprint(ctx, e, cx, cy, ts, t);
       return;
     }
     case "echo": {
@@ -1009,6 +992,18 @@ function drawHero(
 ) {
   const cx = sx + ts / 2,
     cy = sy + ts / 2;
+  if (artStyle() === "engraved") {
+    engravedHero(ctx, hero, sx, sy, ts, t);
+    arrow(
+      ctx,
+      cx + DX(hero.facing) * ts * 0.44,
+      cy + DY(hero.facing) * ts * 0.44,
+      hero.facing,
+      ts * 0.1,
+      PALETTE.ember,
+    );
+    return;
+  }
   glow(ctx, cx, cy, ts * 0.8, "rgba(234,220,198,0.18)");
   const breathe = Math.sin(t / 500) * ts * 0.01;
   drawFigure(ctx, cx, cy + breathe, ts, PALETTE.bone, "rgba(0,0,0,0.5)");
@@ -1022,4 +1017,42 @@ function drawHero(
     ts * 0.11,
     PALETTE.ember,
   );
+}
+
+/** Where a patrol will tread next: a faint scorch on that tile, breathing with its stride. */
+function patrolFootprint(
+  ctx: CanvasRenderingContext2D,
+  e: Entity,
+  cx: number,
+  cy: number,
+  ts: number,
+  t: number,
+) {
+  const s = e.state ?? {};
+  if (typeof s.next === "string" && s.next !== "wait") {
+    // Where it will tread next: a faint scorch on that tile, breathing with its stride.
+    const n = s.next;
+    const fx = cx + DX(n) * ts,
+      fy = cy + DY(n) * ts;
+    const pulse = 0.5 + 0.5 * Math.sin(t / 220 + e.x + e.y);
+    const scorch = ctx.createRadialGradient(fx, fy, 0, fx, fy, ts * 0.42);
+    scorch.addColorStop(0, `rgba(170,30,20,${0.22 + 0.12 * pulse})`);
+    scorch.addColorStop(1, "rgba(170,30,20,0)");
+    ctx.fillStyle = scorch;
+    ctx.fillRect(fx - ts / 2, fy - ts / 2, ts, ts);
+    // Two claw marks, turned the way it is heading.
+    ctx.save();
+    ctx.translate(fx, fy);
+    ctx.rotate(Math.atan2(DY(n), DX(n)) + Math.PI / 2);
+    ctx.strokeStyle = `rgba(40,6,4,${0.35 + 0.2 * pulse})`;
+    ctx.lineWidth = Math.max(1, ts / 22);
+    ctx.lineCap = "round";
+    for (const ox of [-0.09, 0.09]) {
+      ctx.beginPath();
+      ctx.moveTo(ts * ox, ts * 0.12);
+      ctx.lineTo(ts * ox * 1.2, -ts * 0.1);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
 }
