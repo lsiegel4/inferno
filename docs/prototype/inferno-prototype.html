@@ -1,0 +1,1043 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inferno Floor 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+15&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: one portrait game column (map → controls → log/chat); on wide screens log/chat moves to a side column.
+     Single dark theme by choice: a lit dungeon on basalt. */
+  :root {
+    color-scheme: dark;
+    --basalt: #14100e;
+    --stone: #2b231f;
+    --stone-hi: #3d322c;
+    --floor: #221b18;
+    --bone: #eadcc6;
+    --ash: #9a8b7c;
+    --ember: #f0a23b;
+    --lava: #e4572e;
+    --moss: #7fae6a;
+    --display: "Jersey 15", "Courier New", monospace;
+    --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --r: 6px;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--basalt);
+    color: var(--bone);
+    font: 15px/1.45 var(--body);
+    padding-inline: 16px;
+    padding-block: 12px 20px;
+    box-sizing: border-box;
+  }
+  .app {
+    max-width: 920px;
+    margin: 0 auto;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 860px) {
+    .app { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); align-items: start; }
+  }
+  .game { display: grid; gap: 12px; max-width: 440px; width: 100%; margin: 0 auto; }
+
+  header { display: grid; gap: 6px; }
+  .title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 {
+    font: 400 40px/1 var(--display);
+    letter-spacing: 0.04em;
+    margin: 0;
+    color: var(--ember);
+    text-shadow: 0 0 18px rgba(240, 162, 59, 0.35);
+  }
+  .floor-tag { font: 400 22px/1 var(--display); color: var(--bone); letter-spacing: 0.06em; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font: 600 11px/1 var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: var(--stone);
+    color: var(--ash);
+    font-variant-numeric: tabular-nums;
+  }
+  .chip b { color: var(--bone); font-weight: 600; }
+  .chip.mode { color: var(--basalt); background: var(--ember); }
+
+  .map-wrap {
+    position: relative;
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: 0 0 0 2px var(--stone), 0 12px 40px rgba(0,0,0,0.5);
+    aspect-ratio: 9 / 13;
+    max-width: 100%;
+    background: var(--basalt);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+  .overlay {
+    position: absolute; inset: 0;
+    display: grid; place-content: center; gap: 12px;
+    text-align: center;
+    background: rgba(20, 16, 14, 0.82);
+    padding: 24px;
+  }
+  .overlay h2 { font: 400 40px/1 var(--display); margin: 0; color: var(--ember); letter-spacing: 0.04em; }
+  .overlay p { margin: 0; color: var(--ash); }
+
+  .status {
+    display: flex; justify-content: space-between; gap: 12px;
+    font: 12px/1.3 var(--mono); color: var(--ash);
+    font-variant-numeric: tabular-nums;
+    min-height: 1.3em;
+  }
+  .status .msg { color: var(--ember); }
+
+  /* Controls: D-pad left, actions right */
+  .controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: center;
+    position: relative;
+  }
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(3, 56px);
+    gap: 4px;
+  }
+  .actions { display: grid; gap: 8px; justify-items: stretch; }
+  button {
+    font: inherit;
+    color: var(--bone);
+    background: var(--stone);
+    border: 0;
+    border-radius: var(--r);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.35), inset 0 1px 0 var(--stone-hi);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 -1px 0 rgba(0,0,0,0.35); }
+  button:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+  button:disabled { cursor: not-allowed; opacity: 0.45; }
+  .dpad button { font: 400 26px/1 var(--display); }
+  .dpad .up { grid-column: 2; grid-row: 1; }
+  .dpad .left { grid-column: 1; grid-row: 2; }
+  .dpad .right { grid-column: 3; grid-row: 2; }
+  .dpad .down { grid-column: 2; grid-row: 3; }
+  .dpad .hub { grid-column: 2; grid-row: 2; border-radius: 50%; background: var(--floor); box-shadow: none; }
+  .act {
+    height: 52px;
+    font: 400 22px/1 var(--display);
+    letter-spacing: 0.06em;
+  }
+  .act.primary { background: var(--ember); color: var(--basalt); box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25); }
+  .act.primary:disabled { background: var(--stone); color: var(--ash); }
+  .act small { font: 11px/1 var(--mono); letter-spacing: 0.04em; opacity: 0.7; margin-left: 6px; }
+  .cooldown {
+    height: 4px; border-radius: 2px; background: var(--stone); overflow: hidden;
+  }
+  .cooldown span { display: block; height: 100%; width: 100%; background: var(--ember); transform-origin: left; transform: scaleX(0); }
+  .hint { font: 11px/1.4 var(--mono); color: var(--ash); }
+
+  /* Log / chat panel */
+  .panel {
+    background: var(--floor);
+    border-radius: var(--r);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 320px;
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  @media (min-width: 860px) { .panel { height: 640px; max-width: none; } }
+  .tabs { display: flex; gap: 4px; padding: 6px; border-bottom: 1px solid var(--stone); }
+  .tab {
+    flex: 1;
+    padding: 8px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ash);
+    font: 400 20px/1 var(--display);
+    letter-spacing: 0.06em;
+  }
+  .tab[aria-selected="true"] { background: var(--stone); color: var(--bone); }
+  .feed {
+    overflow-y: auto;
+    padding: 10px 12px;
+    font: 13px/1.5 var(--mono);
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .feed .row { display: flex; gap: 10px; }
+  .feed .t { color: var(--ash); min-width: 3.5ch; text-align: right; font-variant-numeric: tabular-nums; }
+  .feed .died { color: var(--lava); }
+  .feed .good { color: var(--moss); }
+  .feed .who { color: var(--ember); }
+  .feed .empty { color: var(--ash); }
+  .chat-form { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--stone); }
+  .chat-form input {
+    flex: 1; min-width: 0;
+    font: 14px var(--body);
+    color: var(--bone);
+    background: var(--basalt);
+    border: 1px solid var(--stone);
+    border-radius: var(--r);
+    padding: 8px 10px;
+  }
+  .chat-form input:focus-visible { outline: 2px solid var(--ember); outline-offset: 1px; }
+  .chat-form button { padding: 0 14px; font: 400 18px/1 var(--display); letter-spacing: 0.06em; }
+  .sim {
+    display: grid; gap: 8px;
+    padding: 12px;
+    background: var(--floor);
+    border-radius: var(--r);
+  }
+  .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch .track {
+    width: 40px; height: 22px; border-radius: 999px; background: var(--stone);
+    position: relative; flex: none; transition: background 0.15s;
+  }
+  .switch .track::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--ash); transition: transform 0.15s, background 0.15s;
+  }
+  .switch input:checked + .track { background: var(--ember); }
+  .switch input:checked + .track::after { transform: translateX(18px); background: var(--basalt); }
+  .switch input:focus-visible + .track { outline: 2px solid var(--ember); outline-offset: 2px; }
+  .bot-row { display: flex; align-items: center; gap: 12px; font: 12px var(--mono); color: var(--ash); }
+  .bot-row b { color: var(--bone); font-variant-numeric: tabular-nums; display: inline-block; min-width: 2ch; }
+  .bot-row input { flex: 1; min-width: 0; accent-color: var(--ember); }
+  .bot-row select {
+    font: 12px var(--mono); color: var(--bone); background: var(--basalt);
+    border: 1px solid var(--stone); border-radius: var(--r); padding: 4px 6px;
+  }
+  .bot-row select:focus-visible { outline: 2px solid var(--ember); outline-offset: 1px; }
+  .bot-row.off { opacity: 0.45; }
+  .map-btn {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    padding: 6px 10px;
+    font: 400 18px/1 var(--display); letter-spacing: 0.06em;
+    background: rgba(20, 16, 14, 0.8);
+  }
+  .map-btn small { font: 10px/1 var(--mono); opacity: 0.6; margin-left: 4px; }
+  .map-btn[aria-expanded="true"] { background: var(--ember); color: var(--basalt); }
+  .floor-map {
+    position: absolute; inset: 0; z-index: 1;
+    background: rgba(10, 8, 7, 0.94);
+    display: grid; grid-template-rows: 1fr auto; gap: 8px;
+    padding: 44px 12px 12px;
+  }
+  .floor-map canvas { width: 100%; height: 100%; min-height: 0; }
+  .floor-map-note { margin: 0; text-align: center; font: 11px/1.3 var(--mono); color: var(--ash); }
+  .proto-note { font: 11px/1.4 var(--mono); color: var(--ash); text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    button:active:not(:disabled) { transform: none; }
+  }
+  .seg { display: inline-flex; background: var(--basalt); border: 1px solid var(--stone); border-radius: 999px; padding: 2px; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg label {
+    font: 600 11px/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 6px 10px; border-radius: 999px; color: var(--ash); cursor: pointer;
+  }
+  .seg input:checked + label { background: var(--ember); color: var(--basalt); }
+  .seg input:focus-visible + label { outline: 2px solid var(--ember); outline-offset: 1px; }
+  .setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 700; }
+  .setting.off { opacity: 0.45; }
+  .sim h3 { margin: 0; font: 400 20px/1 var(--display); letter-spacing: 0.06em; color: var(--ash); }
+  .sim hr { border: 0; border-top: 1px solid var(--stone); margin: 2px 0; width: 100%; }
+  .tally {
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    font: 12px/1.3 var(--mono); color: var(--ash); font-variant-numeric: tabular-nums;
+  }
+  .tally .counts { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tally .counts b { color: var(--bone); font-weight: 600; }
+  .tally .counts .lead b { color: var(--ember); }
+  .status .msg.good { color: var(--moss); }
+  .status .msg.meh { color: var(--ash); }
+</style>
+
+<div class="app">
+  <div class="game">
+    <header>
+      <div class="title-row">
+        <h1>INFERNO</h1>
+        <span class="floor-tag">FLOOR 1</span>
+      </div>
+      <div class="chips">
+        <span class="chip mode" id="modeChip">Anarchy</span>
+        <span class="chip"><b id="playingCount">1</b> playing · <b>0</b> watching</span>
+        <span class="chip">Min <b>1</b></span>
+        <span class="chip">Turn <b id="turnChip">0</b></span>
+      </div>
+    </header>
+
+    <div class="map-wrap" id="mapWrap">
+      <canvas id="map" aria-label="Dungeon map"></canvas>
+      <button class="map-btn" id="mapBtn" type="button" aria-expanded="false" aria-controls="floorMap">Map <small>M</small></button>
+      <div class="floor-map" id="floorMap" hidden>
+        <canvas id="floorMapCanvas" aria-label="Explored floor map"></canvas>
+        <p class="floor-map-note"><span id="exploredPct">0</span>% explored · press M or Esc to close</p>
+      </div>
+      <div class="overlay" id="winOverlay" hidden>
+        <h2>FLOOR CLEARED</h2>
+        <p id="winStats"></p>
+        <button class="act primary" id="restartBtn" type="button">Play again</button>
+      </div>
+    </div>
+
+    <div class="tally" id="tally" hidden>
+      <span class="counts" id="tallyCounts"></span>
+      <span id="tallyTimer"></span>
+    </div>
+
+    <div class="status">
+      <span id="statusLeft">Facing up</span>
+      <span class="msg" id="statusMsg" aria-live="polite"></span>
+    </div>
+
+    <div class="controls">
+      <div class="dpad" role="group" aria-label="Move">
+        <button class="up" data-dir="up" type="button" aria-label="Move up">▲</button>
+        <button class="left" data-dir="left" type="button" aria-label="Move left">◀</button>
+        <span class="hub" aria-hidden="true"></span>
+        <button class="right" data-dir="right" type="button" aria-label="Move right">▶</button>
+        <button class="down" data-dir="down" type="button" aria-label="Move down">▼</button>
+      </div>
+      <div class="actions">
+        <button class="act primary" id="interactBtn" type="button">Interact</button>
+        <button class="act" id="jumpBtn" type="button">Jump</button>
+        <button class="act" id="useBtn" type="button" disabled>Use <small>no items</small></button>
+        <div class="cooldown" aria-hidden="true"><span id="cdBar"></span></div>
+        <div class="hint" id="rateHint">1 action / sec · Arrows/WASD, Space jump, E interact</div>
+      </div>
+    </div>
+
+    <div class="sim">
+      <h3>PLAYTEST SETTINGS</h3>
+      <label class="switch" for="simToggle">
+        <input type="checkbox" id="simToggle">
+        <span class="track" aria-hidden="true"></span>
+        <span>Simulate other players</span>
+      </label>
+      <div class="bot-row off" id="botRow">
+        <label for="simCount">Bots <b id="botCount">10</b></label>
+        <input type="range" id="simCount" min="1" max="50" value="10">
+      </div>
+      <hr>
+      <div class="setting">
+        <span>Mode</span>
+        <div class="seg" role="radiogroup" aria-label="Mode">
+          <input type="radio" name="mode" id="modeAnarchy" value="anarchy"><label for="modeAnarchy">Anarchy</label>
+          <input type="radio" name="mode" id="modeDemocracy" value="democracy" checked><label for="modeDemocracy">Democracy</label>
+        </div>
+      </div>
+      <div class="setting" id="pickRow">
+        <span>Anarchy pick</span>
+        <div class="seg" role="radiogroup" aria-label="Anarchy pick">
+          <input type="radio" name="pick" id="pickRandom" value="random" checked><label for="pickRandom">Random</label>
+          <input type="radio" name="pick" id="pickPlurality" value="plurality"><label for="pickPlurality">Plurality</label>
+        </div>
+      </div>
+      <div class="bot-row" id="speedRow">
+        <label for="simSpeed">Hero speed (anarchy)</label>
+        <select id="simSpeed">
+          <option value="1" selected>1 turn / sec</option>
+          <option value="2">2 turns / sec</option>
+          <option value="3">3 turns / sec</option>
+        </select>
+      </div>
+      <label class="switch" for="crowdToggle">
+        <input type="checkbox" id="crowdToggle">
+        <span class="track" aria-hidden="true"></span>
+        <span>Show the crowd's presses</span>
+      </label>
+      <label class="switch" for="feedbackToggle">
+        <input type="checkbox" id="feedbackToggle">
+        <span class="track" aria-hidden="true"></span>
+        <span>Tell me when my press is picked</span>
+      </label>
+      <p class="hint">Random: one press is drawn from the window. Plurality: the most-pressed action wins (ties drawn at random). Democracy: one vote per player per 3 s tick; the top vote wins; no votes means no turn. Invalid presses never count.</p>
+    </div>
+  </div>
+
+  <section class="panel" aria-label="Event log and chat">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabLog" aria-selected="true" type="button">Event log</button>
+      <button class="tab" role="tab" id="tabChat" aria-selected="false" type="button">Chat</button>
+    </div>
+    <div class="feed" id="logFeed" role="log"></div>
+    <div class="feed" id="chatFeed" role="log" hidden></div>
+    <form class="chat-form" id="chatForm" hidden>
+      <input id="chatInput" maxlength="200" autocomplete="off" placeholder="Say something to the crowd">
+      <button type="submit">Send</button>
+    </form>
+  </section>
+</div>
+<p class="proto-note">Prototype · nothing is sent anywhere · bots are simulated in your browser</p>
+
+<script>
+(() => {
+  // --- Floor definition -------------------------------------------------
+  // #: wall  .: floor  L: lava  S: start  U: stairs up
+  // a-z: lever, opens the door with the matching capital letter (A-Z, except L/S/U)
+  const MAP_ID = "floor-big";
+  const FLOOR = [
+    "#########################",
+    "#U#.......#.............#",
+    "#.#.LLLLL.#.LLLLLLLLLLL.#",
+    "#C#.L...L.#.L.........L.#",
+    "#.#.L.c.L...L.LLLLLLL.L.#",
+    "#.#.L...LLLLL.L.....L.L.#",
+    "#.#.LL.LL.....L.LLL.L...#",
+    "#.#...........L.L.L.LLLL#",
+    "#.#############.L.L.....#",
+    "#...............L.#####.#",
+    "###############.L.....#.#",
+    "#.......#.......LLLLL.#.#",
+    "#.LLLLL.#.............#.#",
+    "#.L...L.#######B#########",
+    "#.L.b.L.................#",
+    "#.LL.LL.LLLLLLLLLLLLLLLL#",
+    "#.......................#",
+    "#LLLLLLLLLLLLLLLLLLLLLL.#",
+    "#.......................#",
+    "#############A###########",
+    "#.#.....................#",
+    "#.#.LLLLLLLLLLLLLLLLLLL.#",
+    "#.#.L.................L.#",
+    "#...L.##############..L.#",
+    "#####.#............#..L.#",
+    "#.....#.LLLLLLLLLL.#.LL.#",
+    "#.LLL.#.L........L.#..a.#",
+    "#.L.L...L.LLLLLL.L.######",
+    "#.L.L.###L......L.......#",
+    "#S..L....L.LLLL.L.L.L.L.#",
+    "#########################",
+  ];
+  // The camera shows a 9 x 13 window and follows the hero.
+  const VIEW_W = 9, VIEW_H = 13;
+  const W = FLOOR[0].length, H = FLOOR.length;
+  const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  const ARROW = { up: "↑", down: "↓", left: "←", right: "→" };
+  const COOLDOWN_MS = 1000;
+  const DEMOCRACY_TICK_MS = 3000;
+
+  let start;
+  FLOOR.forEach((row, y) => [...row].forEach((c, x) => { if (c === "S") start = { x, y }; }));
+
+  const fresh = () => ({
+    hero: { x: start.x, y: start.y, facing: "up" },
+    mapId: MAP_ID,
+    pulled: {},          // lever letter -> true; its door is open
+    turn: 0,
+    deaths: 0,
+    won: false,
+    log: [],
+    chat: [],
+    lastAction: 0,
+    votedEnd: 0,
+    lastVoteAt: 0,
+    explored: [],        // tile indices the camera has shown (fog of war for the floor map)
+  });
+  let S = fresh();
+
+  const CFG = { mode: "democracy", pick: "random", showCrowd: false, feedback: false };
+  const SIM = { on: false, count: 10, k: 1, bots: [], lastChat: 0 };
+  let WIN = { items: [], start: 0, end: 0 };
+
+  const tileAt = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? "#" : FLOOR[y][x];
+  const isLever = (c) => c >= "a" && c <= "z";
+  const isDoor = (c) => c >= "A" && c <= "Z" && !"LSU".includes(c);
+  const doorOpen = (c) => !!S.pulled[c.toLowerCase()];
+  const blocks = (c) => c === "#" || isLever(c) || (isDoor(c) && !doorOpen(c));
+
+  // --- Rules (mirrors game-design.md) -----------------------------------
+  function facingTile() {
+    const [dx, dy] = DIRS[S.hero.facing];
+    return { x: S.hero.x + dx, y: S.hero.y + dy, c: tileAt(S.hero.x + dx, S.hero.y + dy) };
+  }
+  function interactLabel() {
+    const f = facingTile();
+    if (isLever(f.c)) return S.pulled[f.c] ? "Lever pulled" : "Pull lever";
+    if (isDoor(f.c) && !doorOpen(f.c)) return "Locked";
+    return "Interact";
+  }
+  function canInteract() { const f = facingTile(); return isLever(f.c) && !S.pulled[f.c]; }
+  function jumpTarget() {
+    const [dx, dy] = DIRS[S.hero.facing];
+    const mid = tileAt(S.hero.x + dx, S.hero.y + dy);
+    const land = { x: S.hero.x + 2 * dx, y: S.hero.y + 2 * dy };
+    const landC = tileAt(land.x, land.y);
+    if (blocks(mid) || blocks(landC)) return null;
+    return { ...land, c: landC };
+  }
+  function isValid(a) {
+    if (a.kind === "jump") return !!jumpTarget();
+    if (a.kind === "interact") return canInteract();
+    return true; // moves are always valid (into a wall = turn in place)
+  }
+  const keyOf = (a) => a.kind === "move" ? a.dir : a.kind;
+
+  function apply(action) {
+    if (S.won) return;
+    let outcome = null;
+    if (action.kind === "move") {
+      S.hero.facing = action.dir;
+      const [dx, dy] = DIRS[action.dir];
+      const nx = S.hero.x + dx, ny = S.hero.y + dy, c = tileAt(nx, ny);
+      if (!blocks(c)) { S.hero.x = nx; S.hero.y = ny; outcome = landOn(c); }
+      else outcome = "turned";
+    } else if (action.kind === "jump") {
+      const t = jumpTarget();
+      if (!t) return flash("Can't jump there");
+      S.hero.x = t.x; S.hero.y = t.y; outcome = landOn(t.c);
+    } else if (action.kind === "interact") {
+      if (!canInteract()) return flash("Nothing to interact with");
+      S.pulled[facingTile().c] = true; outcome = "door";
+    }
+    S.turn++;
+    S.log.push({ turn: S.turn, action, outcome, mode: CFG.mode });
+    if (outcome === "died") die();
+    if (outcome === "won") win();
+    render();
+  }
+  function landOn(c) { return c === "L" ? "died" : c === "U" ? "won" : null; }
+  function die() {
+    S.deaths++;
+    S.hero = { x: start.x, y: start.y, facing: "up" };
+    flash("The hero burned. Back to the start.");
+  }
+  function win() {
+    S.won = true;
+    document.getElementById("winStats").textContent =
+      `${S.turn} turns · ${S.deaths} ${S.deaths === 1 ? "death" : "deaths"}`;
+    document.getElementById("winOverlay").hidden = false;
+  }
+
+  // --- Windows: sampling (anarchy) or ticks (democracy) -------------------
+  const windowed = () => SIM.on || CFG.mode === "democracy";
+  const windowLen = () => CFG.mode === "democracy" ? DEMOCRACY_TICK_MS : 1000 / SIM.k;
+  function newWindow(now) { WIN = { items: [], start: now, end: now + windowLen() }; }
+
+  function countsOf(items) {
+    const c = { up: 0, down: 0, left: 0, right: 0, jump: 0, interact: 0 };
+    for (const i of items) c[keyOf(i.a)]++;
+    return c;
+  }
+
+  function resolveWindow() {
+    const items = WIN.items;
+    const mine = items.find(i => i.mine);
+    const valid = items.filter(i => isValid(i.a));
+    if (!valid.length) {
+      if (mine && CFG.feedback) flash("No valid presses. No turn.", "meh");
+      return;
+    }
+    let chosen, picked;
+    if (CFG.mode === "democracy" || CFG.pick === "plurality") {
+      const tally = new Map();
+      for (const i of valid) {
+        const k = keyOf(i.a);
+        tally.set(k, { a: i.a, n: (tally.get(k)?.n || 0) + 1 });
+      }
+      const max = Math.max(...[...tally.values()].map(t => t.n));
+      const leaders = [...tally.entries()].filter(([, t]) => t.n === max);
+      const [winKey, winT] = leaders[Math.floor(Math.random() * leaders.length)];
+      chosen = winT.a;
+      picked = !!mine && keyOf(mine.a) === winKey;
+    } else {
+      const c = valid[Math.floor(Math.random() * valid.length)];
+      chosen = c.a;
+      picked = !!c.mine;
+    }
+    apply(chosen);
+    if (mine && CFG.feedback) {
+      const verb = CFG.mode === "democracy" ? "vote" : "press";
+      picked
+        ? flash(`Your ${describe(mine.a)} ${verb} was picked`, "good")
+        : flash(`Your ${describe(mine.a)} ${verb} wasn't picked`, "meh");
+    }
+  }
+
+  // --- Input & rate limit ------------------------------------------------
+  function tryAction(action) {
+    if (S.won) return;
+    const now = performance.now();
+    if (CFG.mode === "democracy") {
+      if (S.votedEnd === WIN.end) return flash("You already voted this turn");
+      S.votedEnd = WIN.end;
+      S.lastVoteAt = now;
+      WIN.items.push({ a: action, mine: true });
+      return flash(`Voted ${describe(action)}`, "meh");
+    }
+    if (now - S.lastAction < COOLDOWN_MS) return flash("Wait for your next action");
+    S.lastAction = now;
+    if (windowed()) WIN.items.push({ a: action, mine: true });
+    else apply(action);
+  }
+
+  document.querySelectorAll("[data-dir]").forEach(b =>
+    b.addEventListener("click", () => tryAction({ kind: "move", dir: b.dataset.dir })));
+  document.getElementById("jumpBtn").addEventListener("click", () => tryAction({ kind: "jump" }));
+  document.getElementById("interactBtn").addEventListener("click", () => tryAction({ kind: "interact" }));
+  document.getElementById("restartBtn").addEventListener("click", () => {
+    S = fresh();
+    resetBotsAndWindow();
+    document.getElementById("winOverlay").hidden = true;
+    render();
+  });
+
+  const KEYS = {
+    ArrowUp: "up", w: "up", W: "up", ArrowDown: "down", s: "down", S: "down",
+    ArrowLeft: "left", a: "left", A: "left", ArrowRight: "right", d: "right", D: "right",
+  };
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+    if (KEYS[e.key]) { e.preventDefault(); tryAction({ kind: "move", dir: KEYS[e.key] }); }
+    else if (e.key === " ") { e.preventDefault(); tryAction({ kind: "jump" }); }
+    else if (e.key === "e" || e.key === "E") { tryAction({ kind: "interact" }); }
+  });
+
+  let flashTimer;
+  function flash(msg, tone = "") {
+    const el = document.getElementById("statusMsg");
+    el.textContent = msg;
+    el.className = "msg " + tone;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => (el.textContent = ""), 2000);
+  }
+
+  // --- Simulated crowd -----------------------------------------------------
+  const BOT_NAMES = ["cinder_fox", "ashwalker", "magma_mo", "torchbearer", "pyre_pal", "slag_queen", "kiln_kid",
+    "brimstone_b", "ember_owl2", "coalminer", "obsidian_j", "scorch", "flint_and_tin", "hotfoot", "smolder"];
+  const BOT_LINES = ["lever A first!!", "now lever B", "face up BEFORE jumping", "where is lever C??", "I think B is down-left", "UP UP UP", "stop going left", "who keeps jumping", "wait for the gap",
+    "one press at a time pls", "lava lava lava", "pls coordinate", "everyone press up", "almost there",
+    "why are we back at start", "go around the lava"];
+
+  // Planner over (x, y, facing, levers pulled): shortest safe action sequence to the stairs.
+  // Focused bots play its first action; the rest of the time they wander.
+  let planCache = { key: "", action: null };
+  function plan() {
+    const stateKey = `${S.hero.x},${S.hero.y},${S.hero.facing},${Object.keys(S.pulled).sort().join("")}`;
+    if (planCache.key === stateKey) return planCache.action;
+    planCache = { key: stateKey, action: planFresh() };
+    return planCache.action;
+  }
+  function planFresh() {
+    const lev = [...new Set(FLOOR.join("").split("").filter(isLever))];
+    const bit = (c) => 1 << lev.indexOf(c);
+    const startM = lev.reduce((m, c) => S.pulled[c] ? m | bit(c) : m, 0);
+    const blk = (c, m) => c === "#" || isLever(c) || (isDoor(c) && !(m & bit(c.toLowerCase())));
+    const k = (x, y, f, m) => `${x},${y},${f},${m}`;
+    const q = [[S.hero.x, S.hero.y, S.hero.facing, startM, null]];
+    const seen = new Set([k(...q[0].slice(0, 4))]);
+    while (q.length) {
+      const [x, y, f, m, first] = q.shift();
+      const nexts = [];
+      for (const [d, [dx, dy]] of Object.entries(DIRS)) {
+        const c = tileAt(x + dx, y + dy);
+        nexts.push(blk(c, m) ? [x, y, d, m, { kind: "move", dir: d }, null]
+                             : [x + dx, y + dy, d, m, { kind: "move", dir: d }, c]);
+      }
+      const [dx, dy] = DIRS[f];
+      const mid = tileAt(x + dx, y + dy), land = tileAt(x + 2 * dx, y + 2 * dy);
+      if (!blk(mid, m) && !blk(land, m)) nexts.push([x + 2 * dx, y + 2 * dy, f, m, { kind: "jump" }, land]);
+      if (isLever(mid) && !(m & bit(mid))) nexts.push([x, y, f, m | bit(mid), { kind: "interact" }, null]);
+      for (const [nx, ny, nf, nm, a, landed] of nexts) {
+        if (landed === "L") continue;
+        const fa = first || a;
+        if (landed === "U") return fa;
+        const key = k(nx, ny, nf, nm);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        q.push([nx, ny, nf, nm, fa]);
+      }
+    }
+    return null;
+  }
+  function botIntent(bot) {
+    const r = Math.random();
+    if (r < bot.focus) { const a = plan(); if (a) return a; }
+    if (r < bot.focus + 0.08) return { kind: "jump" };
+    const dirs = Object.keys(DIRS);
+    return { kind: "move", dir: dirs[Math.floor(Math.random() * dirs.length)] };
+  }
+  function nextBotTime(now) {
+    // Anarchy: once a second at a random phase. Democracy: once per tick, at a random moment in it.
+    return CFG.mode === "democracy" ? WIN.start + Math.random() * DEMOCRACY_TICK_MS * 0.95
+                                    : now + Math.random() * COOLDOWN_MS;
+  }
+  function resetBotsAndWindow() {
+    const now = performance.now();
+    newWindow(now);
+    S.votedEnd = 0;
+    const n = SIM.on ? SIM.count : 0;
+    SIM.bots = Array.from({ length: n }, (_, i) => ({
+      name: BOT_NAMES[i % BOT_NAMES.length] + (i >= BOT_NAMES.length ? i : ""),
+      focus: 0.45 + Math.random() * 0.4,
+      next: 0,
+    }));
+    SIM.bots.forEach(b => (b.next = nextBotTime(now)));
+  }
+
+  function tick() {
+    if (S.won) return;
+    const now = performance.now();
+    if (!windowed()) { WIN.items = []; return; }
+    for (const b of SIM.bots) {
+      if (b.next > now) continue;
+      WIN.items.push({ a: botIntent(b), mine: false });
+      if (CFG.mode === "democracy") { b.next = Infinity; continue; } // one vote per tick
+      b.next += COOLDOWN_MS;
+      if (b.next < now) b.next = now + Math.random() * COOLDOWN_MS; // fell behind (tab hidden)
+    }
+    // Democracy: the tick ends early once every active player has voted.
+    const youActive = now - S.lastVoteAt < 60000;
+    const activeVoters = SIM.bots.length + (youActive ? 1 : 0);
+    const allVoted = CFG.mode === "democracy" && WIN.items.length > 0 && WIN.items.length >= activeVoters;
+    if (now >= WIN.end || allVoted) {
+      resolveWindow();
+      newWindow(now);
+      if (CFG.mode === "democracy") SIM.bots.forEach(b => (b.next = now + Math.random() * DEMOCRACY_TICK_MS * 0.95));
+    }
+    if (SIM.on && SIM.bots.length && now - SIM.lastChat > 2500 && Math.random() < 0.02) {
+      SIM.lastChat = now;
+      const b = SIM.bots[Math.floor(Math.random() * SIM.bots.length)];
+      S.chat.push({ handle: b.name, text: BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)] });
+      renderChat();
+    }
+  }
+  setInterval(tick, 50);
+
+  // --- Settings wiring ------------------------------------------------------
+  function applySettings() {
+    SIM.on = document.getElementById("simToggle").checked;
+    SIM.count = +document.getElementById("simCount").value;
+    SIM.k = +document.getElementById("simSpeed").value;
+    CFG.mode = document.querySelector('input[name="mode"]:checked').value;
+    CFG.pick = document.querySelector('input[name="pick"]:checked').value;
+    CFG.showCrowd = document.getElementById("crowdToggle").checked;
+    CFG.feedback = document.getElementById("feedbackToggle").checked;
+
+    const demo = CFG.mode === "democracy";
+    document.getElementById("botCount").textContent = SIM.count;
+    document.getElementById("playingCount").textContent = SIM.on ? SIM.count + 1 : 1;
+    document.getElementById("botRow").classList.toggle("off", !SIM.on);
+    document.getElementById("pickRow").classList.toggle("off", demo);
+    document.getElementById("speedRow").classList.toggle("off", demo);
+    document.getElementById("modeChip").textContent = demo ? "Democracy" : "Anarchy";
+    document.getElementById("rateHint").textContent = demo
+      ? "1 vote per 3 s turn · Arrows/WASD, Space jump, E interact"
+      : "1 action / sec · Arrows/WASD, Space jump, E interact";
+    resetBotsAndWindow();
+    render();
+  }
+  ["simToggle", "simCount", "simSpeed", "crowdToggle", "feedbackToggle", "modeAnarchy", "modeDemocracy", "pickRandom", "pickPlurality"]
+    .forEach(id => document.getElementById(id).addEventListener(id === "simCount" ? "input" : "change", applySettings));
+
+  // --- Tabs & chat --------------------------------------------------------
+  const tabLog = document.getElementById("tabLog"), tabChat = document.getElementById("tabChat");
+  function showTab(chat) {
+    tabLog.setAttribute("aria-selected", String(!chat));
+    tabChat.setAttribute("aria-selected", String(chat));
+    document.getElementById("logFeed").hidden = chat;
+    document.getElementById("chatFeed").hidden = !chat;
+    document.getElementById("chatForm").hidden = !chat;
+  }
+  tabLog.addEventListener("click", () => showTab(false));
+  tabChat.addEventListener("click", () => showTab(true));
+  document.getElementById("chatForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text) return;
+    S.chat.push({ handle: "ember_owl", text });
+    input.value = "";
+    renderChat();
+  });
+
+  // --- Rendering -----------------------------------------------------------
+  const canvas = document.getElementById("map");
+  const ctx = canvas.getContext("2d");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const css = getComputedStyle(document.documentElement);
+  const C = (n) => css.getPropertyValue(n).trim();
+  const PAL = {
+    basalt: C("--basalt"), stone: C("--stone"), stoneHi: C("--stone-hi"), floor: C("--floor"),
+    bone: C("--bone"), ash: C("--ash"), ember: C("--ember"), lava: C("--lava"), moss: C("--moss"),
+  };
+  const showTally = () => windowed() && (CFG.showCrowd || CFG.mode === "democracy");
+
+  function sizeCanvas() {
+    const r = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(r.width * dpr);
+    canvas.height = Math.round(r.height * dpr);
+  }
+
+  function drawTile(c, x, y, ts, t) {
+    const px = x * ts, py = y * ts;
+    if (c === "#") {
+      ctx.fillStyle = PAL.stone; ctx.fillRect(px, py, ts, ts);
+      ctx.fillStyle = PAL.stoneHi; ctx.fillRect(px, py, ts, ts * 0.12);
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(px + ts * 0.5, py + ts * 0.12, 1, ts * 0.44);
+      ctx.fillRect(px, py + ts * 0.56, ts, 1);
+      return;
+    }
+    ctx.fillStyle = PAL.floor; ctx.fillRect(px, py, ts, ts);
+    ctx.strokeStyle = "rgba(0,0,0,0.35)"; ctx.lineWidth = 1;
+    ctx.strokeRect(px + 0.5, py + 0.5, ts - 1, ts - 1);
+    if (c === "L") {
+      const phase = reduceMotion ? 0 : t / 600;
+      const g = ctx.createLinearGradient(px, py, px + ts, py + ts);
+      g.addColorStop(0, PAL.lava);
+      g.addColorStop(0.5 + 0.3 * Math.sin(phase + x + y), PAL.ember);
+      g.addColorStop(1, PAL.lava);
+      ctx.fillStyle = g; ctx.fillRect(px + 1, py + 1, ts - 2, ts - 2);
+      ctx.fillStyle = "rgba(255,230,180,0.5)";
+      const bx = px + ts * (0.3 + 0.2 * Math.sin(phase * 1.3 + x));
+      const by = py + ts * (0.4 + 0.15 * Math.cos(phase + y));
+      ctx.beginPath(); ctx.arc(bx, by, ts * 0.06, 0, Math.PI * 2); ctx.fill();
+    } else if (c === "U") {
+      for (let i = 0; i < 4; i++) {
+        ctx.fillStyle = i % 2 ? PAL.stoneHi : PAL.ash;
+        ctx.fillRect(px + ts * 0.15, py + ts * (0.18 + i * 0.17), ts * 0.7, ts * 0.13);
+      }
+    } else if (isDoor(c)) {
+      if (doorOpen(c)) {
+        ctx.fillStyle = PAL.stoneHi;
+        ctx.fillRect(px, py, ts * 0.12, ts); ctx.fillRect(px + ts * 0.88, py, ts * 0.12, ts);
+      } else {
+        ctx.fillStyle = "#5a3f2a"; ctx.fillRect(px + 2, py + 2, ts - 4, ts - 4);
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        for (let i = 1; i < 4; i++) ctx.fillRect(px + i * ts / 4, py + 2, 2, ts - 4);
+        ctx.fillStyle = PAL.ember; ctx.fillRect(px + ts * 0.42, py + ts * 0.45, ts * 0.16, ts * 0.12);
+      }
+    } else if (isLever(c)) {
+      ctx.fillStyle = PAL.stoneHi; ctx.fillRect(px + ts * 0.3, py + ts * 0.62, ts * 0.4, ts * 0.18);
+      ctx.strokeStyle = PAL.bone; ctx.lineWidth = Math.max(2, ts * 0.07); ctx.lineCap = "round";
+      const ang = S.pulled[c] ? Math.PI * 0.25 : -Math.PI * 0.25;
+      const ex = px + ts * 0.5 + Math.sin(ang) * ts * 0.36, ey = py + ts * 0.66 - Math.cos(ang) * ts * 0.36;
+      ctx.beginPath(); ctx.moveTo(px + ts * 0.5, py + ts * 0.66); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.fillStyle = S.pulled[c] ? PAL.moss : PAL.lava;
+      ctx.beginPath(); ctx.arc(ex, ey, ts * 0.08, 0, Math.PI * 2); ctx.fill();
+    }
+    if (isLever(c) || (isDoor(c) && !doorOpen(c))) {
+      ctx.fillStyle = PAL.bone;
+      ctx.font = `600 ${Math.round(ts * 0.22)}px ${C("--mono")}`;
+      ctx.textAlign = "left"; ctx.textBaseline = "top";
+      ctx.fillText(c.toUpperCase(), px + ts * 0.08, py + ts * 0.06);
+    }
+    if (c === "S") {
+      ctx.strokeStyle = "rgba(234,220,198,0.18)"; ctx.lineWidth = 2;
+      ctx.strokeRect(px + ts * 0.2, py + ts * 0.2, ts * 0.6, ts * 0.6);
+    }
+  }
+
+  function drawCrowdArrows(ts) {
+    const counts = countsOf(WIN.items);
+    const max = Math.max(1, ...Object.keys(DIRS).map(d => counts[d]));
+    for (const [d, [dx, dy]] of Object.entries(DIRS)) {
+      const n = counts[d];
+      if (!n) continue;
+      const cx = (S.hero.x + dx) * ts + ts / 2, cy = (S.hero.y + dy) * ts + ts / 2;
+      const s = ts * (0.18 + 0.22 * (n / max));
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.atan2(dy, dx));
+      ctx.globalAlpha = 0.35 + 0.6 * (n / max);
+      ctx.fillStyle = PAL.ember;
+      ctx.beginPath(); ctx.moveTo(s, 0); ctx.lineTo(-s * 0.6, -s * 0.8); ctx.lineTo(-s * 0.6, s * 0.8); ctx.closePath(); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = PAL.bone;
+      ctx.font = `600 ${Math.round(ts * 0.26)}px ${C("--mono")}`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(n), cx + dx * ts * 0.32 - dy * 0 , cy + dy * ts * 0.32 + (dx ? -ts * 0.3 : 0));
+    }
+  }
+
+  const cam = { x: null, y: null };
+  function draw(t) {
+    const ts = canvas.width / VIEW_W;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = PAL.basalt;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const clamp = (v, max) => Math.max(0, Math.min(max, v));
+    const tx = clamp(S.hero.x - (VIEW_W - 1) / 2, W - VIEW_W);
+    const ty = clamp(S.hero.y - (VIEW_H - 1) / 2, H - VIEW_H);
+    if (cam.x === null || reduceMotion) { cam.x = tx; cam.y = ty; }
+    else { cam.x += (tx - cam.x) * 0.18; cam.y += (ty - cam.y) * 0.18; }
+    ctx.translate(-Math.round(cam.x * ts), -Math.round(cam.y * ts));
+    const x0 = Math.floor(cam.x), y0 = Math.floor(cam.y);
+    for (let y = y0; y <= Math.min(H - 1, y0 + VIEW_H); y++)
+      for (let x = x0; x <= Math.min(W - 1, x0 + VIEW_W); x++) drawTile(FLOOR[y][x], x, y, ts, t);
+    if (!S.won) {
+      const f = facingTile();
+      ctx.strokeStyle = "rgba(240,162,59,0.55)"; ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(f.x * ts + 3, f.y * ts + 3, ts - 6, ts - 6);
+      ctx.setLineDash([]);
+    }
+    const hx = S.hero.x * ts + ts / 2, hy = S.hero.y * ts + ts / 2;
+    const glow = ctx.createRadialGradient(hx, hy, ts * 0.1, hx, hy, ts * 1.4);
+    glow.addColorStop(0, "rgba(240,162,59,0.22)"); glow.addColorStop(1, "rgba(240,162,59,0)");
+    ctx.fillStyle = glow; ctx.fillRect(hx - ts * 1.5, hy - ts * 1.5, ts * 3, ts * 3);
+    ctx.fillStyle = PAL.bone;
+    ctx.beginPath(); ctx.arc(hx, hy, ts * 0.3, 0, Math.PI * 2); ctx.fill();
+    const [dx, dy] = DIRS[S.hero.facing];
+    ctx.fillStyle = PAL.basalt;
+    ctx.beginPath();
+    ctx.arc(hx + dx * ts * 0.13 - dy * ts * 0.09, hy + dy * ts * 0.13 - dx * ts * 0.09, ts * 0.045, 0, Math.PI * 2);
+    ctx.arc(hx + dx * ts * 0.13 + dy * ts * 0.09, hy + dy * ts * 0.13 + dx * ts * 0.09, ts * 0.045, 0, Math.PI * 2);
+    ctx.fill();
+    if (showTally() && !S.won) drawCrowdArrows(ts);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function renderTally(now) {
+    const el = document.getElementById("tally");
+    el.hidden = !showTally();
+    if (el.hidden) return;
+    const c = countsOf(WIN.items);
+    const max = Math.max(...Object.values(c));
+    const parts = [["↑", c.up], ["↓", c.down], ["←", c.left], ["→", c.right], ["Jump", c.jump], ["Interact", c.interact]];
+    document.getElementById("tallyCounts").innerHTML = parts
+      .map(([l, n]) => `<span class="${n && n === max ? "lead" : ""}">${l} <b>${n}</b></span>`).join("");
+    const left = Math.max(0, (WIN.end - now) / 1000);
+    document.getElementById("tallyTimer").textContent =
+      CFG.mode === "democracy" ? `Next turn in ${left.toFixed(1)} s` : `Window ${left.toFixed(1)} s`;
+  }
+
+  const OUTCOME_TEXT = { died: "burned in lava", won: "reached the stairs", door: "the door opened", turned: "bumped and turned" };
+  function describe(a) { return a.kind === "move" ? ARROW[a.dir] : a.kind; }
+
+  function renderLog() {
+    const feed = document.getElementById("logFeed");
+    if (!S.log.length) {
+      feed.innerHTML = `<div class="empty">No turns yet. Every hero action shows up here, without names.</div>`;
+      return;
+    }
+    feed.innerHTML = S.log.slice(-200).map(e => {
+      const cls = e.outcome === "died" ? "died" : (e.outcome === "won" || e.outcome === "door") ? "good" : "";
+      const tail = e.outcome ? ` · ${OUTCOME_TEXT[e.outcome]}` : "";
+      const verb = e.action.kind === "move" ? `move ${describe(e.action)}` : e.action.kind;
+      return `<div class="row ${cls}"><span class="t">${e.turn}</span><span>${verb}${tail}</span></div>`;
+    }).join("");
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  const esc = (s) => s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  function renderChat() {
+    const feed = document.getElementById("chatFeed");
+    if (!S.chat.length) {
+      feed.innerHTML = `<div class="empty">Chat is how the crowd coordinates. Turn on simulated players to see it move.</div>`;
+      return;
+    }
+    feed.innerHTML = S.chat.slice(-200).map(m => `<div class="row"><span class="who">${esc(m.handle)}</span><span>${esc(m.text)}</span></div>`).join("");
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  // Fog of war: every tile the camera has shown counts as explored.
+  function reveal() {
+    const clamp = (v, max) => Math.max(0, Math.min(max, v));
+    const x0 = clamp(S.hero.x - (VIEW_W - 1) / 2, W - VIEW_W);
+    const y0 = clamp(S.hero.y - (VIEW_H - 1) / 2, H - VIEW_H);
+    const seen = new Set(S.explored);
+    for (let y = y0; y < y0 + VIEW_H; y++) for (let x = x0; x < x0 + VIEW_W; x++) seen.add(y * W + x);
+    S.explored = [...seen];
+  }
+
+  const mapCanvas = document.getElementById("floorMapCanvas");
+  const mctx = mapCanvas.getContext("2d");
+  function drawFloorMap() {
+    const r = mapCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    mapCanvas.width = Math.round(r.width * dpr);
+    mapCanvas.height = Math.round(r.height * dpr);
+    const ts = Math.floor(Math.min(mapCanvas.width / W, mapCanvas.height / H));
+    const ox = Math.floor((mapCanvas.width - ts * W) / 2), oy = Math.floor((mapCanvas.height - ts * H) / 2);
+    const seen = new Set(S.explored);
+    mctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const px = ox + x * ts, py = oy + y * ts, c = FLOOR[y][x];
+      if (!seen.has(y * W + x)) { mctx.fillStyle = "#0c0a09"; mctx.fillRect(px, py, ts, ts); continue; }
+      mctx.fillStyle = c === "#" ? PAL.stone : c === "L" ? PAL.lava : PAL.floor;
+      mctx.fillRect(px, py, ts, ts);
+      if (c === "U") { mctx.fillStyle = PAL.moss; mctx.fillRect(px + ts * 0.2, py + ts * 0.2, ts * 0.6, ts * 0.6); }
+      if (isLever(c)) { mctx.fillStyle = S.pulled[c] ? PAL.moss : PAL.ember; mctx.beginPath(); mctx.arc(px + ts / 2, py + ts / 2, ts * 0.3, 0, Math.PI * 2); mctx.fill(); }
+      if (isDoor(c)) { mctx.fillStyle = doorOpen(c) ? PAL.stoneHi : "#5a3f2a"; mctx.fillRect(px + 1, py + 1, ts - 2, ts - 2); }
+      if ((isLever(c) || isDoor(c)) && ts >= 10) {
+        mctx.fillStyle = PAL.bone; mctx.font = `600 ${Math.round(ts * 0.6)}px ${C("--mono")}`;
+        mctx.textAlign = "center"; mctx.textBaseline = "middle";
+        mctx.fillText(c.toUpperCase(), px + ts / 2, py + ts / 2 + 1);
+      }
+    }
+    // hero
+    const hx = ox + S.hero.x * ts + ts / 2, hy = oy + S.hero.y * ts + ts / 2;
+    mctx.fillStyle = PAL.bone; mctx.beginPath(); mctx.arc(hx, hy, ts * 0.38, 0, Math.PI * 2); mctx.fill();
+    mctx.strokeStyle = PAL.ember; mctx.lineWidth = 2; mctx.beginPath(); mctx.arc(hx, hy, ts * 0.7, 0, Math.PI * 2); mctx.stroke();
+    const walkableTotal = FLOOR.join("").split("").filter(ch => ch !== "#").length;
+    const walkableSeen = S.explored.filter(i => FLOOR[Math.floor(i / W)][i % W] !== "#").length;
+    document.getElementById("exploredPct").textContent = Math.round(100 * walkableSeen / walkableTotal);
+  }
+  const mapBtn = document.getElementById("mapBtn"), floorMap = document.getElementById("floorMap");
+  function toggleMap(open = floorMap.hidden) {
+    floorMap.hidden = !open;
+    mapBtn.setAttribute("aria-expanded", String(open));
+    if (open) drawFloorMap();
+  }
+  mapBtn.addEventListener("click", () => toggleMap());
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+    if (e.key === "m" || e.key === "M") toggleMap();
+    else if (e.key === "Escape" && !floorMap.hidden) toggleMap(false);
+  });
+
+  function render() {
+    reveal();
+    if (!floorMap.hidden) drawFloorMap();
+    document.getElementById("turnChip").textContent = S.turn;
+    document.getElementById("statusLeft").textContent = `Facing ${S.hero.facing} · ${S.deaths} ${S.deaths === 1 ? "death" : "deaths"}`;
+    const ib = document.getElementById("interactBtn");
+    ib.textContent = interactLabel();
+    ib.disabled = !canInteract() || S.won;
+    document.getElementById("jumpBtn").disabled = !jumpTarget() || S.won;
+    renderLog();
+    renderChat();
+  }
+
+  function frame(t) {
+    const now = performance.now();
+    draw(t);
+    renderTally(now);
+    let fill = 0;
+    if (CFG.mode === "democracy") fill = S.votedEnd === WIN.end ? Math.max(0, (WIN.end - now) / DEMOCRACY_TICK_MS) : 0;
+    else if (S.lastAction) fill = Math.max(0, 1 - (now - S.lastAction) / COOLDOWN_MS);
+    document.getElementById("cdBar").style.transform = `scaleX(${fill})`;
+    requestAnimationFrame(frame);
+  }
+
+  // --- Boot (preserve state across republish) ------------------------------
+  function boot(data) {
+    if (data && data.state && data.state.mapId === MAP_ID) S = { ...fresh(), ...data.state, lastAction: 0, votedEnd: 0 };
+    if (S.won) win();
+    sizeCanvas();
+    applySettings();
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener("resize", sizeCanvas);
+  window.claude?.hot?.snapshot?.(() => ({ state: S }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+})();
+</script>
