@@ -1,0 +1,57 @@
+{
+  "id": "barrators",
+  "index": 18,
+  "name": "Malebolge: the Boiling Pitch",
+  "minimumPlayers": 10,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 2
+  },
+  "legend": {
+    "b": {
+      "id": "malebranche-1",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRRRRRRRRDDDDDDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUURRRRR"
+    },
+    "c": {
+      "id": "malebranche-2",
+      "kind": "patrol",
+      "route": "DDDDDDLLLLLLLLLLLLLLLLLLLLLLUUUUUUUUUURRRRRRRRRRRRRRRRRRRRRRDDDD"
+    },
+    "d": {
+      "id": "malebranche-3",
+      "kind": "patrol",
+      "route": "LLLLLLLUUUUUUUUUURRRRRRRRRRRRRRRRRRRRRRDDDDDDDDDDLLLLLLLLLLLLLLL"
+    },
+    "s": {
+      "id": "sign-malacoda",
+      "kind": "sign",
+      "text": "Malacoda, captain of the Malebranche, grins: The demons walk the shore of the pitch and never rest; hide in the niches as they pass. The fourth niche along the south shore is the safest of all, I promise you. The ferries will carry you to the island, if you are quick."
+    },
+    "t": {
+      "id": "malacodas-niche",
+      "kind": "trap"
+    },
+    "a": {
+      "id": "lever-pitch",
+      "kind": "lever",
+      "targets": ["pitch-door"]
+    },
+    "A": {
+      "id": "pitch-door",
+      "kind": "door"
+    },
+    "f": {
+      "id": "ferry-west",
+      "kind": "platform",
+      "dir": "right",
+      "on": "L"
+    },
+    "h": {
+      "id": "ferry-east",
+      "kind": "platform",
+      "dir": "left",
+      "on": "L"
+    }
+  }
+}

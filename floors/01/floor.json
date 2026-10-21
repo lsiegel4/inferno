@@ -1,11 +1,20 @@
 {
-  "id": "prototype-two-levers",
+  "id": "the-gate",
   "index": 1,
+  "name": "The Gate",
   "minimumPlayers": 1,
   "legend": {
-    "a": { "id": "lever-a", "kind": "lever", "targets": ["door-a"] },
-    "A": { "id": "door-a", "kind": "door" },
-    "b": { "id": "lever-b", "kind": "lever", "targets": ["door-b"] },
-    "B": { "id": "door-b", "kind": "door" }
+    "s": {
+      "id": "sign-abandon",
+      "kind": "sign",
+      "text": "ABANDON ALL HOPE, YE WHO ENTER HERE. Every move is a vote, and the hero does what most of you choose. To read a sign or pull a lever, face it and Interact."
+    },
+    "a": { "id": "lever-gate", "kind": "lever", "targets": ["gate"] },
+    "A": { "id": "gate", "kind": "door" },
+    "t": {
+      "id": "sign-lava",
+      "kind": "sign",
+      "text": "Lava kills. The dead wake at the start of the floor; doors once opened stay open. Find the stairs and go deeper."
+    }
   }
 }

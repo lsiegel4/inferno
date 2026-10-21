@@ -123,8 +123,15 @@ export class DynamoGameLog implements GameLog {
         }),
       );
       for (const item of res.Items ?? []) {
-        const { turn, floorId, action, at, outcome } = item;
-        out.push({ turn, floorId, action, at, ...(outcome ? { outcome } : {}) } as TurnRecord);
+        const { turn, floorId, action, at, outcome, crowd } = item;
+        out.push({
+          turn,
+          floorId,
+          action,
+          at,
+          ...(outcome ? { outcome } : {}),
+          ...(crowd ? { crowd } : {}),
+        } as TurnRecord);
       }
       start = res.LastEvaluatedKey;
     } while (start && out.length < limit);

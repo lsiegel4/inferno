@@ -71,7 +71,7 @@ describe("push blocks", () => {
     expect(pos(r.state)).toEqual([2, 1]);
   });
 
-  it("a block pushed into lava fills it: the tile becomes walkable and jumpable floor", () => {
+  it("a block pushed into lava fills it: the tile becomes walkable floor, no longer jumpable", () => {
     const s = createGame([floor(1, ["########", "#S.bL..#", "########"], BLOCK)]);
     const filled = play(s, [right, right]);
     expect(entity(filled.state, "block").state.filled).toBe(true);
@@ -81,9 +81,9 @@ describe("push blocks", () => {
     expect(walked.outcome).toBeUndefined();
     expect(pos(walked.state)).toEqual([5, 1]);
 
-    const jumped = applyTurn(filled.state, { kind: "jump" }); // over the filled tile
-    expect(jumped.outcome).toBeUndefined();
-    expect(pos(jumped.state)).toEqual([5, 1]);
+    const jumped = applyTurn(filled.state, { kind: "jump" }); // the filled tile is not a hazard
+    expect(jumped.outcome).toBe("no_effect");
+    expect(pos(jumped.state)).toEqual([3, 1]);
   });
 
   it("a block pushed into a pit fills it, so the pit no longer drops the hero", () => {

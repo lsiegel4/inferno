@@ -1,0 +1,97 @@
+{
+  "id": "malebolge-first",
+  "index": 15,
+  "name": "Malebolge: the Panderers and the Flatterers",
+  "minimumPlayers": 8,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 3
+  },
+  "legend": {
+    "a": {
+      "id": "whip-east-1",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRDDDDDLLLLLLLLLLUUUUU"
+    },
+    "b": {
+      "id": "whip-east-2",
+      "kind": "patrol",
+      "route": "DDDDDLLLLLLLLLLUUUUURRRRRRRRRR"
+    },
+    "c": {
+      "id": "whip-east-3",
+      "kind": "patrol",
+      "route": "LLLLLUUUUURRRRRRRRRRDDDDDLLLLL"
+    },
+    "d": {
+      "id": "whip-west-1",
+      "kind": "patrol",
+      "route": "DDDDDRRRRRRRRRRUUUUULLLLLLLLLL"
+    },
+    "e": {
+      "id": "whip-west-2",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRUUUUULLLLLLLLLLDDDDD"
+    },
+    "f": {
+      "id": "whip-west-3",
+      "kind": "patrol",
+      "route": "RRRRRUUUUULLLLLLLLLLDDDDDRRRRR"
+    },
+    "v": {
+      "id": "no-return",
+      "kind": "oneway",
+      "dir": "right"
+    },
+    "w": {
+      "id": "into-the-ditch",
+      "kind": "oneway",
+      "dir": "down"
+    },
+    "t": {
+      "id": "flattery",
+      "kind": "trap",
+      "many": true
+    },
+    "1": {
+      "id": "flatterer-1",
+      "kind": "sign",
+      "text": "I would never deceive you, friend: the middle way is the safe one."
+    },
+    "2": {
+      "id": "flatterer-2",
+      "kind": "sign",
+      "text": "How wise you look! Trust me: the left way is not safe."
+    },
+    "3": {
+      "id": "flatterer-3",
+      "kind": "sign",
+      "text": "The first of us is lying to you."
+    },
+    "s": {
+      "id": "sign-malebolge",
+      "kind": "sign",
+      "text": "Malebolge: ten stone ditches of fraud. In the first, panderers and seducers march in two files, whipped by horned demons; walk with the march and never stop. In the second, the flatterers lie in filth, still flattering. Of their three signs, exactly one tells the truth."
+    },
+    "k": {
+      "id": "whip-light-1",
+      "kind": "light",
+      "radius": 4
+    },
+    "m": {
+      "id": "whip-light-2",
+      "kind": "light",
+      "radius": 4
+    },
+    "n": {
+      "id": "whip-light-3",
+      "kind": "light",
+      "radius": 4
+    },
+    "p": {
+      "id": "whip-light-4",
+      "kind": "light",
+      "radius": 4
+    }
+  }
+}

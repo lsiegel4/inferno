@@ -1,0 +1,100 @@
+{
+  "id": "hypocrites",
+  "index": 19,
+  "name": "Malebolge: the Hypocrites",
+  "minimumPlayers": 10,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 4
+  },
+  "legend": {
+    ">": {
+      "id": "no-turning-back",
+      "kind": "oneway",
+      "dir": "right"
+    },
+    "V": {
+      "id": "into-the-cloister",
+      "kind": "oneway",
+      "dir": "down"
+    },
+    "v": {
+      "id": "lead-fire-a",
+      "kind": "vent",
+      "period": 3,
+      "burn": 1,
+      "phase": 0,
+      "many": true
+    },
+    "w": {
+      "id": "lead-fire-b",
+      "kind": "vent",
+      "period": 3,
+      "burn": 1,
+      "phase": 1,
+      "many": true
+    },
+    "s": {
+      "id": "sign-hypocrites",
+      "kind": "sign",
+      "text": "The hypocrites creep in cloaks gilded outside and lead within. Past here there is no turning back: the only way out of their cloister is the corridor of five gilded doors, and five levers in the cloister move them, each more than one. The second and fourth doors wear gold: they stand open until a lever touches them."
+    },
+    "t": {
+      "id": "sign-caiaphas",
+      "kind": "sign",
+      "text": "Caiaphas lies crucified across the path, and every hypocrite treads on him. He who advised that one man should die for the people says: three of the five, and never the first."
+    },
+    "A": {
+      "id": "gilded-door-1",
+      "kind": "door",
+      "parity": true
+    },
+    "B": {
+      "id": "gilded-door-2",
+      "kind": "door",
+      "parity": true,
+      "inverted": true
+    },
+    "C": {
+      "id": "gilded-door-3",
+      "kind": "door",
+      "parity": true
+    },
+    "E": {
+      "id": "gilded-door-5",
+      "kind": "door",
+      "parity": true
+    },
+    "1": {
+      "id": "cloister-lever-1",
+      "kind": "switch",
+      "targets": ["gilded-door-1", "gilded-door-3", "gilded-door-4"]
+    },
+    "2": {
+      "id": "cloister-lever-2",
+      "kind": "switch",
+      "targets": ["gilded-door-1", "gilded-door-2", "gilded-door-3"]
+    },
+    "3": {
+      "id": "cloister-lever-3",
+      "kind": "switch",
+      "targets": ["gilded-door-2", "gilded-door-3"]
+    },
+    "4": {
+      "id": "cloister-lever-4",
+      "kind": "switch",
+      "targets": ["gilded-door-2", "gilded-door-3", "gilded-door-5"]
+    },
+    "5": {
+      "id": "cloister-lever-5",
+      "kind": "switch",
+      "targets": ["gilded-door-3", "gilded-door-5"]
+    },
+    "F": {
+      "id": "gilded-door-4",
+      "kind": "door",
+      "parity": true,
+      "inverted": true
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "id": "phlegethon",
+  "index": 11,
+  "name": "Phlegethon, the River of Blood",
+  "minimumPlayers": 5,
+  "legend": {
+    "s": {
+      "id": "sign-centaurs",
+      "kind": "sign",
+      "text": "The violent boil in the river of blood, and centaurs run the banks with bows drawn. A line of fire burns whoever stands in it at the end of a turn. Mirrors turn the fire; anything solid stops it."
+    },
+    ">": { "id": "chiron", "kind": "beam", "dir": "right" },
+    "m": { "id": "phlegethon-mirror", "kind": "mirror", "slant": "\\" },
+    "r": { "id": "phlegethon-eye", "kind": "receiver", "targets": ["phlegethon-gate"] },
+    "A": { "id": "phlegethon-gate", "kind": "door" },
+    "n": { "id": "nessus", "kind": "patrol", "route": "RRRRRRRRLLLLLLLL" },
+    "p": { "id": "pholus", "kind": "patrol", "route": "LLLLLLLLRRRRRRRR" }
+  }
+}

@@ -1,34 +1,20 @@
 {
-  "id": "prototype-big-floor",
+  "id": "vestibule",
   "index": 2,
+  "name": "Vestibule of the Uncommitted",
   "minimumPlayers": 1,
   "legend": {
-    "a": {
-      "id": "lever-a",
-      "kind": "lever",
-      "targets": ["door-a"]
+    "s": {
+      "id": "sign-uncommitted",
+      "kind": "sign",
+      "text": "Here run the souls who never took a side; neither Heaven nor Hell will have them. Stand on the stone and choose nothing: vote Wait, five times in a row."
     },
-    "A": {
-      "id": "door-a",
-      "kind": "door"
-    },
-    "b": {
-      "id": "lever-b",
-      "kind": "lever",
-      "targets": ["door-b"]
-    },
-    "B": {
-      "id": "door-b",
-      "kind": "door"
-    },
-    "c": {
-      "id": "lever-c",
-      "kind": "lever",
-      "targets": ["door-c"]
-    },
-    "C": {
-      "id": "door-c",
-      "kind": "door"
+    "v": { "id": "vigil-uncommitted", "kind": "vigil", "turns": 5, "targets": ["vestibule-door"] },
+    "A": { "id": "vestibule-door", "kind": "door" },
+    "t": {
+      "id": "sign-jump",
+      "kind": "sign",
+      "text": "Jump carries you two tiles in the direction you face, over one tile of lava. Never two."
     }
   }
 }

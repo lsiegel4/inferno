@@ -1,0 +1,22 @@
+{
+  "id": "heresy",
+  "index": 10,
+  "name": "The Burning Tombs",
+  "minimumPlayers": 4,
+  "reveal": { "mode": "torchlight", "radius": 3 },
+  "legend": {
+    "s": {
+      "id": "sign-heresy",
+      "kind": "sign",
+      "text": "Here lie the heretics, in tombs that burn and cool and burn again. Those who said the soul dies with the body learn otherwise. Do not end your turn on a tomb as it flares. Watch the embers: they glow before the fire."
+    },
+    "v": { "id": "tomb-even", "kind": "vent", "period": 2, "burn": 1, "phase": 0, "many": true },
+    "w": { "id": "tomb-odd", "kind": "vent", "period": 2, "burn": 1, "phase": 1, "many": true },
+    "x": { "id": "tomb-three-a", "kind": "vent", "period": 3, "burn": 2, "phase": 0, "many": true },
+    "y": { "id": "tomb-three-b", "kind": "vent", "period": 3, "burn": 2, "phase": 1, "many": true },
+    "z": { "id": "tomb-three-c", "kind": "vent", "period": 3, "burn": 2, "phase": 2, "many": true },
+    "a": { "id": "lever-heresy", "kind": "lever", "targets": ["heresy-door"] },
+    "B": { "id": "heresy-door", "kind": "door" },
+    "*": { "id": "heresy-brazier", "kind": "light", "radius": 2 }
+  }
+}

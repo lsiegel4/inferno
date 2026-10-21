@@ -5,6 +5,7 @@
 import {
   applyTurn,
   CHAT_MAX_LENGTH,
+  crowdOf,
   ClientMessageSchema,
   PROTOCOL_VERSION,
   resolveVotes,
@@ -251,18 +252,21 @@ export class GameRoom {
     const t = this.tick;
     if (!t || this.stopped) return;
     this.discardTick();
-    const action = resolveVotes([...t.votes.values()], this.rng);
+    const cast = [...t.votes.values()];
+    const action = resolveVotes(cast, this.rng);
     if (!action) return;
+    const crowd = crowdOf(cast, action);
 
     // Compute the turn, write it durably, and only then apply it (ADR-0001).
     const before = this.state;
-    const r = applyTurn(before, action);
+    const r = applyTurn(before, action, crowd);
     const record: TurnRecord = {
       turn: r.state.turn,
       floorId: before.currentFloor,
       action,
       at: new Date(this.clock.now()).toISOString(),
       ...(r.outcome ? { outcome: r.outcome } : {}),
+      crowd,
     };
     const write: TurnWrite = {
       record,
@@ -322,6 +326,7 @@ export class GameRoom {
     this.broadcast("turn", {
       turn: r.state.turn,
       action,
+      ...(record.crowd ? { crowd: record.crowd } : {}),
       hero: toProtocolHero(r.state),
       changes: delta.changes,
       ...(delta.revealed.length ? { revealed: delta.revealed } : {}),

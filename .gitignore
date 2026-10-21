@@ -8,3 +8,5 @@ cdk.out/
 .env.*
 .DS_Store
 .claude/
+dist-playtest/
+apps/client/solutions.json

@@ -1,7 +1,7 @@
 /** Convert engine state into protocol shapes sent to clients. */
 import type { Entity, FloorState, Hero, InventoryItemView } from "../protocol.js";
 import type { FloorDef } from "../floor.js";
-import { isHidden } from "./registry.js";
+import { entityType, isHidden } from "./registry.js";
 import { revealFor } from "./reveal.js";
 import type { GameState, RuntimeEntity } from "./types.js";
 
@@ -16,12 +16,32 @@ export function encodeTerrain(def: FloorDef, reveal: RevealFn = revealAll): stri
     .join("\n");
 }
 
+/**
+ * Props that describe hidden wiring rather than what can be seen: which doors a lever, plate or
+ * switch drives, where a portal leads, a patrol's whole route. Clients are not sent them; the
+ * crowd has to find out by trying (game design: non-local consequences).
+ */
+const WIRING_PROPS = new Set(["targets", "to", "route", "landing", "on"]);
+
 export function toProtocolEntity(e: RuntimeEntity): Entity {
-  return { id: e.id, kind: e.kind, x: e.x, y: e.y, state: { ...e.props, ...e.state } };
+  const custom = entityType(e.kind).view?.(e);
+  if (custom) return { id: e.id, kind: custom.kind, x: e.x, y: e.y, state: custom.state };
+  const props = Object.fromEntries(Object.entries(e.props).filter(([k]) => !WIRING_PROPS.has(k)));
+  return { id: e.id, kind: e.kind, x: e.x, y: e.y, state: { ...props, ...e.state } };
 }
 
 function visibleEntities(entities: readonly RuntimeEntity[], reveal: RevealFn): Entity[] {
-  return entities.filter((e) => !isHidden(e) && reveal(e.x, e.y)).map(toProtocolEntity);
+  return entities.filter((e) => isVisible(e, reveal)).map(toProtocolEntity);
+}
+
+/**
+ * Is the entity in view? Its own tile must be revealed, or, for something that reaches across the
+ * floor (a beam), any tile it covers.
+ */
+export function isVisible(e: RuntimeEntity, reveal: RevealFn): boolean {
+  if (isHidden(e)) return false;
+  if (reveal(e.x, e.y)) return true;
+  return (entityType(e.kind).extent?.(e) ?? []).some(([x, y]) => reveal(x, y));
 }
 
 /** The current floor as clients see it: unrevealed terrain and entities are left out. */
@@ -31,6 +51,7 @@ export function toFloorState(state: GameState, reveal: RevealFn = revealFor(stat
   return {
     floorId: def.id,
     index: def.index,
+    ...(def.name ? { name: def.name } : {}),
     width: def.width,
     height: def.height,
     tiles: encodeTerrain(def, reveal),
@@ -79,14 +100,12 @@ export function turnDelta(
     }
   }
 
-  const wasVisible = new Map(
-    floorBefore.entities.map((e) => [e.id, !isHidden(e) && rb(e.x, e.y)] as const),
-  );
+  const wasVisible = new Map(floorBefore.entities.map((e) => [e.id, isVisible(e, rb)] as const));
   const changedIds = new Set(changed);
   const changes: Entity[] = [];
   for (const e of floorAfter.entities) {
     const was = wasVisible.get(e.id) ?? false;
-    const now = !isHidden(e) && ra(e.x, e.y);
+    const now = isVisible(e, ra);
     if (now && (!was || changedIds.has(e.id))) changes.push(toProtocolEntity(e));
     else if (!now && was)
       changes.push({ id: e.id, kind: e.kind, x: e.x, y: e.y, state: { hidden: true } });

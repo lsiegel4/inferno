@@ -1,0 +1,17 @@
+{
+  "id": "acheron",
+  "index": 3,
+  "name": "Acheron",
+  "minimumPlayers": 1,
+  "legend": {
+    "f": { "id": "ferry-upper", "kind": "platform", "dir": "right", "on": "L" },
+    "g": { "id": "ferry-lower", "kind": "platform", "dir": "right", "on": "L" },
+    "a": { "id": "lever-acheron", "kind": "lever", "targets": ["acheron-door"] },
+    "A": { "id": "acheron-door", "kind": "door" },
+    "s": {
+      "id": "sign-charon",
+      "kind": "sign",
+      "text": "Charon's ferry crosses whether you are ready or not, one tile each turn. Step aboard as it touches the shore, and step off when it touches the other."
+    }
+  }
+}

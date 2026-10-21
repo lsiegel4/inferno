@@ -1,7 +1,7 @@
 import type { EntityType } from "../registry.js";
 import { stringProp } from "./props.js";
 
-export const ITEM_TYPES = ["key", "torch", "weight"] as const;
+export const ITEM_TYPES = ["key", "torch", "weight", "plank", "hourglass"] as const;
 
 /**
  * Item lying on the floor. Blocks movement (it is picked up with Interact while facing it).

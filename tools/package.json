@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "solve": "node dist/solve-floors.js ../floors",
-    "previews": "node dist/render-reveal.js"
+    "previews": "node dist/render-reveal.js",
+    "export-solutions": "node dist/export-solutions.js ../floors ../apps/client/solutions.json"
   },
   "dependencies": {
     "@inferno/shared": "workspace:*"

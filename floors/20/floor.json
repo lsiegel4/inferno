@@ -1,0 +1,115 @@
+{
+  "id": "thieves",
+  "index": 20,
+  "name": "Malebolge: the Thieves",
+  "minimumPlayers": 10,
+  "reveal": {
+    "mode": "line_of_sight",
+    "radius": 3
+  },
+  "legend": {
+    "a": {
+      "id": "serpent-1",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRRRRRRRRRLLLLLLLLLLLLLLLLLL"
+    },
+    "b": {
+      "id": "serpent-2",
+      "kind": "patrol",
+      "route": "LLLLLLLLLLLLLLLLLLRRRRRRRRRRRRRRRRRR"
+    },
+    "c": {
+      "id": "serpent-3",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRRRRRRRRRLLLLLLLLLLLLLLLLLL"
+    },
+    "d": {
+      "id": "serpent-4",
+      "kind": "patrol",
+      "route": "LLLLLLLLLLLLLLLLLLRRRRRRRRRRRRRRRRRR"
+    },
+    "g": {
+      "id": "serpent-7",
+      "kind": "patrol",
+      "route": "RRRRRRRRRRRRRRWWWWLLLLLLLLLLLLLLWWWW"
+    },
+    "r": {
+      "id": "key-red",
+      "kind": "item",
+      "item": "key",
+      "opens": "red"
+    },
+    "n": {
+      "id": "key-green",
+      "kind": "item",
+      "item": "key",
+      "opens": "green"
+    },
+    "k": {
+      "id": "key-blue",
+      "kind": "item",
+      "item": "key",
+      "opens": "blue"
+    },
+    "p": {
+      "id": "vanish-1-1",
+      "kind": "portal",
+      "to": "vanish-11-13"
+    },
+    "q": {
+      "id": "vanish-11-13",
+      "kind": "portal",
+      "to": "vanish-1-1"
+    },
+    "t": {
+      "id": "vanish-9-1",
+      "kind": "portal",
+      "to": "vanish-19-9"
+    },
+    "u": {
+      "id": "vanish-19-9",
+      "kind": "portal",
+      "to": "vanish-9-1"
+    },
+    "v": {
+      "id": "vanish-5-13",
+      "kind": "portal",
+      "to": "vanish-15-1"
+    },
+    "w": {
+      "id": "vanish-15-1",
+      "kind": "portal",
+      "to": "vanish-5-13"
+    },
+    "R": {
+      "id": "door-red",
+      "kind": "locked_door",
+      "lock": "red"
+    },
+    "G": {
+      "id": "door-green",
+      "kind": "locked_door",
+      "lock": "green"
+    },
+    "B": {
+      "id": "door-blue",
+      "kind": "locked_door",
+      "lock": "blue"
+    },
+    "s": {
+      "id": "sign-thieves",
+      "kind": "sign",
+      "text": "In the seventh ditch serpents swarm over the thieves, and where a serpent strikes, a thief burns to ash and rises again. The serpents sweep the aisles between the columns. Three keys were stolen and hidden in the corners of the pit. The circles carry you as a thief vanishes: unseen, and somewhere else."
+    },
+    "h": {
+      "id": "serpent-8",
+      "kind": "patrol",
+      "route": "RRRRRRRRRLLLLLLLLLLLLLLLLLLRRRRRRRRR"
+    },
+    "i": {
+      "id": "serpent-9",
+      "kind": "patrol",
+      "route": "LLLLLLLLLRRRRRRRRRRRRRRRRRRLLLLLLLLL"
+    }
+  }
+}

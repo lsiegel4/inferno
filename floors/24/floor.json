@@ -1,0 +1,80 @@
+{
+  "id": "well-of-giants",
+  "index": 24,
+  "name": "The Well of the Giants",
+  "minimumPlayers": 15,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 3
+  },
+  "legend": {
+    "A": {
+      "id": "well-gate-1",
+      "kind": "door"
+    },
+    "p": {
+      "id": "altar-1",
+      "kind": "altar",
+      "threshold": 0.66,
+      "targets": ["well-gate-1"]
+    },
+    "B": {
+      "id": "well-gate-2",
+      "kind": "door"
+    },
+    "v": {
+      "id": "giants-vigil",
+      "kind": "vigil",
+      "turns": 8,
+      "targets": ["well-gate-2"]
+    },
+    "C": {
+      "id": "well-gate-3",
+      "kind": "door"
+    },
+    "r": {
+      "id": "altar-3",
+      "kind": "altar",
+      "threshold": 0.8,
+      "targets": ["well-gate-3"]
+    },
+    "F": {
+      "id": "well-gate-4",
+      "kind": "door"
+    },
+    "s": {
+      "id": "altar-4",
+      "kind": "altar",
+      "threshold": 0.9,
+      "targets": ["well-gate-4"]
+    },
+    "f": {
+      "id": "giants-breath",
+      "kind": "vent",
+      "period": 4,
+      "burn": 2,
+      "many": true
+    },
+    "n": {
+      "id": "sign-nimrod",
+      "kind": "sign",
+      "text": "Raph\u00e8l mai am\u00e8cche zab\u00ec almi! roars Nimrod, whose tower confused the tongues of men; his words mean nothing to anyone. The giants around the well breathe fire down its stair. At the altars only one voice is heard: the crowd must speak as one, and the deeper the altar, the more of you it demands. Halfway down, keep watch for the giants: be still for eight turns."
+    },
+    "h": {
+      "id": "giants-roar",
+      "kind": "vent",
+      "period": 3,
+      "burn": 2,
+      "phase": 1,
+      "many": true
+    },
+    "j": {
+      "id": "giants-roar-late",
+      "kind": "vent",
+      "period": 3,
+      "burn": 2,
+      "phase": 0,
+      "many": true
+    }
+  }
+}

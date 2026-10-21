@@ -1,0 +1,21 @@
+{
+  "id": "wood-of-suicides",
+  "index": 12,
+  "name": "The Wood of the Suicides",
+  "minimumPlayers": 5,
+  "reveal": { "mode": "line_of_sight", "radius": 4 },
+  "legend": {
+    "s": {
+      "id": "sign-pier",
+      "kind": "sign",
+      "text": "Here those who did violence to themselves grow as thorn trees, and the Harpies feed on their leaves. Break a branch and it bleeds and speaks. Three branches hold the way down. Each breaks and heals as often as you like."
+    },
+    "1": { "id": "branch-east", "kind": "switch", "targets": ["thicket", "root-gate"] },
+    "2": { "id": "branch-west", "kind": "switch", "targets": ["thicket", "root-gate"] },
+    "3": { "id": "branch-deep", "kind": "switch", "targets": ["root-gate"] },
+    "P": { "id": "thicket", "kind": "door", "parity": true },
+    "G": { "id": "root-gate", "kind": "door", "need": 3 },
+    "h": { "id": "harpy", "kind": "patrol", "route": "LLDDRRUU" },
+    "t": { "id": "thorn", "kind": "trap", "many": true }
+  }
+}

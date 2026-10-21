@@ -1,0 +1,18 @@
+{
+  "id": "styx",
+  "index": 8,
+  "name": "The Marsh of Styx",
+  "minimumPlayers": 3,
+  "reveal": { "mode": "torchlight", "radius": 2 },
+  "legend": {
+    "s": {
+      "id": "sign-styx",
+      "kind": "sign",
+      "text": "In the black marsh the wrathful tear at one another, and beneath the mud the sullen gurgle, unseen. Some cracks are only cracks. Some are mouths. A weight pushed ahead of you finds out which."
+    },
+    "f": { "id": "phlegyas", "kind": "platform", "dir": "right", "on": "L" },
+    "b": { "id": "styx-stone", "kind": "block" },
+    "t": { "id": "sullen", "kind": "trap", "hint": true, "many": true },
+    "c": { "id": "crack", "kind": "crack", "many": true }
+  }
+}

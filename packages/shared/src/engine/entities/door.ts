@@ -1,44 +1,40 @@
+import { weighed } from "../bodies.js";
 import type { TurnContext } from "../context.js";
 import type { EntityType } from "../registry.js";
 import type { RuntimeEntity } from "../types.js";
+import { receiveSignal, validateActivation, wantsOn } from "./activation.js";
 
 /**
  * Door: blocks movement while closed.
  * - A latching signal (lever) opens it for good: it stays open, even through floor resets.
- * - A non-latching signal (pressure plate) holds it open only while that plate is weighed down.
- *   When the last holder lets go it closes, but never on someone: while the hero or a block is in
+ * - A non-latching signal (pressure plate, switch) holds it open only while that source is on.
+ *   When the last holder lets go it closes, but never on someone: while the hero or a body is in
  *   the doorway it waits, and closes at the end of the first turn the doorway is clear.
+ * - `need: n`: opens only while n sources hold it at once. `parity: true`: open while an odd
+ *   number hold it. `inverted: true`: starts open, and its sources close it (a lever closes it
+ *   for good). See activation.ts.
  */
 export const door: EntityType = {
   kind: "door",
-  initialState: () => ({ open: false, latched: false, holders: [] }),
+  initialState: (p) => ({ open: p.props.inverted === true, latched: false, holders: [] }),
   blocksMove: (e) => !e.state.open,
-  onSignal(ctx, e, on, { sourceId, latch }) {
-    const holders = new Set(e.state.holders as string[]);
-    if (on) {
-      if (latch) e.state.latched = true;
-      else holders.add(sourceId);
-    } else {
-      holders.delete(sourceId);
-    }
-    e.state.holders = [...holders];
-    if (on && !e.state.open) {
-      e.state.open = true;
-      ctx.markChanged(e);
-    }
-    closeIfFree(ctx, e);
+  onSignal(ctx, e, on, source) {
+    receiveSignal(e, on, source);
+    settle(ctx, e);
   },
-  onTurnEnd: (ctx, e) => closeIfFree(ctx, e),
-  /** Lever-opened doors stay open; plate-held doors start closed and follow their plates again. */
+  onTurnEnd: (ctx, e) => settle(ctx, e),
+  /** Lever-latched doors stay as they are; others start as in the floor file and follow again. */
   onFloorReset: (current, initial) => (current.state.latched ? current : initial),
+  validate: (e) => validateActivation(e).map((p) => `door ${p}`),
 };
 
-function closeIfFree(ctx: TurnContext, e: RuntimeEntity): void {
-  if (!e.state.open || e.state.latched || (e.state.holders as string[]).length > 0) return;
-  const occupied =
-    (ctx.state.hero.x === e.x && ctx.state.hero.y === e.y) ||
-    ctx.entitiesAt(e.x, e.y).some((o) => o.kind === "block" && !o.state.filled);
-  if (occupied) return;
-  e.state.open = false;
-  ctx.markChanged(e);
+function settle(ctx: TurnContext, e: RuntimeEntity): void {
+  const want = wantsOn(e);
+  if (want && !e.state.open) {
+    e.state.open = true;
+    ctx.markChanged(e);
+  } else if (!want && e.state.open && !weighed(ctx, e.x, e.y)) {
+    e.state.open = false;
+    ctx.markChanged(e);
+  }
 }

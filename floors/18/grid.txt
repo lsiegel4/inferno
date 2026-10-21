@@ -1,0 +1,15 @@
+###############################
+########.#####.#####.##########
+###.....b.................#####
+###.LLLLLLLLLLLLLLLLLLLLL.#####
+###.LLLLLLLLLLLLLLLLLLLLL.#####
+##..LLLLLLLLLLLLLLLLLLLLL..####
+#s..LLLLLLLL.....LLLLLLLLc#####
+#S..fLLLLLLL..a..LLLLLLLh.A.U##
+#...LLLLLLLL.....LLLLLLLL.#####
+###.LLLLLLLLLLLLLLLLLLLLL..####
+##..LLLLLLLLLLLLLLLLLLLLL.#####
+###.LLLLLLLLLLLLLLLLLLLLL.#####
+###.......d...............#####
+########.#####.#####t##########
+###############################
