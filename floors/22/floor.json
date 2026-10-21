@@ -1,0 +1,70 @@
+{
+  "id": "sowers-of-discord",
+  "index": 22,
+  "name": "Malebolge: the Sowers of Discord",
+  "minimumPlayers": 12,
+  "legend": {
+    "E": {
+      "id": "shade",
+      "kind": "echo"
+    },
+    "p": {
+      "id": "discord-plate-1",
+      "kind": "plate",
+      "targets": ["discord-door-1"]
+    },
+    "q": {
+      "id": "discord-plate-2",
+      "kind": "plate",
+      "targets": ["discord-door-1"]
+    },
+    "A": {
+      "id": "discord-door-1",
+      "kind": "door",
+      "need": 2
+    },
+    "s": {
+      "id": "sign-bertran",
+      "kind": "sign",
+      "text": "Here walk the sowers of discord, split open by a demon's sword for every soul they split. Bertran de Born carries his own head like a lantern. Your discord walks here too, as a shade: every turn it does what the second-most of you voted for. When you all agree, it stands still. It can never do what the hero does."
+    },
+    ">": {
+      "id": "split-gate-1",
+      "kind": "oneway",
+      "dir": "right",
+      "many": true
+    },
+    "r": {
+      "id": "discord-plate-3",
+      "kind": "plate",
+      "targets": ["discord-gate-2"]
+    },
+    "B": {
+      "id": "discord-gate-2",
+      "kind": "door"
+    },
+    "l": {
+      "id": "discord-lever",
+      "kind": "lever",
+      "targets": ["discord-door-2"]
+    },
+    "C": {
+      "id": "discord-door-2",
+      "kind": "door"
+    },
+    "t": {
+      "id": "schism",
+      "kind": "trap",
+      "many": true
+    },
+    "m": {
+      "id": "discord-lever-1",
+      "kind": "lever",
+      "targets": ["discord-door-1", "discord-exit-1"]
+    },
+    "M": {
+      "id": "discord-exit-1",
+      "kind": "door"
+    }
+  }
+}

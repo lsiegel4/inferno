@@ -1,0 +1,89 @@
+{
+  "id": "burning-sands",
+  "index": 13,
+  "name": "The Burning Sands",
+  "minimumPlayers": 6,
+  "legend": {
+    "s": {
+      "id": "sign-sands",
+      "kind": "sign",
+      "text": "On the plain of burning sand the flakes of fire fall slowly, like snow on windless mountains. In the north the fire rolls east like a wave: ride it and do not stop. In the south it flickers: keep moving every turn, and never walk into a rock. An hourglass holds the fire still, for a little while."
+    },
+    "0": {
+      "id": "flame-0",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 0,
+      "many": true
+    },
+    "1": {
+      "id": "flame-1",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 1,
+      "many": true
+    },
+    "2": {
+      "id": "flame-2",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 2,
+      "many": true
+    },
+    "h": {
+      "id": "hourglass-sands",
+      "kind": "item",
+      "item": "hourglass"
+    },
+    "g": {
+      "id": "hourglass-oasis",
+      "kind": "item",
+      "item": "hourglass"
+    },
+    "a": {
+      "id": "lever-sands-north",
+      "kind": "lever",
+      "targets": ["sands-gate-north"]
+    },
+    "b": {
+      "id": "lever-sands-south",
+      "kind": "lever",
+      "targets": ["sands-gate-south"]
+    },
+    "A": {
+      "id": "sands-gate-north",
+      "kind": "door"
+    },
+    "B": {
+      "id": "sands-gate-south",
+      "kind": "door"
+    },
+    "e": {
+      "id": "ember-even",
+      "kind": "vent",
+      "period": 2,
+      "burn": 1,
+      "phase": 0,
+      "many": true
+    },
+    "o": {
+      "id": "ember-odd",
+      "kind": "vent",
+      "period": 2,
+      "burn": 1,
+      "phase": 1,
+      "many": true
+    },
+    "3": {
+      "id": "flame-3",
+      "kind": "vent",
+      "period": 4,
+      "burn": 3,
+      "phase": 3,
+      "many": true
+    }
+  }
+}

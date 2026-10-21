@@ -1,16 +1,61 @@
 /** Hero movement onto tiles, floor transitions, and death with floor reset. */
 import { TERRAIN, terrainAt } from "../floor.js";
 import type { TurnContext } from "./context.js";
-import { blocksMove, entityType } from "./registry.js";
+import {
+  blocksEntry,
+  blocksMove,
+  coversHazard,
+  entityType,
+  isHazardEntity,
+  isRemoved,
+} from "./registry.js";
+import { cloneEntity, cloneJson, sameJson } from "./clone.js";
+import { DELTAS } from "./types.js";
 
-/** True if the hero cannot enter this tile (wall or a blocking entity). Lava is enterable. */
-export function isBlocked(ctx: TurnContext, x: number, y: number): boolean {
+/**
+ * True if the hero cannot enter this tile (wall or a blocking entity). Lava is enterable. With a
+ * direction of travel, one-way tiles that refuse that direction also block.
+ */
+export function isBlocked(ctx: TurnContext, x: number, y: number, dx = 0, dy = 0): boolean {
   if (terrainAt(ctx.floor.def, x, y) === TERRAIN.wall) return true;
-  return ctx.entitiesAt(x, y).some(blocksMove);
+  return ctx.entitiesAt(x, y).some((e) => blocksMove(e) || blocksEntry(e, dx, dy));
 }
 
-/** Move the hero onto a tile and apply whatever is there. */
+/** True if something (e.g. a block that filled it) turns this tile's hazard into plain floor. */
+export function isCovered(ctx: TurnContext, x: number, y: number): boolean {
+  return ctx.entitiesAt(x, y).some(coversHazard);
+}
+
+/** True if this tile is lava or a hole (pit, trap, collapsed floor) that nothing covers. */
+export function isHazardTile(ctx: TurnContext, x: number, y: number): boolean {
+  if (isCovered(ctx, x, y)) return false;
+  return (
+    terrainAt(ctx.floor.def, x, y) === TERRAIN.lava || ctx.entitiesAt(x, y).some(isHazardEntity)
+  );
+}
+
+export function isIce(ctx: TurnContext, x: number, y: number): boolean {
+  return terrainAt(ctx.floor.def, x, y) === TERRAIN.ice && !isCovered(ctx, x, y);
+}
+
+/**
+ * Move the hero onto a tile and apply whatever is there. On ice the hero keeps sliding in the
+ * direction it faces until something blocks it or it reaches a tile that is not ice.
+ */
 export function moveHeroTo(ctx: TurnContext, x: number, y: number): void {
+  const hero = ctx.state.hero;
+  const [dx, dy] = DELTAS[hero.facing];
+  for (let guard = 0; guard < 1000; guard++) {
+    enterTile(ctx, x, y);
+    if (ctx.outcome && ctx.outcome !== "no_effect") return;
+    if (hero.x !== x || hero.y !== y || !isIce(ctx, x, y)) return; // teleported, or off the ice
+    if (isBlocked(ctx, x + dx, y + dy, dx, dy)) return;
+    x += dx;
+    y += dy;
+  }
+}
+
+function enterTile(ctx: TurnContext, x: number, y: number): void {
   const hero = ctx.state.hero;
   hero.x = x;
   hero.y = y;
@@ -18,12 +63,15 @@ export function moveHeroTo(ctx: TurnContext, x: number, y: number): void {
   ctx.emit({ type: "hero_moved" });
 
   const t = terrainAt(ctx.floor.def, x, y);
+  if (isCovered(ctx, x, y)) return;
   if (t === TERRAIN.lava) return die(ctx);
   if (t === TERRAIN.stairsUp) return climb(ctx);
   if (t === TERRAIN.stairsDown) return descend(ctx);
   for (const e of ctx.entitiesAt(x, y)) {
+    if (isRemoved(e)) continue;
     entityType(e.kind).onEnter?.(ctx, e);
-    if (ctx.outcome) return;
+    if (ctx.outcome && ctx.outcome !== "no_effect") return;
+    if (hero.x !== x || hero.y !== y) return; // teleported
   }
 }
 
@@ -83,12 +131,15 @@ export function die(ctx: TurnContext): void {
   const { state } = ctx;
   const floor = ctx.floor;
   const previous = floor.entities;
+  const byId = new Map(previous.map((e) => [e.id, e]));
   floor.entities = floor.initial.map((initial) => {
-    const current = previous.find((e) => e.id === initial.id) ?? initial;
+    const current = byId.get(initial.id) ?? initial;
     const t = entityType(initial.kind);
     const kept = t.onFloorReset ? t.onFloorReset(current, initial) : initial;
-    const copy = structuredClone(kept);
-    if (JSON.stringify(copy) !== JSON.stringify(current)) ctx.changed.add(copy.id);
+    const copy = cloneEntity(kept);
+    if (copy.x !== current.x || copy.y !== current.y || !sameJson(copy.state, current.state)) {
+      ctx.changed.add(copy.id);
+    }
     return copy;
   });
   // Entities placed during play (not in the floor file, e.g. a torch's light) are removed. They
@@ -96,11 +147,12 @@ export function die(ctx: TurnContext): void {
   const initialIds = new Set(floor.initial.map((e) => e.id));
   for (const e of previous) {
     if (initialIds.has(e.id) || e.state.removed === true) continue;
-    floor.entities.push({ ...structuredClone(e), state: { ...e.state, removed: true } });
+    floor.entities.push({ ...cloneEntity(e), state: { ...cloneJson(e.state), removed: true } });
     ctx.changed.add(e.id);
   }
   for (const s of floor.spent) if (s.returnOnReset) state.inventory.push(s.item);
   floor.spent = [];
+  floor.frozen = 0;
   const { start } = floor.def;
   state.hero = { x: start.x, y: start.y, facing: "up", stairsLock: false };
   ctx.setOutcome("died");

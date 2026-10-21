@@ -33,6 +33,26 @@ describe("parseFloor", () => {
     ]);
   });
 
+  it("repeats a legend entry marked many, with position-based ids", () => {
+    const f = parseFloor(
+      "######\n#SccU#\n######",
+      meta({ c: { id: "crack", kind: "crack", many: true } }),
+    );
+    expect(f.entities.map((e) => e.id)).toEqual(["crack-2-1", "crack-3-1"]);
+    expect(f.entities[0]!.props).toEqual({});
+  });
+
+  it("puts the terrain named by on under an entity, and rejects other terrain", () => {
+    const f = parseFloor(
+      "#####\n#SfU#\n#####",
+      meta({ f: { id: "f", kind: "platform", on: "L" } }),
+    );
+    expect(f.terrain[1]).toBe("#SLU#");
+    expect(problems("#####\n#SfU#\n#####", meta({ f: { id: "f", kind: "x", on: "#" } }))).toEqual([
+      'legend "f": on must be ".", "L" or "I"',
+    ]);
+  });
+
   it("reports every problem at once", () => {
     expect(
       problems(

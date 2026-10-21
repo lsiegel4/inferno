@@ -30,7 +30,7 @@ export async function recoverGame(floors: readonly FloorDef[], log: GameLog): Pr
     if (t.turn !== state.turn + 1) {
       throw new RecoveryError(`turn log has a gap: expected ${state.turn + 1}, found ${t.turn}`);
     }
-    const r = applyTurn(state, t.action);
+    const r = applyTurn(state, t.action, t.crowd);
     if ((r.outcome ?? null) !== (t.outcome ?? null)) {
       throw new RecoveryError(`replay diverged at turn ${t.turn}: ${r.outcome} vs ${t.outcome}`);
     }

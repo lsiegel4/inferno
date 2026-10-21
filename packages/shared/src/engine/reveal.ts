@@ -1,8 +1,9 @@
 /**
  * Darkness (game design §7a): which tiles of the current floor are revealed to players.
  *
- * Light sources are the hero (the floor's torchlight radius) and every `light` entity (its own
- * `radius` prop, or the floor radius). A tile is lit when it is within a source's radius,
+ * Light sources are the hero (the floor's torchlight radius) and whatever entities cast light
+ * (EntityType.lights): `light` entities (their own `radius` prop, or the floor radius) and the
+ * tiles of a firing beam. A tile is lit when it is within a source's radius,
  * measured as Euclidean distance (dx² + dy² ≤ r²). In line_of_sight mode the straight line
  * from the source to the tile must also be clear: walls and move-blocking entities (closed
  * doors, levers, signs, unpicked items...) stop sight, though the blocking tile itself is lit.
@@ -12,7 +13,7 @@
  * what is around them. Nothing is remembered: tiles go dark again when no source reaches them.
  */
 import { TERRAIN, terrainAt } from "../floor.js";
-import { blocksMove, isRemoved } from "./registry.js";
+import { blocksMove, entityType, isRemoved } from "./registry.js";
 import type { GameState } from "./types.js";
 import type { RevealFn } from "./view.js";
 
@@ -29,9 +30,10 @@ export function revealFor(state: GameState): RevealFn {
 
   const sources: Source[] = [{ x: state.hero.x, y: state.hero.y, radius: reveal.radius }];
   for (const e of floor.entities) {
-    if (e.kind !== "light" || isRemoved(e)) continue;
-    const r = e.props.radius;
-    sources.push({ x: e.x, y: e.y, radius: typeof r === "number" ? r : reveal.radius });
+    if (isRemoved(e)) continue;
+    for (const l of entityType(e.kind).lights?.(e) ?? []) {
+      sources.push({ x: l.x, y: l.y, radius: l.radius ?? reveal.radius });
+    }
   }
 
   const opaque = (x: number, y: number): boolean =>

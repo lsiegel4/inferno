@@ -65,7 +65,7 @@ export class Bot {
         return this.maybeVote();
       case "turn": {
         this.followPlan(msg.data.action);
-        const r = applyTurn(this.shadow!, msg.data.action);
+        const r = applyTurn(this.shadow!, msg.data.action, msg.data.crowd);
         this.shadow = r.state;
         const { x, y, facing } = r.state.hero;
         const h = msg.data.hero;

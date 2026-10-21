@@ -1,0 +1,93 @@
+{
+  "id": "falsifiers",
+  "index": 23,
+  "name": "Malebolge: the Falsifiers",
+  "minimumPlayers": 12,
+  "reveal": {
+    "mode": "torchlight",
+    "radius": 3
+  },
+  "legend": {
+    "s": {
+      "id": "sign-liar",
+      "kind": "sign",
+      "text": "Sinon the Greek, who lied the horse into Troy, swears: the cracked stones are the sound ones; walk only on the cracks. And the fires here keep a steady beat: two up, one down."
+    },
+    "v": {
+      "id": "alchemy",
+      "kind": "vent",
+      "period": 3,
+      "burn": 1,
+      "many": true
+    },
+    "t": {
+      "id": "counterfeit",
+      "kind": "trap",
+      "hint": true,
+      "many": true
+    },
+    "c": {
+      "id": "true-crack",
+      "kind": "crack",
+      "many": true
+    },
+    ">": {
+      "id": "one-way-on",
+      "kind": "oneway",
+      "dir": "right",
+      "many": true
+    },
+    "E": {
+      "id": "impersonator",
+      "kind": "echo"
+    },
+    "K": {
+      "id": "cell-door",
+      "kind": "door"
+    },
+    "p": {
+      "id": "cell-plate",
+      "kind": "plate",
+      "targets": ["cell-door"]
+    },
+    "q": {
+      "id": "bridge-plate",
+      "kind": "plate",
+      "targets": ["bridge-door"]
+    },
+    "B": {
+      "id": "bridge-door",
+      "kind": "door"
+    },
+    "w": {
+      "id": "counterfeit-vigil",
+      "kind": "vigil",
+      "turns": 5,
+      "targets": ["vigil-door"]
+    },
+    "V": {
+      "id": "vigil-door",
+      "kind": "door"
+    },
+    "f": {
+      "id": "far-plate",
+      "kind": "plate",
+      "targets": ["last-door"]
+    },
+    "g": {
+      "id": "near-plate",
+      "kind": "plate",
+      "targets": ["last-door"]
+    },
+    "X": {
+      "id": "last-door",
+      "kind": "door",
+      "need": 2
+    },
+    "Y": {
+      "id": "shade-drop",
+      "kind": "oneway",
+      "dir": "down"
+    }
+  }
+}

@@ -4,9 +4,12 @@
  * Grid terrain characters are fixed:
  *   #  wall        .  floor       L  lava
  *   S  start       U  stairs up   D  stairs down
+ *   I  ice (the hero, blocks and statues slide across it)
  * Every other character must be defined in the JSON `legend`, which places an entity of the
- * given kind on that tile (the tile underneath is floor). Each legend character may appear
- * at most once in the grid, so every entity has a stable id.
+ * given kind on that tile. The tile underneath is floor, or the terrain named by the entry's
+ * optional `on` (e.g. "L" for a ferry floating on lava, "I" for a plate on ice). Each legend
+ * character may appear at most once in the grid, so every entity has a stable id, unless its
+ * entry has `"many": true`: then every copy is its own entity with id "<id>-<x>-<y>".
  */
 import { z } from "zod";
 
@@ -17,6 +20,7 @@ export const TERRAIN = {
   start: "S",
   stairsUp: "U",
   stairsDown: "D",
+  ice: "I",
 } as const;
 export type TerrainChar = (typeof TERRAIN)[keyof typeof TERRAIN];
 const TERRAIN_CHARS = new Set<string>(Object.values(TERRAIN));
@@ -49,6 +53,13 @@ export const FloorMetaSchema = z.object({
   minimumPlayers: z.number().int().min(1),
   legend: z.record(z.string().length(1), LegendEntrySchema).default({}),
   reveal: RevealSchema.default({ mode: "viewport" }),
+  /** Display name, e.g. "The Gate". */
+  name: z.string().min(1).optional(),
+  /**
+   * Item ids the crowd must still hold when leaving this floor, because a later floor needs them.
+   * Not enforced in play; the solver treats leaving without them as failing the floor.
+   */
+  carry: z.array(z.string().min(1)).default([]),
 });
 export type FloorMeta = z.infer<typeof FloorMetaSchema>;
 
@@ -66,6 +77,8 @@ export interface FloorDef {
   index: number;
   minimumPlayers: number;
   reveal: Reveal;
+  name?: string;
+  carry: string[];
   width: number;
   height: number;
   /** Terrain rows; legend characters are replaced with ".". */
@@ -130,11 +143,21 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
           problems.push(`unknown character "${ch}" at ${x},${y}`);
           return TERRAIN.floor;
         }
-        if (seenLegend.has(ch)) problems.push(`legend character "${ch}" appears more than once`);
+        const { id: baseId, kind, on, many, ...props } = entry;
+        if (seenLegend.has(ch) && many !== true) {
+          problems.push(`legend character "${ch}" appears more than once`);
+        }
         seenLegend.add(ch);
-        const { id, kind, ...props } = entry;
+        const id = many === true ? `${baseId}-${x}-${y}` : baseId;
         entities.push({ id, kind, x, y, props });
-        return TERRAIN.floor;
+        if (on === undefined) return TERRAIN.floor;
+        if (on !== TERRAIN.floor && on !== TERRAIN.lava && on !== TERRAIN.ice) {
+          problems.push(
+            `legend "${ch}": on must be "${TERRAIN.floor}", "${TERRAIN.lava}" or "${TERRAIN.ice}"`,
+          );
+          return TERRAIN.floor;
+        }
+        return on;
       })
       .join(""),
   );
@@ -157,6 +180,8 @@ export function parseFloor(gridText: string, metaJson: unknown): FloorDef {
     index: meta.index,
     minimumPlayers: meta.minimumPlayers,
     reveal: meta.reveal,
+    ...(meta.name ? { name: meta.name } : {}),
+    carry: meta.carry,
     width,
     height: rows.length,
     terrain,

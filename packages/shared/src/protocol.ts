@@ -44,6 +44,8 @@ export type Entity = z.infer<typeof EntitySchema>;
 export const FloorStateSchema = z.object({
   floorId: z.string(),
   index: z.number().int().min(1),
+  /** Display name, e.g. "The Gate" (absent on unnamed floors). */
+  name: z.string().optional(),
   width: z.number().int().min(1),
   height: z.number().int().min(1),
   /** Static terrain, one row per line. Unrevealed tiles are " " (see encodeTerrain). */
@@ -57,7 +59,7 @@ export type FloorState = z.infer<typeof FloorStateSchema>;
 
 export const InventoryItemSchema = z.object({
   id: z.string(),
-  type: z.enum(["key", "torch", "weight"]),
+  type: z.enum(["key", "torch", "weight", "plank", "hourglass"]),
 });
 export type InventoryItemView = z.infer<typeof InventoryItemSchema>;
 
@@ -72,12 +74,23 @@ export type Presence = z.infer<typeof PresenceSchema>;
 export const TurnOutcomeSchema = z.enum(["died", "floor_up", "floor_down", "fell", "no_effect"]);
 export type TurnOutcome = z.infer<typeof TurnOutcomeSchema>;
 
+/**
+ * How the crowd voted on a turn: the winner's share of the votes cast, and the runner-up action
+ * (null when everyone agreed). Crowd mechanics (the echo, altars) depend on it, so it is part of
+ * the turn log and replayed on recovery. Absent on old records: treated as unanimous.
+ */
+export const CrowdSchema = z.object({
+  support: z.number().min(0).max(1),
+  dissent: ActionSchema.nullable(),
+});
+
 export const TurnRecordSchema = z.object({
   turn: z.number().int().min(1),
   floorId: z.string(),
   action: ActionSchema,
   at: z.string(),
   outcome: TurnOutcomeSchema.optional(),
+  crowd: CrowdSchema.optional(),
 });
 export type TurnRecord = z.infer<typeof TurnRecordSchema>;
 
@@ -163,6 +176,7 @@ export const ServerMessageSchema = z.discriminatedUnion("type", [
     z.object({
       turn: z.number().int().min(1),
       action: ActionSchema,
+      crowd: CrowdSchema.optional(),
       hero: HeroSchema,
       changes: z.array(EntitySchema),
       inventory: z.array(InventoryItemSchema).optional(),
