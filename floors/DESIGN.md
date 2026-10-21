@@ -2,7 +2,7 @@
 
 Twenty-seven floors, one per circle (and ditch, and round) of Dante's Inferno, in his order: the
 Gate to Judecca. Each floor introduces at most one or two mechanics and then combines them with
-everything before. The floor lab (`pnpm --filter @inferno/client playtest`) plays them all.
+everything before. The floor lab (`pnpm --filter @inferno/client lab`) plays them all in the real client.
 
 ## The yardstick
 

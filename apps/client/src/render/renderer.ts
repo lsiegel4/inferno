@@ -4,6 +4,7 @@
  * shapes so it scales to any tile size.
  */
 import type { Entity, FloorState, Hero } from "@inferno/shared";
+import { drawAtmosphere } from "./atmosphere.js";
 
 export const PALETTE = {
   void: "#050303",
@@ -31,19 +32,11 @@ export const PALETTE = {
   gold: "#e8c25a",
 };
 
-export interface Light {
-  x: number;
-  y: number;
-  radius: number;
-}
-
 export interface SceneView {
   floor: FloorState;
   hero: Hero;
   /** Tiles seen before (explored map): terrain characters, drawn dimmed when not lit. */
   remembered: Map<string, string>;
-  /** Light sources for the falloff shading; null on fully lit (viewport) floors. */
-  lights: Light[] | null;
   /** Extra entities to outline (designer x-ray: hidden traps etc.). */
   xray: Entity[];
   /** Camera top-left in tiles (may be fractional). */
@@ -53,6 +46,10 @@ export interface SceneView {
   time: number;
   /** 0..1: a red flash after a death. */
   hurt: number;
+  /** False with prefers-reduced-motion: the torch does not flicker and the fog holds still. */
+  motion?: boolean;
+  /** The hero's height above the floor in tiles, mid-jump. */
+  heroLift?: number;
 }
 
 const key = (x: number, y: number) => `${x},${y}`;
@@ -77,17 +74,6 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: SceneView, w: number
   const px = (x: number) => (x - v.camX) * ts;
   const py = (y: number) => (y - v.camY) * ts;
 
-  const brightness = (x: number, y: number): number => {
-    if (!v.lights) return 1;
-    let b = 0;
-    for (const l of v.lights) {
-      const d = Math.hypot(x - l.x, y - l.y);
-      const r = l.radius + 0.75;
-      if (d <= r) b = Math.max(b, Math.pow(1 - d / (r + 0.5), 0.6));
-    }
-    return Math.max(0.42, Math.min(1, b + 0.25));
-  };
-
   // Terrain
   for (let y = Math.max(0, y0); y < Math.min(floor.height, y1); y++) {
     for (let x = Math.max(0, x0); x < Math.min(floor.width, x1); x++) {
@@ -98,11 +84,6 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: SceneView, w: number
       const sx = px(x),
         sy = py(y);
       drawTerrain(ctx, mem, x, y, sx, sy, ts, v.time, rows, v.remembered);
-      const shade = seen ? 1 - brightness(x, y) : 0.78;
-      if (shade > 0) {
-        ctx.fillStyle = seen ? `rgba(5,3,3,${shade})` : `rgba(8,6,10,${shade})`;
-        ctx.fillRect(sx, sy, ts + 0.5, ts + 0.5);
-      }
     }
   }
 
@@ -125,7 +106,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: SceneView, w: number
     })[e.kind] ?? 5;
   for (const e of [...floor.entities].sort((a, b) => order(a) - order(b))) {
     if (e.state?.hidden === true) continue;
-    drawEntity(ctx, e, px(e.x), py(e.y), ts, v.time);
+    drawEntity(ctx, e, px(e.x), py(e.y), ts, v.time, v.hero);
   }
   for (const e of v.xray) {
     ctx.save();
@@ -136,7 +117,47 @@ export function drawScene(ctx: CanvasRenderingContext2D, v: SceneView, w: number
     ctx.restore();
   }
 
-  drawHero(ctx, v.hero, px(v.hero.x), py(v.hero.y), ts, v.time);
+  const lift = (v.heroLift ?? 0) * ts;
+  if (lift > 0) {
+    // The hero's shadow stays on the floor during a jump.
+    ctx.fillStyle = `rgba(0,0,0,${0.35 - lift / ts / 3})`;
+    ctx.beginPath();
+    ctx.ellipse(
+      px(v.hero.x) + ts / 2,
+      py(v.hero.y) + ts * 0.8,
+      ts * 0.22,
+      ts * 0.07,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    ctx.fill();
+  }
+  drawHero(ctx, v.hero, px(v.hero.x), py(v.hero.y) - lift, ts, v.time);
+
+  // Torchlight, fog and glow over everything: the light fades toward what cannot be seen.
+  drawAtmosphere(
+    ctx,
+    {
+      rows,
+      width: floor.width,
+      height: floor.height,
+      remembered: (x, y) => v.remembered.has(key(x, y)),
+      camX: v.camX,
+      camY: v.camY,
+      tile: ts,
+      time: v.time,
+      motion: v.motion ?? true,
+      glows: [
+        { x: v.hero.x, y: v.hero.y, radius: 2.6 },
+        ...floor.entities
+          .filter((e) => e.kind === "light")
+          .map((e) => ({ x: e.x, y: e.y, radius: 2.2 })),
+      ],
+    },
+    w,
+    h,
+  );
 
   if (v.hurt > 0) {
     ctx.fillStyle = `rgba(163,18,28,${0.45 * v.hurt})`;
@@ -415,6 +436,8 @@ export function drawEntity(
   sy: number,
   ts: number,
   t: number,
+  /** Where the hero stands (watchers' eyes follow it). */
+  hero?: { x: number; y: number },
 ) {
   const s = e.state ?? {};
   const cx = sx + ts / 2,
@@ -539,16 +562,28 @@ export function drawEntity(
       ctx.beginPath();
       ctx.ellipse(cx, sy + ts * 0.38, ts * 0.14, ts * 0.12, 0, 0, Math.PI * 2);
       ctx.fill();
+      // The eyes follow the hero; while it is free to move they smoulder.
       const free = s.watched === false;
-      ctx.fillStyle = free ? "#ff3b2f" : "#2a2522";
-      ctx.fillRect(cx - ts * 0.09, sy + ts * 0.36, ts * 0.06, ts * 0.04);
-      ctx.fillRect(cx + ts * 0.03, sy + ts * 0.36, ts * 0.06, ts * 0.04);
-      if (free) glow(ctx, cx, sy + ts * 0.38, ts * 0.35, "rgba(255,40,30,0.35)");
+      let lx = 0,
+        ly = 0;
+      if (hero) {
+        const dx = hero.x - e.x,
+          dy = hero.y - e.y;
+        const d = Math.hypot(dx, dy) || 1;
+        lx = (dx / d) * ts * 0.025;
+        ly = (dy / d) * ts * 0.018;
+      }
+      const ember = free ? 0.65 + 0.35 * Math.sin(t / 260 + e.x * 3) : 0;
+      ctx.fillStyle = free ? `rgba(255,${70 + 40 * ember},40,${0.75 + 0.25 * ember})` : "#2a2522";
+      ctx.fillRect(cx - ts * 0.09 + lx, sy + ts * 0.36 + ly, ts * 0.06, ts * 0.035);
+      ctx.fillRect(cx + ts * 0.03 + lx, sy + ts * 0.36 + ly, ts * 0.06, ts * 0.035);
+      if (free)
+        glow(ctx, cx + lx, sy + ts * 0.38, ts * 0.3, `rgba(255,50,30,${0.18 + 0.12 * ember})`);
       return;
     }
     case "patrol": {
       const bob = Math.sin(t / 180 + e.x) * ts * 0.03;
-      glow(ctx, cx, cy, ts * 0.6, "rgba(200,20,20,0.3)");
+      glow(ctx, cx, cy, ts * 0.6, "rgba(200,20,20,0.26)");
       ctx.fillStyle = "#8f1219";
       ctx.beginPath();
       ctx.arc(cx, cy + bob, ts * 0.3, 0, Math.PI * 2);
@@ -566,15 +601,30 @@ export function drawEntity(
       ctx.fillRect(cx - ts * 0.13, cy - ts * 0.04 + bob, ts * 0.08, ts * 0.06);
       ctx.fillRect(cx + ts * 0.05, cy - ts * 0.04 + bob, ts * 0.08, ts * 0.06);
       if (typeof s.next === "string" && s.next !== "wait") {
+        // Where it will tread next: a faint scorch on that tile, breathing with its stride.
         const n = s.next;
-        arrow(
-          ctx,
-          cx + DX(n) * ts * 0.42,
-          cy + DY(n) * ts * 0.42,
-          n,
-          ts * 0.12,
-          "rgba(255,200,120,0.9)",
-        );
+        const fx = cx + DX(n) * ts,
+          fy = cy + DY(n) * ts;
+        const pulse = 0.5 + 0.5 * Math.sin(t / 220 + e.x + e.y);
+        const scorch = ctx.createRadialGradient(fx, fy, 0, fx, fy, ts * 0.42);
+        scorch.addColorStop(0, `rgba(170,30,20,${0.22 + 0.12 * pulse})`);
+        scorch.addColorStop(1, "rgba(170,30,20,0)");
+        ctx.fillStyle = scorch;
+        ctx.fillRect(fx - ts / 2, fy - ts / 2, ts, ts);
+        // Two claw marks, turned the way it is heading.
+        ctx.save();
+        ctx.translate(fx, fy);
+        ctx.rotate(Math.atan2(DY(n), DX(n)) + Math.PI / 2);
+        ctx.strokeStyle = `rgba(40,6,4,${0.35 + 0.2 * pulse})`;
+        ctx.lineWidth = Math.max(1, ts / 22);
+        ctx.lineCap = "round";
+        for (const ox of [-0.09, 0.09]) {
+          ctx.beginPath();
+          ctx.moveTo(ts * ox, ts * 0.12);
+          ctx.lineTo(ts * ox * 1.2, -ts * 0.1);
+          ctx.stroke();
+        }
+        ctx.restore();
       }
       return;
     }
@@ -612,7 +662,28 @@ export function drawEntity(
     case "vent": {
       ctx.fillStyle = "#1b1310";
       ctx.fillRect(sx + ts * 0.12, sy + ts * 0.12, ts * 0.76, ts * 0.76);
-      ctx.strokeStyle = s.next ? PALETTE.ember : "#4a3a33";
+      if (s.next && !s.up) {
+        // About to flare: heat breathes up between the bars, and a few embers rise.
+        const heat = 0.5 + 0.5 * Math.sin(t / 240 + e.x * 1.7);
+        const g = ctx.createRadialGradient(cx, cy + ts * 0.1, 0, cx, cy, ts * 0.42);
+        g.addColorStop(0, `rgba(255,110,30,${0.28 + 0.14 * heat})`);
+        g.addColorStop(1, "rgba(255,110,30,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(sx + ts * 0.12, sy + ts * 0.12, ts * 0.76, ts * 0.76);
+        ctx.fillStyle = "rgba(255,190,110,0.8)";
+        for (let i = 0; i < 3; i++) {
+          const phase = (t / 1400 + hash(e.x, e.y, i)) % 1;
+          ctx.globalAlpha = 1 - phase;
+          ctx.fillRect(
+            sx + ts * (0.25 + 0.5 * hash(e.y, e.x, i)),
+            sy + ts * (0.8 - 0.6 * phase),
+            Math.max(1, ts * 0.04),
+            Math.max(1, ts * 0.04),
+          );
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.strokeStyle = s.up ? "#6a3a24" : "#4a3a33";
       for (let i = 0; i < 4; i++) {
         ctx.beginPath();
         ctx.moveTo(sx + ts * (0.2 + i * 0.2), sy + ts * 0.16);
@@ -623,8 +694,6 @@ export function drawEntity(
         glow(ctx, cx, cy, ts * 0.8, "rgba(255,90,20,0.5)");
         flame(ctx, cx - ts * 0.18, sy + ts * 0.88, ts * 0.3, t, e.x);
         flame(ctx, cx + ts * 0.16, sy + ts * 0.88, ts * 0.34, t, e.y + 2);
-      } else if (s.next) {
-        glow(ctx, cx, cy, ts * 0.5, "rgba(255,120,30,0.3)");
       }
       return;
     }

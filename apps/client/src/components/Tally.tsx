@@ -1,34 +1,36 @@
-import { useEffect, useState } from "react";
 import { describeAction } from "../game/interact.js";
 import type { GameView } from "../game/store.js";
 
-/** Live vote tally and countdown for the open tick. */
+/**
+ * The turn's state in words: who has voted, and (for screen readers) the live counts. The fuse
+ * in the controls shows the same thing at a glance.
+ */
 export function Tally({ view }: { view: GameView }) {
-  const [now, setNow] = useState(() => Date.now());
   const tally = view.tally;
-  useEffect(() => {
-    if (!tally) return;
-    const id = setInterval(() => setNow(Date.now()), 100);
-    return () => clearInterval(id);
-  }, [tally]);
-
   if (!tally) {
-    return <div className="tally idle">No votes yet this turn.</div>;
+    return (
+      <div className="tally idle" aria-live="polite">
+        The first vote lights the fuse.
+      </div>
+    );
   }
-  const left = Math.max(0, (Date.parse(tally.endsAt) - now) / 1000);
   const max = Math.max(...tally.counts.map((c) => c.votes));
+  const lead = tally.counts.filter((c) => c.votes === max).map((c) => describeAction(c.action));
   return (
     <div className="tally" aria-live="polite">
-      <ul className="tally-counts">
+      <span>
+        The crowd leans <b>{lead.join(" or ")}</b>
+      </span>
+      <span className="tally-meta">
+        {tally.voted} of {tally.active} voted
+      </span>
+      <ul className="sr-only">
         {tally.counts.map((c) => (
-          <li key={JSON.stringify(c.action)} className={c.votes === max ? "lead" : ""}>
-            {describeAction(c.action)} <b>{c.votes}</b>
+          <li key={JSON.stringify(c.action)}>
+            {describeAction(c.action)}: {c.votes}
           </li>
         ))}
       </ul>
-      <span className="tally-meta">
-        {tally.voted}/{tally.active} voted · {left.toFixed(1)}s
-      </span>
     </div>
   );
 }

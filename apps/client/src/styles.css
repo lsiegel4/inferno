@@ -47,6 +47,7 @@ input {
 
 .app {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   max-width: 960px;
   margin: 0 auto;
@@ -61,6 +62,7 @@ input {
 }
 .stage {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   width: 100%;
   max-width: 440px;
@@ -70,9 +72,10 @@ input {
 /* Header: a title plate with the floor's Roman numeral and the crowd counts. */
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   border-bottom: 3px double var(--stone-light);
   padding-bottom: 8px;
 }
@@ -89,8 +92,15 @@ input {
 }
 .stats {
   display: flex;
-  gap: 14px;
+  gap: clamp(8px, 3vw, 14px);
   margin: 0;
+}
+/* Very narrow: the stats take their own row, spread evenly under the title. */
+@media (max-width: 360px) {
+  .stats {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
 }
 .stats div {
   text-align: center;
@@ -187,30 +197,283 @@ input {
   font-size: 14px;
 }
 
-/* Tally strip. */
+/* Arriving on a floor: dark, the numeral rises, then the lamp lifts from the hero outward. */
+@property --iris {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+.descent {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: #050303;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--cx, 50%) var(--cy, 50%),
+    transparent var(--iris),
+    #000 calc(var(--iris) + 14%)
+  );
+  mask-image: radial-gradient(
+    circle at var(--cx, 50%) var(--cy, 50%),
+    transparent var(--iris),
+    #000 calc(var(--iris) + 14%)
+  );
+  animation: descent-iris 2600ms cubic-bezier(0.6, 0, 0.3, 1) forwards;
+}
+@keyframes descent-iris {
+  0%,
+  58% {
+    --iris: 0%;
+    opacity: 1;
+  }
+  99% {
+    --iris: 150%;
+    opacity: 1;
+  }
+  100% {
+    --iris: 150%;
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.descent-card {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 16px;
+  text-align: center;
+  animation: descent-card 2600ms ease-out forwards;
+}
+@keyframes descent-card {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  18%,
+  52% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  66%,
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+.descent-how {
+  margin: 0;
+  font: 400 13px/1 var(--body);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.descent-numeral {
+  margin: 0;
+  font: 400 clamp(56px, 18vw, 96px)/1 var(--display);
+  color: var(--ember);
+  text-shadow:
+    0 0 24px rgb(217 138 54 / 0.55),
+    0 0 2px rgb(255 210 150 / 0.8);
+}
+.descent-rule {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ember), transparent);
+  animation: descent-rule 2600ms ease-out forwards;
+}
+@keyframes descent-rule {
+  10% {
+    width: 0;
+  }
+  40%,
+  100% {
+    width: min(220px, 60vw);
+  }
+}
+.descent-name {
+  margin: 0;
+  max-width: 24ch;
+  font: italic 400 clamp(17px, 4.5vw, 22px)/1.25 var(--body);
+  color: var(--bone);
+  text-wrap: balance;
+}
+
+/* The lobby: the gate, before you go in. */
+.lobby {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 100%, rgb(196 70 43 / 0.28), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgb(43 36 31 / 0.9), transparent 70%), var(--ground);
+}
+.lobby-embers {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lobby-embers span {
+  position: absolute;
+  bottom: -10px;
+  left: calc(4% + var(--i) * 6.8%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffc46e;
+  box-shadow: 0 0 6px 1px rgb(240 162 59 / 0.8);
+  opacity: 0;
+  animation: ember-rise calc(7s + var(--i) * 0.37s) linear infinite;
+  animation-delay: calc(var(--i) * -0.83s);
+}
+@keyframes ember-rise {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc(sin(var(--i)) * 60px), -105vh);
+    opacity: 0;
+  }
+}
+.lobby-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  width: min(100%, 480px);
+  text-align: center;
+}
+.lobby-kicker {
+  margin: 0;
+  font: 400 12px/1 var(--body);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.lobby-title {
+  margin: 0;
+  font: 400 clamp(52px, 16vw, 88px)/0.95 var(--display);
+  letter-spacing: 0.04em;
+  color: var(--ember);
+  text-shadow: 0 0 32px rgb(217 138 54 / 0.45);
+}
+.lobby-lede {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 17px;
+  color: var(--bone);
+  text-wrap: balance;
+}
+.lobby-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  margin: 8px 0 0;
+  border-block: var(--rule);
+}
+.lobby-stats div {
+  padding: 12px 4px;
+}
+.lobby-stats div + div {
+  border-left: var(--rule);
+}
+.lobby-stats dt {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.lobby-stats dd {
+  margin: 4px 0 0;
+  font: 700 26px/1.1 var(--body);
+  color: var(--bone);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+/* The circle is a Roman numeral; counts use plain figures so 11 never reads as II. */
+.lobby-stats .roman {
+  font: 400 30px/1 var(--display);
+}
+.lobby-floor {
+  margin: -4px 0 0;
+  font-style: italic;
+  color: var(--ash);
+}
+.lobby-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--bone);
+  text-wrap: balance;
+}
+.lobby-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--verdigris);
+  box-shadow: 0 0 10px var(--verdigris);
+  animation: dot-pulse 1.8s ease-in-out infinite;
+}
+.lobby-status.waiting .lobby-dot {
+  background: var(--ember);
+  box-shadow: 0 0 10px var(--ember);
+}
+@keyframes dot-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+.lobby-enter {
+  width: min(100%, 320px);
+  min-height: 56px;
+  margin-top: 6px;
+  font: 400 20px/1 var(--display);
+  letter-spacing: 0.06em;
+}
+.lobby-account {
+  width: 100%;
+  text-align: left;
+}
+.lobby-account .account {
+  border-bottom: 0;
+  padding-bottom: 0;
+  justify-items: center;
+  text-align: center;
+}
+.lobby-me {
+  margin: 0;
+  color: var(--ash);
+}
+.lobby-me b {
+  color: var(--bone);
+}
+
+/* Tally strip: the turn in words. */
 .tally {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  align-items: baseline;
+  gap: 4px 12px;
   flex-wrap: wrap;
   min-height: 1.5em;
   font: 14px/1.4 var(--ledger);
   color: var(--ash);
 }
-.tally-counts {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.tally-counts b {
-  color: var(--bone);
-  font-weight: 400;
-}
-.tally-counts .lead b {
+.tally b {
   color: var(--ember);
+  font-weight: 400;
 }
 .tally-meta {
   font-variant-numeric: tabular-nums;
@@ -218,16 +481,40 @@ input {
 
 /* Keys: square, inked, with a carved lower edge. */
 .key {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
+  min-width: 0;
   padding: 0 14px;
   border: 1px solid var(--ink);
-  border-radius: 2px;
+  border-radius: 6px;
   background: var(--stone);
   box-shadow:
     inset 0 1px 0 var(--stone-light),
     0 3px 0 var(--ink);
   cursor: pointer;
   touch-action: manipulation;
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out,
+    background-color 150ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.key .icon {
+  flex: none;
+}
+.key-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .key:hover:not(:disabled) {
+    background: var(--stone-light);
+  }
 }
 .key:active:not(:disabled) {
   transform: translateY(2px);
@@ -246,10 +533,63 @@ input {
     inset 0 1px 0 rgb(255 255 255 / 0.25),
     0 3px 0 var(--ink);
 }
+@media (hover: hover) {
+  .key.primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ember) 85%, white);
+  }
+}
+/* Your vote: lit at once, before the server answers. */
 .key.chosen {
   outline: 2px solid var(--ember);
   outline-offset: 2px;
   opacity: 1;
+  box-shadow:
+    0 0 0 1px var(--ink),
+    0 0 18px rgb(217 138 54 / 0.45);
+}
+/* The crowd's lean: an ember bar along the key's lower edge. */
+.key::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  bottom: 3px;
+  height: 3px;
+  width: calc((100% - 8px) * var(--share, 0));
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--lava), var(--ember));
+  box-shadow: 0 0 8px rgb(217 138 54 / 0.6);
+  transition: width 220ms ease-out;
+  pointer-events: none;
+}
+.key.primary::after {
+  background: var(--ink);
+  box-shadow: none;
+}
+.key.lead {
+  box-shadow:
+    inset 0 1px 0 var(--stone-light),
+    0 3px 0 var(--ink),
+    0 0 14px rgb(217 138 54 / 0.35);
+}
+/* Overruled: your key flinches when the crowd went another way. */
+.key.overruled {
+  animation: flinch 420ms ease-out;
+}
+@keyframes flinch {
+  0% {
+    transform: translateX(0);
+    filter: brightness(1.6) saturate(0.4);
+  }
+  25% {
+    transform: translateX(-4px) rotate(-2deg);
+  }
+  55% {
+    transform: translateX(3px) rotate(1deg);
+  }
+  100% {
+    transform: translateX(0);
+    filter: none;
+  }
 }
 .key:focus-visible,
 .link:focus-visible,
@@ -270,19 +610,19 @@ input:focus-visible {
 
 .controls {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 16px;
-  align-items: start;
+  align-items: center;
 }
 .dpad {
+  --pad: clamp(48px, 15vw, 60px);
   display: grid;
-  grid-template-columns: repeat(3, 56px);
-  grid-template-rows: repeat(3, 56px);
+  grid-template-columns: repeat(3, var(--pad));
+  grid-template-rows: repeat(3, var(--pad));
   gap: 4px;
 }
 .dpad .key {
   padding: 0;
-  font-size: 20px;
 }
 .dir-up {
   grid-area: 1 / 2;
@@ -296,20 +636,53 @@ input:focus-visible {
 .dir-down {
   grid-area: 3 / 2;
 }
+.actions-wrap {
+  container: actions / inline-size;
+  min-width: 0;
+}
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 .actions .key {
-  font: 400 18px/1 var(--display);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 10px;
+  font: 400 17px/1 var(--display);
   letter-spacing: 0.04em;
+}
+/* A narrow action column (phones, or a tight layout): the icon sits over its label. */
+@container actions (max-width: 300px) {
+  .actions .key {
+    flex-direction: column;
+    gap: 3px;
+    min-height: 58px;
+    padding: 6px 4px;
+    font-size: 14px;
+  }
+  .actions .key .icon {
+    width: 22px;
+    height: 22px;
+  }
+  /* Long labels ("Turn mirror", "Take weight") wrap rather than being cut off. */
+  .actions .key-label {
+    white-space: normal;
+    overflow: visible;
+    text-align: center;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+}
+@container actions (max-width: 170px) {
+  .actions .key {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
 }
 .use {
   position: relative;
-}
-.use .key {
-  width: 100%;
+  min-width: 0;
 }
 .use-menu {
   position: absolute;
@@ -322,11 +695,14 @@ input:focus-visible {
   list-style: none;
   background: var(--bone);
   border: 1px solid var(--ink);
+  border-radius: 6px;
 }
 .use-menu button {
   width: 100%;
+  min-height: 40px;
   padding: 8px 10px;
   border: 0;
+  border-radius: 4px;
   background: none;
   color: var(--ink);
   text-align: left;
@@ -336,11 +712,126 @@ input:focus-visible {
 .use-menu button:hover {
   background: rgb(0 0 0 / 0.08);
 }
+.hint-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .hint-touch {
+    display: inline;
+  }
+  .hint-keys {
+    display: none;
+  }
+}
 .controls-hint {
   grid-column: 1 / -1;
   margin: 0;
   font-size: 13px;
   color: var(--ash);
+  text-wrap: pretty;
+}
+
+/* The ember fuse: the D-pad's hub. It burns down while the crowd votes. */
+.fuse {
+  grid-area: 2 / 2;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.fuse-ring {
+  position: absolute;
+  inset: -6px;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+.fuse-coil {
+  fill: none;
+  stroke: var(--stone-light);
+  stroke-width: 3;
+  stroke-dasharray: 2 4;
+  opacity: 0.8;
+}
+.fuse-burn {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgb(240 162 59 / 0.9));
+  animation: fuse-burn var(--dur) linear forwards;
+}
+@keyframes fuse-burn {
+  from {
+    stroke-dashoffset: var(--from);
+  }
+  to {
+    stroke-dashoffset: var(--to);
+  }
+}
+.fuse-spark {
+  transform-origin: 32px 32px;
+  fill: #ffd27a;
+  animation: fuse-spark var(--dur) linear forwards;
+}
+.fuse-halo {
+  fill: rgb(240 162 59 / 0.35);
+  animation: spark-flicker 140ms steps(2) infinite;
+}
+@keyframes fuse-spark {
+  from {
+    transform: rotate(var(--a0));
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+@keyframes spark-flicker {
+  50% {
+    opacity: 0.4;
+  }
+}
+.fuse-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, var(--stone-light), var(--ink));
+  color: var(--ash);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transition: color 200ms;
+}
+.fuse.burning .fuse-core {
+  color: var(--bone);
+  background: radial-gradient(circle at 50% 40%, #5a3a24, var(--ink));
+}
+.fuse-count {
+  font: 700 16px/1 var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.fuse-count small {
+  font-size: 11px;
+  color: var(--ash);
+}
+/* The turn resolves: the fuse flares. */
+.fuse-flare {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: flare 520ms ease-out forwards;
+}
+@keyframes flare {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 196 110 / 0.75);
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 0 18px rgb(255 196 110 / 0);
+    opacity: 0;
+  }
 }
 
 /* Side column: account, then the record (event log) and chat. */
@@ -499,5 +990,31 @@ input:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .key:active:not(:disabled) {
     transform: none;
+  }
+  .key.overruled,
+  .fuse-flare,
+  .fuse-halo,
+  .lobby-embers span,
+  .lobby-dot,
+  .descent-card,
+  .descent-rule {
+    animation: none;
+  }
+  .descent-rule {
+    width: min(220px, 60vw);
+  }
+  /* No iris: the card shows, then the dark simply fades. */
+  .descent {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: descent-fade 2200ms step-end forwards;
+  }
+  @keyframes descent-fade {
+    100% {
+      visibility: hidden;
+    }
+  }
+  .key::after {
+    transition: none;
   }
 }

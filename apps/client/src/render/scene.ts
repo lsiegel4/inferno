@@ -1,5 +1,5 @@
 /**
- * Bridges the client's game view to the shared floor renderer (playtest/render.ts), which draws
+ * Bridges the client's game view to the shared floor renderer (render/renderer.ts), which draws
  * every entity kind the engine knows.
  */
 import type { Entity, FloorState } from "@inferno/shared";

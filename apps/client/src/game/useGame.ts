@@ -1,6 +1,7 @@
 import { PROTOCOL_VERSION, type Action, type ClientMessage } from "@inferno/shared";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { GameSocket, socketUrl, type SocketStatus } from "../net/socket.js";
+import type { SocketStatus, Transport } from "../net/socket.js";
+import { useServices } from "../services.js";
 import { initialView, reduce, withMyVote, type GameView } from "./store.js";
 
 type Event =
@@ -20,20 +21,21 @@ export interface GameControls {
   reconnect(): void;
 }
 
-/** Connects to the game server and exposes the view plus the actions a player can take. */
+/** Connects to the game room and exposes the view plus the actions a player can take. */
 export function useGame(): GameControls {
   const [view, dispatch] = useReducer(reducer, initialView);
   const [status, setStatus] = useState<SocketStatus>("connecting");
-  const socket = useRef<GameSocket | null>(null);
+  const { transport } = useServices();
+  const socket = useRef<Transport | null>(null);
   const turnRef = useRef(0);
   turnRef.current = view.turn;
 
   useEffect(() => {
-    const s = new GameSocket(socketUrl(), (msg) => dispatch({ kind: "server", msg }), setStatus);
+    const s = transport((msg) => dispatch({ kind: "server", msg }), setStatus);
     socket.current = s;
     s.connect();
     return () => s.close();
-  }, []);
+  }, [transport]);
 
   const send = useCallback((msg: Omit<ClientMessage, "v">) => {
     socket.current?.send({ v: PROTOCOL_VERSION, ...msg } as ClientMessage);

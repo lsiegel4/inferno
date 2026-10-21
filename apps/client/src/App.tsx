@@ -5,13 +5,16 @@ import { Chat } from "./components/Chat.js";
 import { Controls } from "./components/Controls.js";
 import { EventLog } from "./components/EventLog.js";
 import { FloorMap } from "./components/FloorMap.js";
+import { FloorTransition } from "./components/FloorTransition.js";
 import { Header } from "./components/Header.js";
+import { Lobby } from "./components/Lobby.js";
 import { MapView } from "./components/MapView.js";
 import { PauseOverlay } from "./components/PauseOverlay.js";
 import { SignOverlay } from "./components/SignOverlay.js";
 import { Tally } from "./components/Tally.js";
 import { useGame } from "./game/useGame.js";
-import { api, type Me } from "./net/api.js";
+import type { Me } from "./net/api.js";
+import { useServices } from "./services.js";
 
 const KEYS: Record<string, Action> = {
   ArrowUp: { kind: "move", dir: "up" },
@@ -28,15 +31,32 @@ const KEYS: Record<string, Action> = {
 };
 
 export function App() {
+  const { api, googleClientId, devtools } = useServices();
   const game = useGame();
   const { view } = game;
   const [me, setMe] = useState<Me | null>(null);
   const [tab, setTab] = useState<"log" | "chat">("log");
   const [mapOpen, setMapOpen] = useState(false);
+  // The lobby greets each new visit; within a tab session, a reload goes straight back in.
+  const [entered, setEntered] = useState(() => {
+    try {
+      return sessionStorage.getItem("inferno.entered") === "1";
+    } catch {
+      return false;
+    }
+  });
+  const enter = useCallback(() => {
+    setEntered(true);
+    try {
+      sessionStorage.setItem("inferno.entered", "1");
+    } catch {
+      // private mode: the lobby will just show again next time
+    }
+  }, []);
 
   useEffect(() => {
     void api.me().then(setMe);
-  }, []);
+  }, [api]);
 
   const onAccountChange = useCallback((next: Me | null) => {
     setMe(next);
@@ -44,13 +64,18 @@ export function App() {
   }, []);
 
   const canVote =
-    view.you?.role === "player" && !view.presence?.paused && !view.gameOver && !view.myVote;
+    entered &&
+    view.you?.role === "player" &&
+    !view.presence?.paused &&
+    !view.gameOver &&
+    !view.myVote;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (!entered) return;
       if (key === "m") return setMapOpen((o) => !o);
       if (key === "Escape") return setMapOpen(false);
       const action = KEYS[key];
@@ -62,11 +87,11 @@ export function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [canVote, game, view.canJump]);
+  }, [canVote, entered, game, view.canJump]);
 
   return (
     <div className="app">
-      <main className="stage">
+      <main className="stage" inert={!entered}>
         <Header view={view} />
         <div className="map-frame">
           <MapView view={view} />
@@ -79,6 +104,7 @@ export function App() {
             Map
           </button>
           {mapOpen && <FloorMap view={view} onClose={() => setMapOpen(false)} />}
+          {entered && <FloorTransition view={view} />}
           <SignOverlay view={view} />
           <PauseOverlay view={view} onReady={game.ready} />
           {view.gameOver && (
@@ -96,12 +122,8 @@ export function App() {
         <Tally view={view} />
         <Controls view={view} onVote={game.vote} />
       </main>
-      <aside className="side">
-        <Account
-          me={me}
-          googleClientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
-          onChange={onAccountChange}
-        />
+      <aside className="side" inert={!entered}>
+        <Account me={me} googleClientId={googleClientId} onChange={onAccountChange} />
         <div className="tabs" role="tablist">
           <button
             type="button"
@@ -128,6 +150,17 @@ export function App() {
           )}
         </div>
       </aside>
+      {!entered && (
+        <Lobby
+          view={view}
+          connected={game.status === "open"}
+          me={me}
+          googleClientId={googleClientId}
+          onAccountChange={onAccountChange}
+          onEnter={enter}
+        />
+      )}
+      {devtools}
     </div>
   );
 }

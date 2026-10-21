@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { api, ApiError, type Me } from "../net/api.js";
+import { ApiError, type Me } from "../net/api.js";
+import { useServices } from "../services.js";
 import { AdSlot } from "./AdSlot.js";
 
 declare global {
@@ -40,6 +41,7 @@ export interface AccountProps {
 
 /** Google sign-in button, or the signed-in handle with rename and sign-out. */
 export function Account({ me, googleClientId, onChange }: AccountProps) {
+  const { api } = useServices();
   const buttonRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -70,7 +72,7 @@ export function Account({ me, googleClientId, onChange }: AccountProps) {
     return () => {
       cancelled = true;
     };
-  }, [me, googleClientId, onChange]);
+  }, [api, me, googleClientId, onChange]);
 
   if (!me) {
     return (

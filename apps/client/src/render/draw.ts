@@ -1,6 +1,6 @@
 /** The explored floor map: a compact overview drawn with the shared floor renderer's entities. */
 import type { FloorView } from "../game/store.js";
-import { drawEntity, PALETTE } from "../playtest/render.js";
+import { drawEntity, PALETTE } from "./renderer.js";
 
 function terrainColour(c: string): string {
   switch (c) {
