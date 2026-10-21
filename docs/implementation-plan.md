@@ -8,6 +8,21 @@ The design docs and ADRs are the source of truth. Anything this plan introduces 
 
 ---
 
+## Progress (2026-10-20)
+
+| Phase | Status |
+|---|---|
+| 0 Scaffolding | Done (merged) |
+| 1 Rules engine | Done (merged); since extended in PR #9 with turn cycles, crowd, traps, beams and more (floors/README.md) |
+| 2 Game server | Done (merged) |
+| 3 Auth | Done (merged) |
+| 4 Persistence | Done (merged) |
+| 5 Client | Done on `phase-5-client` (merging); renders every mechanic with the shared floor renderer |
+| — Campaign | 27 floors (PR #9, merged); floor lab playtester |
+| 6 AWS | Not started: needs domain, AWS account/region, environments, deploy method |
+| 7 Moderation/privacy/ads | Not started |
+| 8 Load test and launch | Not started |
+
 ## 1. Goals and scope of v1
 
 **Goal:** one global, playable game of Inferno on AWS. A crowd votes on every turn of a shared hero across a few handmade floors, with chat, pausing, sign-in, and persistence that survives crashes and deploys.

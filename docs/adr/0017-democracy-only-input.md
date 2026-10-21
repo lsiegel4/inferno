@@ -3,6 +3,7 @@
 - Status: accepted
 - Date: 2026-10-04
 - Supersedes: [0003](0003-input-resolution.md)
+- Amended: [0020](0020-crowd-aware-mechanics.md) records the crowd's split each turn for crowd-aware mechanics
 
 ## Context and Problem Statement
 

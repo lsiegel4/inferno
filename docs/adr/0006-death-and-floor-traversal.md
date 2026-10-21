@@ -23,7 +23,7 @@ Chosen option F.
 - Leaving a floor via stairs down or pit preserves its puzzle state.
 - Floors already solved are fast to re-cross because doors stay open and items are kept, so falls hurt less than they appear.
 
-Open: whether a key used on a door that stays open is also returned on reset.
+Since decided: a key used on a door that stays open is not returned. Later additions (PR #9): sprung traps stay sprung and revealed through deaths; laid planks are removed and returned.
 
 ### Consequences
 

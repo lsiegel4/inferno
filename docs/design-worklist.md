@@ -1,8 +1,19 @@
 # Inferno — Design Worklist: Mechanics and Floor Content
 
-Last updated: 2026-10-16
+Last updated: 2026-10-20
 
 Everything we've discussed about puzzle mechanics and floor content, in one place, so you can work through it at your own pace. Items marked **decision** need an answer from you before I can build them. Details live in [game-design.md](game-design.md) §7a and §17–18.
+
+> **Status (2026-10-20):** most of this list was worked through in the floor-design session (PR #9), with its answers recorded in [floors/DESIGN.md](../floors/DESIGN.md):
+> - The 27-floor campaign is built and verified by the solver.
+> - Turn cycles, hidden traps, every brainstormed mechanic except roadblock "behaviours" beyond watchers and patrols, the plank and the hourglass are implemented.
+> - The 7 blocks-and-plates choices stand.
+>
+> **Still open:**
+> - Confirm the decisions that session made (see "Decisions" in floors/DESIGN.md), especially **jump only over lava and visible holes** and **sprung traps stay revealed after a death**.
+> - Tune minimum players against real traffic.
+> - Look and feel (§6).
+> - Whether the multiplayer client should disable Jump when it would fail.
 
 ---
 

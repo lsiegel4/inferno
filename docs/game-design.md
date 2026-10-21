@@ -1,6 +1,6 @@
 # Inferno — Game Design Document
 
-Status: Draft v3 · Last updated: 2026-10-11
+Status: Draft v4 · Last updated: 2026-10-20
 
 Related: [API contracts](api-contracts.md) · [ADRs](adr/)
 
@@ -14,7 +14,7 @@ The core experience is **collective puzzle solving**: every hero move is decided
 
 > Revised 2026-10-04. The original pitch centred on concurrent button presses colliding (two players pressing "up" walking the hero into lava). Prototyping showed that free-for-all input ("anarchy") is unsatisfying and unplayable at scale, so the game is now democracy-only ([ADR-0017](adr/0017-democracy-only-input.md)).
 
-- **Finite, handmade** floors of increasing difficulty.
+- **Finite, handmade** floors of increasing difficulty: a **27-floor campaign**, one per circle (and ditch, and round) of Dante's Inferno, from the Gate to Judecca ([floors/DESIGN.md](../floors/DESIGN.md)).
 - Each floor requires a **minimum number of active players** to be playable.
 - When the final floor is beaten: **game over**. The site remains online in a **read-only** state.
 
@@ -27,9 +27,9 @@ The core experience is **collective puzzle solving**: every hero move is decided
 | Control | Behavior |
 |---|---|
 | Up / Down / Left / Right | Move one tile. Moving into a wall/blocked tile turns the hero to face that direction instead (this still consumes a turn). |
-| Jump | Hop over exactly one tile in the facing direction. Cannot jump over walls or enemies. Landing on a hazard kills the hero. |
+| Jump | Hop over exactly one tile in the facing direction, and **only over lava or a hole the crowd can see** (a pit, a sprung trap, a collapsed ledge). Walls, enemies, blocks, beams, vents, plain floor and unsprung traps cannot be jumped, so a jump never gives a hidden trap away. Landing on a hazard kills the hero. |
 | Interact (Action) | Interact with the tile the hero faces (items lying on the floor block movement and are picked up this way) (lever, door, push block, roadblock enemy, etc.). The button label changes to match the context (e.g. "Open", "Push"). |
-| Use | Opens the inventory menu; the player picks an item, sending `use(itemId)`. |
+| Use | Opens the inventory menu; the player picks an item, sending `use(itemId)`. Items act on the faced tile (a weight stone can also be set down on the plate underfoot). |
 | Wait | Do nothing for one turn; the world still advances (moving elements step forward). |
 
 - Floor designers may **unlock new controls and items** per floor.
@@ -54,6 +54,7 @@ All actions are **intents**, validated against the current state when applied (s
 - **Ties** are broken by random selection among the tied options (never stall play).
 - **Invalid votes are counted.** If an action that is invalid at tally time wins (e.g. `use` of an item no longer held), the turn is consumed with no effect.
 - The live vote tally and tick countdown are shown to everyone.
+- **The crowd's split is part of the turn.** Each turn records the winner's share of the votes and the runner-up action (`crowd`), because some mechanics depend on it: the **echo** performs the runner-up vote, an **altar** works only if enough of the crowd agreed, a **vigil** needs many Waits in a row ([ADR-0020](adr/0020-crowd-aware-mechanics.md)).
 
 ## 5. Activity and pausing
 
@@ -112,23 +113,28 @@ On death the hero returns to the floor's start point, facing up, and the floor r
 | Puzzle elements (blocks, levers, etc.) | Reset — blocks return to their start tiles and lava/pits they filled revert |
 | Solved/cleared roadblock enemies | Stay cleared |
 | Unsolved roadblock enemies | Return to starting positions |
+| Sprung traps | **Stay sprung and revealed** (still deadly), so the crowd learns a floor by dying on it |
+| Planks laid on this floor | Removed; the plank returns to the inventory |
+| Switches and the doors they hold | Reset |
 
 **Design rule:** a floor reset must never leave a puzzle requiring a consumed item that cannot be recovered (enforced by floor design, backed by the "used items return" rule).
 
 ## 7a. Puzzle mechanics (v1)
 
-The rules engine treats each mechanic as a self-contained entity type ([ADR-0019](adr/0019-entity-type-rules-engine.md)), so mechanics can be added after launch without reworking the core. v1 includes:
+The rules engine treats each mechanic as a self-contained entity type ([ADR-0019](adr/0019-entity-type-rules-engine.md)). **The exact rules and floor-file settings for every kind are in [floors/README.md](../floors/README.md)**; design rules learned while building the campaign are in [floors/DESIGN.md](../floors/DESIGN.md). Summary:
 
-| Mechanic | Summary |
+| Group | Mechanics |
 |---|---|
-| **Push blocks** | Moving into a block pushes it one tile. The hero **cannot jump over** a block. **Only one block can be pushed at a time** (no chains). A block pushed **into lava fills it, forming a bridge** (floor tile); a block pushed **into a pit fills the pit**, making it walkable. Puzzle element: resets on death, persists when leaving the floor. |
-| **Pressure plates** | Weighed down by the **hero and/or a block**. While weighed down, the plate activates its linked targets — **one plate can control several doors or other mechanics**. A plate-controlled **door cannot close on someone**: it stays open while the hero or a block is in the doorway and closes once it is clear. |
-| **Turn-cycle elements** | Platforms, gates, and patrolling roadblocks move on a fixed per-turn cycle. Pairs with the Wait action. |
-| **Items** | v1 ships three items, **picked up with Interact** (facing the item); items are **not visible in darkness** until lit. **Key** — opens a matching locked door; consumed. **Torch** — places a light source on the faced tile; consumed. **Weight stone** — placed on the faced pressure plate to hold it down; picked back up with Interact; reusable. |
-| **Signs** | Interact with a sign to show its text to everyone as an **overlay for 2 seconds**; the text is also **recorded in the event log**. |
-| **Darkness** | Per-floor reveal mode: whole viewport, torchlight radius, or line of sight. **Torchlight radius is set per floor.** **Light sources are objects** placed on the map. Light pools are **round** (Euclidean distance). In line-of-sight mode, every move-blocking object blocks sight (walls, closed doors, levers, signs, items on the floor). Light sources reveal tiles even when the hero cannot see them. `viewport` means the whole floor is revealed. Tiles **are not remembered**: they go dark again when no light reaches them. A torch used on a floor is returned on death and its light removed. |
+| Terrain | walls, floor, lava, **ice** (`I`: the hero and blocks slide), stairs up/down, start |
+| Doors and wiring | lever (latches for good; may target other floors), switch (toggle; resets on death), door (`need`, lights-out `parity`, `inverted`; never closes on the hero or a body), locked door + key, pressure plate, receiver (lit by a beam) |
+| Moving world (turn cycles) | ferry (`platform`, carries the hero over lava), fire vents (rhythms, rolling fire waves), patrols (telegraph their next step; kill on contact; wait when blocked), watchers (`statue`: frozen and pushable while lit and in front of the hero, otherwise step toward the hero) |
+| The crowd itself | **echo** (the Shade of Dissent: performs the runner-up vote), **altar** (works only if 66–90% voted as one), **vigil** (Wait N turns in a row) |
+| Hidden information | darkness (viewport / torchlight / line of sight), hidden traps (optionally hinted, indistinguishable from harmless cracks), crumbling ledges, portals (destination not shown), one-way tiles |
+| Beams | emitters, mirrors (Interact turns them), receivers; beams burn and give light |
+| Items | key, torch, weight stone, **plank** (bridges lava or a hole; returned on death), **hourglass** (freezes the world for three steps, except the echo) |
+| Bodies | blocks (pushed one at a time, fill lava and holes, not onto stairs), watchers, patrols and the echo press plates and hold doors |
 
-Rule details for each are open (§17). Other brainstormed mechanics (ice, crumbling floors, hidden traps, teleporters, scarce items, roadblock behaviours, beams and mirrors, cross-floor links, toggle levers) are candidates for later.
+**Turn order:** the hero acts first; then the world moves (ferries carry the hero first, then the echo, patrols, watchers, fire vents); then plates, doors and beams settle.
 
 ## 8. Inventory
 
@@ -215,12 +221,12 @@ No hard per-user target (see [ADR-0016](adr/0016-bandwidth-approach.md)). Estima
 ## 17. Open items (not yet decided)
 
 1. **Profanity filter** library/service.
-2. **Turn-cycle elements** (deferred; not in the first build) — order within a turn (hero first, then world?); does a platform carry the hero; does a patrol moving into the hero kill it; how is a patrolling roadblock passed?
+2. **Jump availability in the game client.** The floor lab disables Jump when it would fail (`canJump`); the multiplayer client still offers it and an impossible jump uses the turn with no effect. Decide whether the client should compute this.
+3. **Minimum players per floor** ramp from 1 to 20 across the campaign: a starting point to tune against real traffic.
 
 ## 18. Under exploration (not decided)
 
 Ideas raised during prototyping. None of these are approved.
 
 - **Off-screen levers.** Not seeing which door a lever opens is acceptable.
-- **Hidden traps** (e.g. floor that crumbles when stepped on). Undecided: reset on death, whether discovered traps stay marked, hints. Hidden entities must be omitted from client state until revealed.
 - **Further puzzle mechanics** after v1 (see §7a).

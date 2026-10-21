@@ -128,6 +128,7 @@ interface TurnRecord {
   action: Action;
   at: string;            // ISO 8601
   outcome?: "died" | "floor_up" | "floor_down" | "fell" | "no_effect";
+  crowd?: Crowd;
 }
 ```
 
@@ -164,6 +165,7 @@ interface Entity {
 interface FloorState {
   floorId: string;
   index: number;                     // 1-based floor number
+  name?: string;                     // display name, e.g. "The Gate"
   width: number;
   height: number;
   tiles: string;                     // terrain rows joined by "\n"; unrevealed tiles are " "
@@ -175,7 +177,13 @@ interface FloorState {
 
 interface InventoryItem {
   id: string;            // instance id, used in use(itemId)
-  type: "key" | "torch" | "weight";
+  type: "key" | "torch" | "weight" | "plank" | "hourglass";
+}
+
+/** How the crowd voted on a turn (ADR-0020); absent on old records = unanimous. */
+interface Crowd {
+  support: number;         // the winning action's share of votes cast, 0..1
+  dissent: Action | null;  // the runner-up action; null when everyone agreed
 }
 
 interface Presence {
@@ -229,6 +237,7 @@ interface Presence {
   changes: Entity[];                 // only entities whose position/state changed
   inventory?: InventoryItem[];       // present only if it changed
   sign?: { text: string };           // a sign was read this turn: show a 2 s overlay and log it
+  crowd?: Crowd;                     // how the crowd split (the echo performed `dissent`)
   revealed?: { x: number; y: number; ch: string }[]; // darkness: tiles that became visible
   hidden?: { x: number; y: number }[];               // darkness: tiles that went dark
   explored?: { x: number; y: number; ch: string }[]; // tiles newly added to the explored floor map
