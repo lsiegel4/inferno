@@ -287,11 +287,12 @@ body {
   width: 100%;
   height: 100%;
 }
+/* Above the explored map too, so the same button closes it. */
 .map-button {
   position: absolute;
   top: 14px;
   right: 14px;
-  z-index: 3;
+  z-index: 4;
   background: rgb(21 17 14 / 0.75);
   backdrop-filter: blur(6px);
 }

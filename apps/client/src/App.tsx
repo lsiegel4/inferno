@@ -107,10 +107,10 @@ export function App() {
               type="button"
               className="topbar-button map-button"
               aria-expanded={mapOpen}
-              aria-label="Floor map"
+              aria-label={mapOpen ? "Close floor map" : "Floor map"}
               onClick={() => setMapOpen((o) => !o)}
             >
-              <Icon name="map" size={20} />
+              <Icon name={mapOpen ? "close" : "map"} size={20} />
             </button>
             {mapOpen && <FloorMap view={view} onClose={() => setMapOpen(false)} />}
             {entered && <FloorTransition view={view} />}
